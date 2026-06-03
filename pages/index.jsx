@@ -27,21 +27,52 @@ export default function Landing() {
 
   const handleSignup = async () => {
     if (!form.companyName || !form.email || !form.password) { setError("Company name, email and password are required"); return; }
+    if (form.password.length < 6) { setError("Password must be at least 6 characters"); return; }
     setLoading(true); setError(null);
+
     try {
+      // 1. Create Supabase auth user
       const { createClient } = await import("@supabase/supabase-js");
       const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
       const { data: authData, error: authError } = await supabase.auth.signUp({ email: form.email, password: form.password });
       if (authError) throw new Error(authError.message);
-      const res = await fetch(`${API}/api/organizations`, {
+
+      // 2. Create organization
+      const orgRes = await fetch(`${API}/api/organizations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.companyName, owner_email: form.email, dealer_code: form.dealerCode, user_id: authData.user?.id, plan: selectedPlan, owner_name: form.ownerName }),
+        body: JSON.stringify({
+          name: form.companyName,
+          owner_email: form.email,
+          dealer_code: form.dealerCode,
+          user_id: authData.user?.id,
+          plan: selectedPlan,
+          owner_name: form.ownerName,
+        }),
       });
-      if (!res.ok) throw new Error("Failed to create organization");
-      setStep("success");
-    } catch (e) { setError(e.message); }
-    setLoading(false);
+      if (!orgRes.ok) throw new Error("Failed to create organization");
+      const { org } = await orgRes.json();
+
+      // 3. Create Stripe checkout session
+      const checkoutRes = await fetch(`${API}/api/billing/create-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: selectedPlan, org_id: org.id, email: form.email }),
+      });
+
+      if (!checkoutRes.ok) throw new Error("Failed to create checkout");
+      const { url } = await checkoutRes.json();
+
+      // 4. Redirect to Stripe checkout
+      if (url) {
+        window.location.href = url;
+      } else {
+        setStep("success");
+      }
+    } catch (e) {
+      setError(e.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,7 +119,7 @@ export default function Landing() {
               <button className="btn" style={{fontSize:13,padding:"16px 36px"}} onClick={()=>setStep("signup")}>Start 14-Day Free Trial</button>
               <button className="btn-outline" onClick={()=>document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}>View Pricing</button>
             </div>
-            <div style={{marginTop:16,fontSize:10,color:"#334155"}}>No credit card required · Cancel anytime</div>
+            <div style={{marginTop:16,fontSize:10,color:"#334155"}}>No credit card required during trial · Cancel anytime</div>
           </div>
 
           <div style={{padding:"60px 40px",maxWidth:1100,margin:"0 auto"}}>
@@ -113,7 +144,7 @@ export default function Landing() {
           <div id="pricing" style={{padding:"60px 40px",maxWidth:1000,margin:"0 auto"}}>
             <div style={{textAlign:"center",marginBottom:48}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:32,fontWeight:800,color:"#f1f5f9",marginBottom:12}}>Simple Pricing</div>
-              <div style={{fontSize:12,color:"#475569"}}>14-day free trial on all plans. No credit card required.</div>
+              <div style={{fontSize:12,color:"#475569"}}>14-day free trial on all plans. No credit card required to start.</div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {PLANS.map(plan=>(
@@ -151,7 +182,8 @@ export default function Landing() {
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f97316",marginBottom:4}}>WHITE GLOVE</div>
             <div style={{fontSize:10,color:"#334155",letterSpacing:".18em",marginBottom:28}}>WIRELESS · AI PLATFORM</div>
             <div style={{fontSize:14,fontWeight:600,color:"#f1f5f9",marginBottom:6}}>Start your free trial</div>
-            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>14 days free · No credit card · Cancel anytime</div>
+            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>14 days free · No credit card charged until trial ends · Cancel anytime</div>
+
             <div style={{display:"flex",gap:8,marginBottom:24}}>
               {PLANS.map(p=>(
                 <button key={p.id} onClick={()=>setSelectedPlan(p.id)} style={{flex:1,padding:"8px 4px",fontSize:10,cursor:"pointer",borderRadius:4,fontFamily:"inherit",background:selectedPlan===p.id?"rgba(249,115,22,.15)":"transparent",color:selectedPlan===p.id?"#f97316":"#475569",border:selectedPlan===p.id?"1px solid rgba(249,115,22,.3)":"1px solid #1e2d47"}}>
@@ -159,6 +191,7 @@ export default function Landing() {
                 </button>
               ))}
             </div>
+
             <div style={{display:"flex",flexDirection:"column",gap:12}}>
               {[
                 {label:"COMPANY NAME *",key:"companyName",placeholder:"e.g. Pacific Northwest Wireless"},
@@ -169,14 +202,21 @@ export default function Landing() {
               ].map(f=>(
                 <div key={f.key}>
                   <div style={{fontSize:9,color:"#475569",marginBottom:5}}>{f.label}</div>
-                  <input className="input" type={f.type||"text"} placeholder={f.placeholder} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))}/>
+                  <input className="input" type={f.type||"text"} placeholder={f.placeholder} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleSignup()}/>
                 </div>
               ))}
             </div>
+
             {error&&<div style={{marginTop:16,padding:"10px 14px",background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",borderRadius:4,fontSize:11,color:"#ef4444"}}>{error}</div>}
+
             <button className="btn" style={{width:"100%",marginTop:20,padding:14}} onClick={handleSignup} disabled={loading}>
-              {loading?"Creating your account...":"Start Free Trial →"}
+              {loading ? "Setting up your account..." : "Start Free Trial → Checkout"}
             </button>
+
+            <div style={{marginTop:12,fontSize:10,color:"#334155",textAlign:"center",lineHeight:1.6}}>
+              By continuing you agree to our terms. You'll be redirected to Stripe to enter payment details. Your card won't be charged for 14 days.
+            </div>
+
             <div style={{marginTop:16,fontSize:10,color:"#334155",textAlign:"center"}}>
               Already have an account? <a href="https://white-glove-frontend.vercel.app" style={{color:"#f97316"}}>Sign in</a>
             </div>
@@ -190,10 +230,6 @@ export default function Landing() {
             <div style={{fontSize:48,marginBottom:20}}>🎉</div>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f1f5f9",marginBottom:8}}>Welcome to White Glove Wireless!</div>
             <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:32}}>Your 14-day free trial has started. Check your email to confirm your account, then sign into your dashboard.</div>
-            <div style={{padding:"16px 20px",background:"rgba(249,115,22,.08)",border:"1px solid rgba(249,115,22,.15)",borderRadius:6,marginBottom:28,fontSize:11,color:"#94a3b8"}}>
-              <div style={{fontSize:10,color:"#f97316",marginBottom:4,letterSpacing:".1em"}}>YOUR DASHBOARD</div>
-              <div style={{color:"#f1f5f9"}}>white-glove-frontend.vercel.app</div>
-            </div>
             <a href="https://white-glove-frontend.vercel.app"><button className="btn" style={{width:"100%",padding:14}}>Go to Dashboard →</button></a>
           </div>
         </div>
