@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Head from "next/head";
+import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
 
@@ -169,9 +170,15 @@ export default function Landing() {
             </div>
           </div>
 
-          <div style={{padding:"40px",textAlign:"center",borderTop:"1px solid #0d1526",color:"#334155",fontSize:10}}>
-            © {new Date().getFullYear()} White Glove Wireless · Authorized AT&T Partner
-          </div>
+          <footer style={{padding:"32px 40px",borderTop:"1px solid #0d1526",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+            <div style={{fontSize:10,color:"#334155"}}>
+              © {new Date().getFullYear()} White Glove Wireless · Authorized AT&T Partner
+            </div>
+            <div style={{display:"flex",gap:24,fontSize:10}}>
+              <Link href="/privacy" style={{color:"#475569"}}>Privacy Policy</Link>
+              <Link href="/terms" style={{color:"#475569"}}>Terms of Service</Link>
+            </div>
+          </footer>
         </div>
       )}
 
