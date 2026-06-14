@@ -54,7 +54,10 @@ export default function WirelessLanding() {
 
       const checkoutRes = await fetch(`${API}/api/billing/create-checkout`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authData.session?.access_token ? { "Authorization": `Bearer ${authData.session.access_token}` } : {}),
+        },
         body: JSON.stringify({ plan: selectedPlan, org_id: org.id, email: form.email }),
       });
 
