@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 
-const SS_APP = "https://spendsense.vercel.app";
+const SS_APP = "https://spendsense-seven.vercel.app";
 
 const FEATURES = [
   {
