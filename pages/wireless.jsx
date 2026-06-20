@@ -4,6 +4,18 @@ import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
 
+const FEATURES = [
+  { key: "ai-team",     icon: "🤖", title: "AI Leadership Team",       desc: "Sophia, Scout, Atlas, Pulse, and Director think independently, share context, and coordinate the next best move.",                                           img: "/screenshots/ai-leadership.png" },
+  { key: "closed-loop", icon: "🔄", title: "Closed-Loop Sales",         desc: "Lead discovery, outreach, consent, appointments, order tracking, coaching, and follow-up stay connected in one system.",                                     img: "/screenshots/closed-loop.png" },
+  { key: "live-ai",     icon: "🎙️", title: "Talk to Your AI Team",      desc: "Use live meetings, microphone input, individual AI personalities, transcripts, and owner approval controls.",                                                img: "/screenshots/live-ai.png" },
+  { key: "field-app",   icon: "📱", title: "Offline-Capable Field App", desc: "Install WGW on a phone and keep the app shell and key field workflows available through weak connectivity.",                                                 img: "/screenshots/field-app.png" },
+  { key: "backups",     icon: "🔒", title: "Backups and Restore",        desc: "Create owner-controlled workspace backups and restore business records without technical deployment knowledge.",                                              img: "/screenshots/backups.png" },
+  { key: "improving",   icon: "📈", title: "Always Improving",           desc: "Performance data, coaching plans, scorecards, analytics, and AI memory help the system get smarter with the team.",                                          img: "/screenshots/improving.png" },
+  { key: "discovery",   icon: "🔍", title: "Opportunity Discovery",      desc: "Search Google businesses, run Apollo workflows, research owners, scout community events, and import qualified leads.",                                         img: "/screenshots/discovery.png" },
+  { key: "coaching",    icon: "🏆", title: "Team Development",           desc: "Rep KPIs, monthly coaching plans, three-month trends, onboarding, and realistic AI sales practice live together.",                                            img: "/screenshots/coaching.png" },
+  { key: "owner",       icon: "👤", title: "Owner Control",              desc: "Approvals, audit trails, permissions, platform health, personal assistance, and business-wide visibility stay in your hands.",                                img: "/screenshots/owner.png" },
+];
+
 const PLANS = [
   {
     id: "starter", name: "Launch", price: 149, color: "#60a5fa",
@@ -25,6 +37,7 @@ export default function WirelessLanding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ companyName: "", dealerCode: "", ownerName: "", email: "", password: "" });
+  const [activeFeature, setActiveFeature] = useState("ai-team");
 
   const handleSignup = async () => {
     if (!form.companyName || !form.email || !form.password) { setError("Company name, email and password are required"); return; }
@@ -93,7 +106,7 @@ export default function WirelessLanding() {
         .input:focus{border-color:#f97316}
         .card{border:1px solid #151c2a;background:#0c1018;border-radius:8px}
         .value-band{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1100px;margin:0 auto;padding:0 40px 40px}
-        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 20px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}}
+        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 20px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}.feature-grid{grid-template-columns:1fr!important}.feature-preview{display:none!important}}
       `}</style>
 
       {step === "landing" && (
@@ -138,24 +151,62 @@ export default function WirelessLanding() {
           </div>
 
           <div style={{padding:"60px 40px",maxWidth:1100,margin:"0 auto"}}>
-            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
-              {[
-                {icon:"🤖",title:"AI Leadership Team",desc:"Sophia, Scout, Atlas, Pulse, and Director think independently, share context, and coordinate the next best move."},
-                {icon:"🔄",title:"Closed-Loop Sales",desc:"Lead discovery, outreach, consent, appointments, order tracking, coaching, and follow-up stay connected."},
-                {icon:"🎙️",title:"Talk to Your AI Team",desc:"Use live meetings, microphone input, individual AI personalities, transcripts, and owner approval controls."},
-                {icon:"📱",title:"Offline-Capable Field App",desc:"Install WGW on a phone and keep the app shell and key field workflows available through weak connectivity."},
-                {icon:"🔒",title:"Backups and Restore",desc:"Create owner-controlled workspace backups and restore business records without technical deployment knowledge."},
-                {icon:"📈",title:"Always Improving",desc:"Performance data, coaching plans, scorecards, analytics, and AI memory help the system improve with the team."},
-                {icon:"🔍",title:"Opportunity Discovery",desc:"Search Google businesses, run Apollo workflows, research owners, scout community events, and import qualified leads."},
-                {icon:"🏆",title:"Team Development",desc:"Rep KPIs, monthly coaching plans, three-month trends, onboarding, and realistic AI sales practice live together."},
-                {icon:"👤",title:"Owner Control",desc:"Approvals, audit trails, permissions, platform health, personal assistance, and business-wide visibility stay in your hands."},
-              ].map(f=>(
-                <div key={f.title} className="card" style={{padding:24}}>
-                  <div style={{fontSize:28,marginBottom:12}}>{f.icon}</div>
-                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:700,color:"#f1f5f9",marginBottom:8}}>{f.title}</div>
-                  <div style={{fontSize:11,color:"#475569",lineHeight:1.7}}>{f.desc}</div>
-                </div>
-              ))}
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"start"}}>
+
+              {/* Feature list */}
+              <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                {FEATURES.map(f => {
+                  const active = activeFeature === f.key;
+                  return (
+                    <div
+                      key={f.key}
+                      className="card"
+                      onMouseEnter={() => setActiveFeature(f.key)}
+                      style={{
+                        padding:"14px 18px",
+                        border: active ? "1px solid rgba(249,115,22,.35)" : "1px solid #151c2a",
+                        background: active ? "rgba(249,115,22,.05)" : "#0c1018",
+                        cursor:"pointer", transition:"all .2s",
+                      }}
+                    >
+                      <div style={{display:"flex",alignItems:"center",gap:12}}>
+                        <span style={{fontSize:20,lineHeight:1}}>{f.icon}</span>
+                        <div style={{flex:1}}>
+                          <div style={{fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:700,color: active ? "#f1f5f9" : "#64748b",transition:"color .2s"}}>{f.title}</div>
+                          {active && <div style={{fontSize:11,color:"#475569",lineHeight:1.7,marginTop:5}}>{f.desc}</div>}
+                        </div>
+                        <span style={{fontSize:10,color: active ? "#f97316" : "#1e2d47",transition:"color .2s"}}>→</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Screenshot preview */}
+              <div style={{position:"sticky",top:40}}>
+                {FEATURES.filter(f => f.key === activeFeature).map(f => (
+                  <div key={f.key} className="card" style={{overflow:"hidden",border:"1px solid rgba(249,115,22,.2)"}}>
+                    <div style={{padding:"12px 16px",borderBottom:"1px solid #151c2a",display:"flex",alignItems:"center",gap:10}}>
+                      <span style={{fontSize:18}}>{f.icon}</span>
+                      <span style={{fontFamily:"'Syne',sans-serif",fontSize:13,fontWeight:700,color:"#f97316"}}>{f.title}</span>
+                    </div>
+                    <div style={{background:"#070910",minHeight:340,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                      <img
+                        src={f.img}
+                        alt={f.title}
+                        style={{width:"100%",display:"block",objectFit:"cover"}}
+                        onError={e => { e.target.style.display = "none"; e.target.nextSibling.style.display = "flex"; }}
+                      />
+                      <div style={{display:"none",flexDirection:"column",alignItems:"center",gap:12,padding:40,textAlign:"center"}}>
+                        <span style={{fontSize:48}}>{f.icon}</span>
+                        <div style={{fontSize:11,color:"#334155",letterSpacing:".1em"}}>SCREENSHOT COMING SOON</div>
+                        <div style={{fontSize:10,color:"#1e2d47"}}>Add image to /public/screenshots/{f.key}.png</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
             </div>
           </div>
 
