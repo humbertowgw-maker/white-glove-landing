@@ -2,8 +2,100 @@ import { useState } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 
+/* ── Mini mockup sub-components ── */
+function WGWMockup({ active }) {
+  const rows = [
+    { name: "Sarah K.", stage: "Cold Call", color: "#f97316", icon: "📞" },
+    { name: "Mike R.",  stage: "Follow-Up", color: "#fbbf24", icon: "💬" },
+    { name: "Ana L.",   stage: "Closing",   color: "#4ade80", icon: "🤝" },
+  ];
+  return (
+    <div style={{
+      background: "rgba(249,115,22,.04)", border: "1px solid rgba(249,115,22,.12)",
+      borderRadius: 8, padding: "10px", maxWidth: 240, margin: "0 auto 24px",
+      opacity: active ? 1 : 0.55, transition: "opacity .4s",
+    }}>
+      <div style={{ fontSize: 8, color: "#f97316", letterSpacing: ".14em", marginBottom: 8, opacity: .7 }}>AI REP BOARD</div>
+      {rows.map(r => (
+        <div key={r.name} style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "6px 8px", borderRadius: 4, marginBottom: 4,
+          background: "rgba(249,115,22,.05)", border: "1px solid rgba(249,115,22,.08)",
+        }}>
+          <span style={{ fontSize: 10, color: "#94a3b8" }}>{r.icon} {r.name}</span>
+          <span style={{ fontSize: 8, color: r.color, letterSpacing: ".06em", border: `1px solid ${r.color}44`, borderRadius: 3, padding: "2px 5px" }}>{r.stage}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SpendSenseMockup({ active }) {
+  const cats = [
+    { label: "Dining",    pct: 52, amt: "$420" },
+    { label: "Transport", pct: 22, amt: "$180" },
+    { label: "Shopping",  pct: 73, amt: "$590" },
+  ];
+  return (
+    <div style={{
+      background: "rgba(20,184,166,.04)", border: "1px solid rgba(20,184,166,.12)",
+      borderRadius: 8, padding: "10px", maxWidth: 240, margin: "0 auto 24px",
+      opacity: active ? 1 : 0.55, transition: "opacity .4s",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 8, color: "#14b8a6", letterSpacing: ".14em", opacity: .7 }}>MAY BUDGET</span>
+        <span style={{ fontSize: 10, color: "#f1f5f9", fontWeight: 500 }}>$3,240</span>
+      </div>
+      <div style={{ height: 4, background: "rgba(20,184,166,.12)", borderRadius: 2, marginBottom: 10, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: "76%", background: "linear-gradient(90deg,#14b8a6,#0d9488)", borderRadius: 2 }}/>
+      </div>
+      {cats.map(c => (
+        <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+          <span style={{ fontSize: 8, color: "#475569", width: 56, flexShrink: 0 }}>{c.label}</span>
+          <div style={{ flex: 1, height: 3, background: "rgba(20,184,166,.1)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${c.pct}%`, background: "#14b8a6", borderRadius: 2 }}/>
+          </div>
+          <span style={{ fontSize: 8, color: "#64748b", width: 30, textAlign: "right" }}>{c.amt}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SalesPlatformMockup({ active }) {
+  const cols = [
+    { label: "QUALIFY",  deals: ["Acme Corp", "Bright Co"], color: "#6366f1" },
+    { label: "PROPOSAL", deals: ["TechFlow", "Metro AI"],   color: "#818cf8" },
+    { label: "CLOSE",    deals: ["Zenith"],                  color: "#4ade80" },
+  ];
+  return (
+    <div style={{
+      background: "rgba(99,102,241,.04)", border: "1px solid rgba(99,102,241,.12)",
+      borderRadius: 8, padding: "10px", maxWidth: 260, margin: "0 auto 24px",
+      opacity: active ? 1 : 0.55, transition: "opacity .4s",
+    }}>
+      <div style={{ fontSize: 8, color: "#6366f1", letterSpacing: ".14em", marginBottom: 8, opacity: .7 }}>AI PIPELINE</div>
+      <div style={{ display: "flex", gap: 4 }}>
+        {cols.map(c => (
+          <div key={c.label} style={{ flex: 1 }}>
+            <div style={{ fontSize: 7, color: c.color, letterSpacing: ".08em", marginBottom: 4, opacity: .8 }}>{c.label}</div>
+            {c.deals.map(d => (
+              <div key={d} style={{
+                fontSize: 8, color: "#94a3b8", background: "rgba(99,102,241,.08)",
+                border: "1px solid rgba(99,102,241,.15)", borderRadius: 3,
+                padding: "4px 5px", marginBottom: 3,
+              }}>{d}</div>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Main component ── */
 export default function Chooser() {
-  const [hover, setHover] = useState(null); // "wgw" | "ss" | "sp" | null
+  const [hover, setHover] = useState(null);
   const router = useRouter();
 
   const go = (side) => {
@@ -12,352 +104,359 @@ export default function Chooser() {
     else window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
   };
 
-  const w = (side) => hover === side ? "50%" : hover ? "25%" : "33.333%";
+  const w = (side) => hover === side ? "52%" : hover ? "24%" : "33.333%";
+
+  const PANEL = {
+    wgw: { c: "#f97316", bg: "radial-gradient(ellipse at 30% 40%,#200e00 0%,#080910 65%)" },
+    ss:  { c: "#14b8a6", bg: "radial-gradient(ellipse at 70% 40%,#001f1d 0%,#060a12 65%)" },
+    sp:  { c: "#6366f1", bg: "radial-gradient(ellipse at 50% 40%,#0d0d30 0%,#07070f 65%)" },
+  };
+
+  const dotGrid = `radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px)`;
 
   return (
     <>
       <Head>
-        <title>Humberto Labs — White Glove Wireless & SpendSense</title>
-        <meta name="description" content="White Glove Wireless is an AI sales operating system. SpendSense brings AI-powered clarity to personal finance." />
+        <title>Humberto Labs — WGW · SpendSense · Sales Platform</title>
+        <meta name="description" content="Three AI-powered platforms: White Glove Wireless sales OS, SpendSense personal finance, and a white-label AI CRM." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
+
       <style>{`
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{overflow:hidden}
-        @media(max-width:640px){
-          body{overflow-y:auto}
-          .chooser-wrap{flex-direction:column!important;height:auto!important;min-height:100svh}
-          .side-wgw,.side-ss{width:100%!important;min-height:50svh;flex:none!important}
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; background: #050509; }
+
+        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+
+        .panel {
+          position: relative; overflow: hidden; cursor: pointer;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          transition: width .5s cubic-bezier(.4,0,.2,1);
+          height: 100svh;
+        }
+
+        .panel-content {
+          position: relative; z-index: 2;
+          max-width: 380px; width: 90%;
+          text-align: center;
+          padding: 24px 0;
+        }
+
+        .eyebrow {
+          display: inline-flex; align-items: center; gap: 6px;
+          font-size: 8.5px; letter-spacing: .22em;
+          border: 1px solid; border-radius: 20px;
+          padding: 5px 12px;
+          margin-bottom: 20px;
+          font-family: 'DM Mono', monospace;
+        }
+
+        .big-title {
+          font-family: 'Syne', sans-serif;
+          font-size: clamp(36px, 4vw, 52px);
+          font-weight: 800;
+          color: #f1f5f9;
+          line-height: 1;
+          letter-spacing: -.01em;
+          margin-bottom: 10px;
+        }
+
+        .step-line {
+          font-size: 8px; letter-spacing: .22em;
+          margin-bottom: 28px; font-family: 'DM Mono', monospace;
+        }
+
+        .desc {
+          font-size: 12px; line-height: 1.85;
+          margin: 0 auto 24px;
+          font-family: 'DM Mono', monospace;
+          max-width: 300px;
+          transition: color .3s;
+        }
+
+        .pills {
+          display: flex; flex-wrap: wrap; gap: 6px;
+          justify-content: center; margin-bottom: 24px;
+        }
+
+        .pill {
+          font-size: 8.5px; letter-spacing: .06em;
+          padding: 4px 9px; border-radius: 3px; border: 1px solid;
+          font-family: 'DM Mono', monospace;
+          transition: all .2s;
+        }
+
+        .cta {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 13px 30px; border-radius: 6px; border: none;
+          font-size: 10px; font-weight: 600; letter-spacing: .14em;
+          text-transform: uppercase; cursor: pointer;
+          transition: all .2s;
+          font-family: 'DM Mono', monospace;
+        }
+
+        .fine-print {
+          margin-top: 12px; font-size: 8.5px; letter-spacing: .1em;
+          font-family: 'DM Mono', monospace; opacity: .4;
+        }
+
+        .top-bar {
+          position: absolute; top: 0; left: 0; right: 0; height: 2px;
+          z-index: 3;
+        }
+
+        .divider {
+          position: absolute; top: 0; right: 0; bottom: 0; width: 1px;
+          z-index: 10; pointer-events: none;
+        }
+
+        @media (max-width: 640px) {
+          html, body { overflow-y: auto; }
+          .chooser-wrap { flex-direction: column !important; height: auto !important; }
+          .panel { width: 100% !important; height: auto !important; min-height: 60svh; }
+          .divider { display: none; }
         }
       `}</style>
 
-      <div
-        className="chooser-wrap"
-        style={{
-          display: "flex",
-          height: "100svh",
-          fontFamily: "'DM Mono', monospace",
-          cursor: "default",
-        }}
-      >
+      <div className="chooser-wrap" style={{ display: "flex", height: "100svh", fontFamily: "'DM Mono', monospace" }}>
+
         {/* ── WHITE GLOVE WIRELESS ── */}
         <div
-          className="side-wgw"
+          className="panel"
+          style={{ width: w("wgw"), background: hover === "wgw" ? PANEL.wgw.bg : "#070910" }}
           onClick={() => go("wgw")}
           onMouseEnter={() => setHover("wgw")}
           onMouseLeave={() => setHover(null)}
-          style={{
-            width: w("wgw"),
-            transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
-            background: hover === "wgw"
-              ? "radial-gradient(ellipse at 30% 50%, #1a0a00 0%, #070910 70%)"
-              : "#070910",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            padding: "60px 48px",
-            position: "relative",
-            overflow: "hidden",
-            borderRight: "1px solid #1a1a2e",
-          }}
         >
-          {/* Glow orb */}
+          {/* dot grid */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
+
+          {/* top accent bar */}
+          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#f97316,transparent)", opacity: hover === "wgw" ? 1 : 0.35, transition: "opacity .4s" }}/>
+
+          {/* main glow */}
           <div style={{
-            position: "absolute",
-            width: 420,
-            height: 420,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(249,115,22,.18) 0%, transparent 70%)",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-            pointerEvents: "none",
-            transition: "opacity .4s",
-            opacity: hover === "wgw" ? 1 : 0.4,
+            position: "absolute", width: 500, height: 500, borderRadius: "50%",
+            background: "radial-gradient(circle,rgba(249,115,22,.22) 0%,transparent 65%)",
+            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "wgw" ? 1 : 0.3, transition: "opacity .5s",
+            animation: hover === "wgw" ? "pulse 3s ease-in-out infinite" : "none",
           }}/>
 
-          {/* Content */}
-          <div style={{ position: "relative", zIndex: 1, maxWidth: 420, width: "100%", textAlign: "center" }}>
-            <div style={{
-              fontSize: 10,
-              color: "#f97316",
-              letterSpacing: ".24em",
-              marginBottom: 20,
-              opacity: .7,
-            }}>AI SALES OPERATING SYSTEM</div>
+          {/* bottom glow */}
+          <div style={{
+            position: "absolute", width: 280, height: 120,
+            background: "radial-gradient(ellipse,rgba(249,115,22,.18) 0%,transparent 70%)",
+            bottom: 60, left: "50%", transform: "translateX(-50%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "wgw" ? .7 : 0, transition: "opacity .5s",
+          }}/>
 
-            <div style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: 44,
-              fontWeight: 800,
-              color: "#f1f5f9",
-              lineHeight: 1.05,
-              marginBottom: 8,
-            }}>WHITE GLOVE<br /><span style={{ color: "#f97316" }}>WIRELESS</span></div>
+          {/* right divider */}
+          <div className="divider" style={{
+            background: (hover === "wgw" || hover === "ss")
+              ? "linear-gradient(180deg,transparent,rgba(249,115,22,.3) 30%,rgba(20,184,166,.3) 70%,transparent)"
+              : "linear-gradient(180deg,transparent,#1a1a2e 40%,#1a1a2e 60%,transparent)",
+          }}/>
 
-            <div style={{ fontSize: 10, color: "#334155", letterSpacing: ".18em", marginBottom: 32 }}>
+          <div className="panel-content">
+            <div className="eyebrow" style={{ color: "#f97316", borderColor: "rgba(249,115,22,.25)", background: "rgba(249,115,22,.06)" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#f97316", display: "inline-block", animation: hover === "wgw" ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
+              AI SALES OPERATING SYSTEM
+            </div>
+
+            <div className="big-title">
+              WHITE GLOVE<br />
+              <span style={{ color: "#f97316" }}>WIRELESS</span>
+            </div>
+
+            <div className="step-line" style={{ color: "#f97316", opacity: .45 }}>
               FIND · ENGAGE · COACH · CLOSE · IMPROVE
             </div>
 
-            <p style={{
-              fontSize: 13,
-              color: "#64748b",
-              lineHeight: 1.8,
-              marginBottom: 36,
-              maxWidth: 340,
-              margin: "0 auto 36px",
-            }}>
-              A coordinated AI team helps find opportunities, guide outreach, coach reps, protect follow-up, and turn every outcome into the next best action.
+            <WGWMockup active={hover === "wgw"} />
+
+            <p className="desc" style={{ color: hover === "wgw" ? "#94a3b8" : "#475569" }}>
+              A coordinated AI team that finds opportunities, guides outreach, coaches reps in real time, and turns every outcome into the next best action.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 32 }}>
-              {["AI Leadership Team","Closed-Loop Sales","Offline Field Access","Live Voice Meetings","One-Click Backups","Rep Coaching"].map(f => (
-                <span key={f} style={{
-                  fontSize: 10,
-                  color: "#475569",
-                  border: "1px solid #1e2d47",
-                  borderRadius: 4,
-                  padding: "4px 10px",
-                  letterSpacing: ".04em",
+            <div className="pills">
+              {["AI Leadership Team","Closed-Loop Sales","Live Voice Meetings","Rep Coaching","One-Click Backups"].map(f => (
+                <span key={f} className="pill" style={{
+                  color: hover === "wgw" ? "#f97316" : "#475569",
+                  borderColor: hover === "wgw" ? "rgba(249,115,22,.3)" : "#1e2d3a",
+                  background: hover === "wgw" ? "rgba(249,115,22,.06)" : "transparent",
                 }}>{f}</span>
               ))}
             </div>
 
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#f97316",
-              color: "#000",
-              padding: "13px 28px",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: ".1em",
-              textTransform: "uppercase",
-              transition: "background .15s, transform .15s",
+            <button className="cta" style={{
+              background: hover === "wgw" ? "linear-gradient(135deg,#f97316,#ea580c)" : "rgba(249,115,22,.12)",
+              color: hover === "wgw" ? "#000" : "#f97316",
+              border: `1px solid ${hover === "wgw" ? "transparent" : "rgba(249,115,22,.2)"}`,
+              boxShadow: hover === "wgw" ? "0 0 28px rgba(249,115,22,.4),0 4px 16px rgba(249,115,22,.2)" : "none",
               transform: hover === "wgw" ? "translateY(-2px)" : "none",
             }}>
               Explore WGW →
-            </div>
+            </button>
 
-            <div style={{ marginTop: 12, fontSize: 9, color: "#1e2d47", letterSpacing: ".1em" }}>
-              14-DAY FREE TRIAL · NO CARD REQUIRED
-            </div>
+            <div className="fine-print" style={{ color: "#f97316" }}>14-DAY FREE TRIAL · NO CARD REQUIRED</div>
           </div>
         </div>
 
         {/* ── SPENDSENSE ── */}
         <div
-          className="side-ss"
+          className="panel"
+          style={{ width: w("ss"), background: hover === "ss" ? PANEL.ss.bg : "#060a12" }}
           onClick={() => go("ss")}
           onMouseEnter={() => setHover("ss")}
           onMouseLeave={() => setHover(null)}
-          style={{
-            width: w("ss"),
-            transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
-            background: hover === "ss"
-              ? "radial-gradient(ellipse at 70% 50%, #001a1a 0%, #060a12 70%)"
-              : "#060a12",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            padding: "60px 48px",
-            position: "relative",
-            overflow: "hidden",
-          }}
         >
-          {/* Glow orb */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
+
+          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#14b8a6,transparent)", opacity: hover === "ss" ? 1 : 0.35, transition: "opacity .4s" }}/>
+
           <div style={{
-            position: "absolute",
-            width: 420,
-            height: 420,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(20,184,166,.15) 0%, transparent 70%)",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-            pointerEvents: "none",
-            transition: "opacity .4s",
-            opacity: hover === "ss" ? 1 : 0.4,
+            position: "absolute", width: 500, height: 500, borderRadius: "50%",
+            background: "radial-gradient(circle,rgba(20,184,166,.2) 0%,transparent 65%)",
+            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "ss" ? 1 : 0.3, transition: "opacity .5s",
+            animation: hover === "ss" ? "pulse 3s ease-in-out infinite" : "none",
           }}/>
 
-          {/* Content */}
-          <div style={{ position: "relative", zIndex: 1, maxWidth: 420, width: "100%", textAlign: "center" }}>
-            <div style={{
-              fontSize: 10,
-              color: "#14b8a6",
-              letterSpacing: ".24em",
-              marginBottom: 20,
-              opacity: .7,
-            }}>PERSONAL FINANCE · AI-POWERED</div>
+          <div style={{
+            position: "absolute", width: 280, height: 120,
+            background: "radial-gradient(ellipse,rgba(20,184,166,.15) 0%,transparent 70%)",
+            bottom: 60, left: "50%", transform: "translateX(-50%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "ss" ? .7 : 0, transition: "opacity .5s",
+          }}/>
 
-            <div style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: 44,
-              fontWeight: 800,
-              color: "#f1f5f9",
-              lineHeight: 1.05,
-              marginBottom: 8,
-            }}>SPEND<span style={{ color: "#14b8a6" }}>SENSE</span></div>
+          {/* right divider toward sp */}
+          <div className="divider" style={{
+            background: (hover === "ss" || hover === "sp")
+              ? "linear-gradient(180deg,transparent,rgba(20,184,166,.3) 30%,rgba(99,102,241,.3) 70%,transparent)"
+              : "linear-gradient(180deg,transparent,#1a1a2e 40%,#1a1a2e 60%,transparent)",
+          }}/>
 
-            <div style={{ fontSize: 10, color: "#1e3a3a", letterSpacing: ".18em", marginBottom: 32 }}>
-              SMART MONEY TRACKING
+          <div className="panel-content">
+            <div className="eyebrow" style={{ color: "#14b8a6", borderColor: "rgba(20,184,166,.25)", background: "rgba(20,184,166,.06)" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#14b8a6", display: "inline-block", animation: hover === "ss" ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
+              PERSONAL FINANCE · AI-POWERED
             </div>
 
-            <p style={{
-              fontSize: 13,
-              color: "#4b6060",
-              lineHeight: 1.8,
-              marginBottom: 36,
-              maxWidth: 340,
-              margin: "0 auto 36px",
-            }}>
+            <div className="big-title">
+              SPEND<span style={{ color: "#14b8a6" }}>SENSE</span>
+            </div>
+
+            <div className="step-line" style={{ color: "#14b8a6", opacity: .45 }}>
+              CONNECT · CATEGORIZE · UNDERSTAND · SAVE
+            </div>
+
+            <SpendSenseMockup active={hover === "ss"} />
+
+            <p className="desc" style={{ color: hover === "ss" ? "#94a3b8" : "#475569" }}>
               Connect your bank, let AI categorize every transaction, and finally understand where your money actually goes — in real time.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 32 }}>
-              {["🏦 Bank Sync","🤖 AI Insights","📸 Receipt Scan","📊 Trend Charts","🔔 Smart Alerts"].map(f => (
-                <span key={f} style={{
-                  fontSize: 10,
-                  color: "#2d4a4a",
-                  border: "1px solid #0f2e2e",
-                  borderRadius: 4,
-                  padding: "4px 10px",
-                  letterSpacing: ".04em",
+            <div className="pills">
+              {["Bank Sync","AI Insights","Receipt Scan","Trend Charts","Smart Alerts"].map(f => (
+                <span key={f} className="pill" style={{
+                  color: hover === "ss" ? "#14b8a6" : "#475569",
+                  borderColor: hover === "ss" ? "rgba(20,184,166,.3)" : "#0f2030",
+                  background: hover === "ss" ? "rgba(20,184,166,.06)" : "transparent",
                 }}>{f}</span>
               ))}
             </div>
 
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#14b8a6",
-              color: "#000",
-              padding: "13px 28px",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: ".1em",
-              textTransform: "uppercase",
-              transition: "background .15s, transform .15s",
+            <button className="cta" style={{
+              background: hover === "ss" ? "linear-gradient(135deg,#14b8a6,#0d9488)" : "rgba(20,184,166,.1)",
+              color: hover === "ss" ? "#000" : "#14b8a6",
+              border: `1px solid ${hover === "ss" ? "transparent" : "rgba(20,184,166,.18)"}`,
+              boxShadow: hover === "ss" ? "0 0 28px rgba(20,184,166,.4),0 4px 16px rgba(20,184,166,.2)" : "none",
               transform: hover === "ss" ? "translateY(-2px)" : "none",
             }}>
               Get Started →
-            </div>
+            </button>
 
-            <div style={{ marginTop: 12, fontSize: 9, color: "#0f2e2e", letterSpacing: ".1em" }}>
-              FREE TO TRY · CONNECT IN SECONDS
-            </div>
+            <div className="fine-print" style={{ color: "#14b8a6" }}>FREE TO TRY · CONNECT IN SECONDS</div>
           </div>
         </div>
+
         {/* ── SALES PLATFORM ── */}
         <div
-          className="side-sp"
+          className="panel"
+          style={{ width: w("sp"), background: hover === "sp" ? PANEL.sp.bg : "#07070f" }}
           onClick={() => go("sp")}
           onMouseEnter={() => setHover("sp")}
           onMouseLeave={() => setHover(null)}
-          style={{
-            width: w("sp"),
-            transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
-            background: hover === "sp"
-              ? "radial-gradient(ellipse at 70% 50%, #0a0a2e 0%, #07070f 70%)"
-              : "#07070f",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            padding: "60px 48px",
-            position: "relative",
-            overflow: "hidden",
-            borderLeft: "1px solid #1a1a2e",
-          }}
         >
-          {/* Glow orb */}
+          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
+
+          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#6366f1,transparent)", opacity: hover === "sp" ? 1 : 0.35, transition: "opacity .4s" }}/>
+
           <div style={{
-            position: "absolute",
-            width: 420,
-            height: 420,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(99,102,241,.18) 0%, transparent 70%)",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%,-50%)",
-            pointerEvents: "none",
-            transition: "opacity .4s",
-            opacity: hover === "sp" ? 1 : 0.4,
+            position: "absolute", width: 520, height: 520, borderRadius: "50%",
+            background: "radial-gradient(circle,rgba(99,102,241,.22) 0%,transparent 65%)",
+            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "sp" ? 1 : 0.3, transition: "opacity .5s",
+            animation: hover === "sp" ? "pulse 3s ease-in-out infinite" : "none",
           }}/>
 
-          {/* Content */}
-          <div style={{ position: "relative", zIndex: 1, maxWidth: 420, width: "100%", textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: "#6366f1", letterSpacing: ".24em", marginBottom: 20, opacity: .7 }}>
+          <div style={{
+            position: "absolute", width: 280, height: 120,
+            background: "radial-gradient(ellipse,rgba(99,102,241,.18) 0%,transparent 70%)",
+            bottom: 60, left: "50%", transform: "translateX(-50%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "sp" ? .7 : 0, transition: "opacity .5s",
+          }}/>
+
+          <div className="panel-content">
+            <div className="eyebrow" style={{ color: "#6366f1", borderColor: "rgba(99,102,241,.25)", background: "rgba(99,102,241,.06)" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#6366f1", display: "inline-block", animation: hover === "sp" ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
               WHITE-LABEL · AI CRM PLATFORM
             </div>
 
-            <div style={{
-              fontFamily: "'Syne', sans-serif",
-              fontSize: 44,
-              fontWeight: 800,
-              color: "#f1f5f9",
-              lineHeight: 1.05,
-              marginBottom: 8,
-            }}>SALES<br /><span style={{ color: "#6366f1" }}>PLATFORM</span></div>
+            <div className="big-title">
+              SALES<br />
+              <span style={{ color: "#6366f1" }}>PLATFORM</span>
+            </div>
 
-            <div style={{ fontSize: 10, color: "#1e1e45", letterSpacing: ".18em", marginBottom: 32 }}>
+            <div className="step-line" style={{ color: "#6366f1", opacity: .45 }}>
               BUILD · BRAND · DEPLOY · SCALE
             </div>
 
-            <p style={{
-              fontSize: 13,
-              color: "#3d3d6b",
-              lineHeight: 1.8,
-              marginBottom: 36,
-              maxWidth: 340,
-              margin: "0 auto 36px",
-            }}>
-              A fully white-label AI sales CRM you can brand and deploy for your own teams or resell to clients — complete with AI assistant, lead management, and 14-day trials.
+            <SalesPlatformMockup active={hover === "sp"} />
+
+            <p className="desc" style={{ color: hover === "sp" ? "#94a3b8" : "#475569" }}>
+              A fully white-label AI sales CRM — brand it, deploy it for your own team, or resell to clients with AI assistant, lead pipeline, and 14-day trials built in.
             </p>
 
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 32 }}>
-              {["White-Label Branding","AI Sales Assistant","Lead Pipeline","14-Day Trial","Multi-Tenant","Agency Ready"].map(f => (
-                <span key={f} style={{
-                  fontSize: 10,
-                  color: "#2d2d5e",
-                  border: "1px solid #1e1e45",
-                  borderRadius: 4,
-                  padding: "4px 10px",
-                  letterSpacing: ".04em",
+            <div className="pills">
+              {["White-Label Branding","AI Sales Assistant","Lead Pipeline","14-Day Trial","Multi-Tenant"].map(f => (
+                <span key={f} className="pill" style={{
+                  color: hover === "sp" ? "#818cf8" : "#475569",
+                  borderColor: hover === "sp" ? "rgba(99,102,241,.3)" : "#1e1e3a",
+                  background: hover === "sp" ? "rgba(99,102,241,.07)" : "transparent",
                 }}>{f}</span>
               ))}
             </div>
 
-            <div style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              background: "#6366f1",
-              color: "#fff",
-              padding: "13px 28px",
-              borderRadius: 4,
-              fontSize: 11,
-              fontWeight: 500,
-              letterSpacing: ".1em",
-              textTransform: "uppercase",
-              transition: "background .15s, transform .15s",
+            <button className="cta" style={{
+              background: hover === "sp" ? "linear-gradient(135deg,#6366f1,#4f46e5)" : "rgba(99,102,241,.1)",
+              color: hover === "sp" ? "#fff" : "#818cf8",
+              border: `1px solid ${hover === "sp" ? "transparent" : "rgba(99,102,241,.2)"}`,
+              boxShadow: hover === "sp" ? "0 0 28px rgba(99,102,241,.5),0 4px 16px rgba(99,102,241,.25)" : "none",
               transform: hover === "sp" ? "translateY(-2px)" : "none",
             }}>
               Sign In →
-            </div>
+            </button>
 
-            <div style={{ marginTop: 12, fontSize: 9, color: "#1e1e45", letterSpacing: ".1em" }}>
-              🚧 UNDER CONSTRUCTION · EARLY ACCESS
-            </div>
+            <div className="fine-print" style={{ color: "#6366f1" }}>EARLY ACCESS · 14-DAY FREE TRIAL</div>
           </div>
         </div>
 
