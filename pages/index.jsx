@@ -93,6 +93,41 @@ function SalesPlatformMockup({ active }) {
   );
 }
 
+function RepairScoutMockup({ active }) {
+  const causes = [
+    { label: "Brake pads", pct: 78, color: "#4ade80" },
+    { label: "Rotors", pct: 54, color: "#fbbf24" },
+    { label: "Wheel bearing", pct: 21, color: "#94a3b8" },
+  ];
+  return (
+    <div style={{
+      background: "rgba(34,197,94,.04)", border: "1px solid rgba(34,197,94,.13)",
+      borderRadius: 8, padding: "10px", maxWidth: 250, margin: "0 auto 24px",
+      opacity: active ? 1 : 0.55, transition: "opacity .4s",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 8, color: "#4ade80", letterSpacing: ".14em", opacity: .75 }}>AI REPAIR CHECK</span>
+        <span style={{ fontSize: 8, color: "#94a3b8" }}>2019 ACCORD</span>
+      </div>
+      {causes.map(c => (
+        <div key={c.label} style={{ marginBottom: 6 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
+            <span style={{ fontSize: 8, color: "#94a3b8" }}>{c.label}</span>
+            <span style={{ fontSize: 8, color: c.color }}>{c.pct}%</span>
+          </div>
+          <div style={{ height: 3, background: "rgba(34,197,94,.1)", borderRadius: 2, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${c.pct}%`, background: c.color, borderRadius: 2 }}/>
+          </div>
+        </div>
+      ))}
+      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(34,197,94,.12)", paddingTop: 7, marginTop: 8 }}>
+        <span style={{ fontSize: 8, color: "#64748b" }}>EST. REPAIR</span>
+        <span style={{ fontSize: 10, color: "#f1f5f9", fontWeight: 600 }}>$230–$540</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main component ── */
 export default function Chooser() {
   const [hover, setHover] = useState(null);
@@ -101,15 +136,17 @@ export default function Chooser() {
   const go = (side) => {
     if (side === "wgw") router.push("/wireless");
     else if (side === "ss") router.push("/spendsense");
-    else window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
+    else if (side === "sp") window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
+    else window.open("https://repairscout-smoky.vercel.app", "_blank");
   };
 
-  const w = (side) => hover === side ? "52%" : hover ? "24%" : "33.333%";
+  const w = (side) => hover === side ? "46%" : hover ? "18%" : "25%";
 
   const PANEL = {
     wgw: { c: "#f97316", bg: "radial-gradient(ellipse at 30% 40%,#200e00 0%,#080910 65%)" },
     ss:  { c: "#14b8a6", bg: "radial-gradient(ellipse at 70% 40%,#001f1d 0%,#060a12 65%)" },
     sp:  { c: "#6366f1", bg: "radial-gradient(ellipse at 50% 40%,#0d0d30 0%,#07070f 65%)" },
+    rs:  { c: "#22c55e", bg: "radial-gradient(ellipse at 60% 40%,#05200f 0%,#060a0a 65%)" },
   };
 
   const dotGrid = `radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px)`;
@@ -117,8 +154,8 @@ export default function Chooser() {
   return (
     <>
       <Head>
-        <title>Humberto Labs — WGW · SpendSense · Sales Platform</title>
-        <meta name="description" content="Three AI-powered platforms: White Glove Wireless sales OS, SpendSense personal finance, and a white-label AI CRM." />
+        <title>Humberto Labs — WGW · SpendSense · Sales Platform · RepairScout</title>
+        <meta name="description" content="Four AI-powered platforms for sales, personal finance, white-label CRM, and transparent automotive repair research." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
 
@@ -138,7 +175,7 @@ export default function Chooser() {
 
         .panel-content {
           position: relative; z-index: 2;
-          max-width: 380px; width: 90%;
+          max-width: 380px; width: 94%;
           text-align: center;
           padding: 24px 0;
         }
@@ -154,7 +191,7 @@ export default function Chooser() {
 
         .big-title {
           font-family: 'Syne', sans-serif;
-          font-size: clamp(36px, 4vw, 52px);
+          font-size: clamp(28px, 2.8vw, 44px);
           font-weight: 800;
           color: #f1f5f9;
           line-height: 1;
@@ -168,7 +205,7 @@ export default function Chooser() {
         }
 
         .desc {
-          font-size: 12px; line-height: 1.85;
+          font-size: 11px; line-height: 1.75;
           margin: 0 auto 24px;
           font-family: 'DM Mono', monospace;
           max-width: 300px;
@@ -415,6 +452,12 @@ export default function Chooser() {
             opacity: hover === "sp" ? .7 : 0, transition: "opacity .5s",
           }}/>
 
+          <div className="divider" style={{
+            background: (hover === "sp" || hover === "rs")
+              ? "linear-gradient(180deg,transparent,rgba(99,102,241,.3) 30%,rgba(34,197,94,.3) 70%,transparent)"
+              : "linear-gradient(180deg,transparent,#1a1a2e 40%,#1a1a2e 60%,transparent)",
+          }}/>
+
           <div className="panel-content">
             <div className="eyebrow" style={{ color: "#6366f1", borderColor: "rgba(99,102,241,.25)", background: "rgba(99,102,241,.06)" }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#6366f1", display: "inline-block", animation: hover === "sp" ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
@@ -457,6 +500,76 @@ export default function Chooser() {
             </button>
 
             <div className="fine-print" style={{ color: "#6366f1" }}>EARLY ACCESS · 14-DAY FREE TRIAL</div>
+          </div>
+        </div>
+
+        {/* ── REPAIRSCOUT ── */}
+        <div
+          className="panel"
+          style={{ width: w("rs"), background: hover === "rs" ? PANEL.rs.bg : "#060a0a" }}
+          onClick={() => go("rs")}
+          onMouseEnter={() => setHover("rs")}
+          onMouseLeave={() => setHover(null)}
+        >
+          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
+          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#22c55e,transparent)", opacity: hover === "rs" ? 1 : 0.35, transition: "opacity .4s" }}/>
+          <div style={{
+            position: "absolute", width: 520, height: 520, borderRadius: "50%",
+            background: "radial-gradient(circle,rgba(34,197,94,.2) 0%,transparent 65%)",
+            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "rs" ? 1 : 0.3, transition: "opacity .5s",
+            animation: hover === "rs" ? "pulse 3s ease-in-out infinite" : "none",
+          }}/>
+          <div style={{
+            position: "absolute", width: 280, height: 120,
+            background: "radial-gradient(ellipse,rgba(34,197,94,.16) 0%,transparent 70%)",
+            bottom: 60, left: "50%", transform: "translateX(-50%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: hover === "rs" ? .7 : 0, transition: "opacity .5s",
+          }}/>
+
+          <div className="panel-content">
+            <div className="eyebrow" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,.25)", background: "rgba(34,197,94,.06)" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block", animation: hover === "rs" ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
+              AI AUTO REPAIR · TWO-SIDED
+            </div>
+
+            <div className="big-title">
+              REPAIR<span style={{ color: "#4ade80" }}>SCOUT</span>
+            </div>
+
+            <div className="step-line" style={{ color: "#4ade80", opacity: .45 }}>
+              DESCRIBE · DIAGNOSE · COMPARE · VERIFY
+            </div>
+
+            <RepairScoutMockup active={hover === "rs"} />
+
+            <p className="desc" style={{ color: hover === "rs" ? "#94a3b8" : "#475569" }}>
+              Drivers research symptoms, parts, labor, and nearby shops while repair businesses receive organized quote requests with diagnostic context.
+            </p>
+
+            <div className="pills">
+              {["VIN Lookup","AI Assessment","Parts Research","Local Shops","Verified Quotes"].map(f => (
+                <span key={f} className="pill" style={{
+                  color: hover === "rs" ? "#4ade80" : "#475569",
+                  borderColor: hover === "rs" ? "rgba(34,197,94,.3)" : "#143021",
+                  background: hover === "rs" ? "rgba(34,197,94,.07)" : "transparent",
+                }}>{f}</span>
+              ))}
+            </div>
+
+            <button className="cta" style={{
+              background: hover === "rs" ? "linear-gradient(135deg,#4ade80,#16a34a)" : "rgba(34,197,94,.1)",
+              color: hover === "rs" ? "#04140a" : "#4ade80",
+              border: `1px solid ${hover === "rs" ? "transparent" : "rgba(34,197,94,.2)"}`,
+              boxShadow: hover === "rs" ? "0 0 28px rgba(34,197,94,.4),0 4px 16px rgba(34,197,94,.2)" : "none",
+              transform: hover === "rs" ? "translateY(-2px)" : "none",
+            }}>
+              Explore RepairScout →
+            </button>
+
+            <div className="fine-print" style={{ color: "#4ade80" }}>LIVE BETA · DRIVER + SHOP PORTALS</div>
           </div>
         </div>
 
