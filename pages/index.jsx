@@ -66,7 +66,7 @@ function SalesPlatformMockup({ active }) {
   const cols = [
     { label: "QUALIFY",  deals: ["Acme Corp", "Bright Co"], color: "#6366f1" },
     { label: "PROPOSAL", deals: ["TechFlow", "Metro AI"],   color: "#818cf8" },
-    { label: "CLOSE",    deals: ["Zenith"],                  color: "#4ade80" },
+    { label: "CLOSE",    deals: ["Zenith", "BluePeak"],       color: "#4ade80" },
   ];
   return (
     <div style={{
@@ -290,7 +290,7 @@ export default function Chooser() {
               A coordinated AI team that finds opportunities, guides outreach, coaches reps in real time, and turns every outcome into the next best action.
             </p>
             <div className="pills" style={{ opacity: h("wgw") ? 1 : 0.3 }}>
-              {["AI Leadership","Live Voice","Rep Coaching","Closed-Loop"].map(f => (
+              {["🤖 AI Leadership","🎙️ Live Voice","🏆 Rep Coaching","🔄 Closed-Loop"].map(f => (
                 <span key={f} className="pill" style={{ color: "#f97316", borderColor: "rgba(249,115,22,.3)", background: "rgba(249,115,22,.06)" }}>{f}</span>
               ))}
             </div>
@@ -330,7 +330,7 @@ export default function Chooser() {
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#14b8a6", display: "inline-block", animation: h("ss") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
               PERSONAL FINANCE · AI-POWERED
             </div>
-            <div className="big-title">SPEND<span style={{ color: "#14b8a6" }}>SENSE</span></div>
+            <div className="big-title">SPEND<br /><span style={{ color: "#14b8a6" }}>SENSE</span></div>
             <div className="step-line" style={{ color: "#14b8a6", opacity: .45 }}>CONNECT · CATEGORIZE · UNDERSTAND · SAVE</div>
 
             <SpendSenseMockup active={h("ss")} />
@@ -339,7 +339,7 @@ export default function Chooser() {
               Connect your bank, let AI categorize every transaction, and finally understand where your money actually goes — in real time.
             </p>
             <div className="pills" style={{ opacity: h("ss") ? 1 : 0.3 }}>
-              {["Bank Sync","AI Insights","Receipt Scan","Smart Alerts"].map(f => (
+              {["🔗 Bank Sync","✨ AI Insights","📸 Receipt Scan","🔔 Smart Alerts"].map(f => (
                 <span key={f} className="pill" style={{ color: "#14b8a6", borderColor: "rgba(20,184,166,.3)", background: "rgba(20,184,166,.06)" }}>{f}</span>
               ))}
             </div>
@@ -388,7 +388,7 @@ export default function Chooser() {
               A fully white-label AI sales CRM — brand it, deploy it for your team, or resell to clients with AI assistant, lead pipeline, and 14-day trials built in.
             </p>
             <div className="pills" style={{ opacity: h("sp") ? 1 : 0.3 }}>
-              {["White-Label","AI Assistant","Lead Pipeline","Multi-Tenant"].map(f => (
+              {["🏷️ White-Label","🤖 AI Assistant","📊 Lead Pipeline","👥 Multi-Tenant"].map(f => (
                 <span key={f} className="pill" style={{ color: "#818cf8", borderColor: "rgba(99,102,241,.3)", background: "rgba(99,102,241,.07)" }}>{f}</span>
               ))}
             </div>
@@ -428,7 +428,7 @@ export default function Chooser() {
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block", animation: h("rs") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
               AI AUTO REPAIR · TWO-SIDED
             </div>
-            <div className="big-title">REPAIR<span style={{ color: "#4ade80" }}>SCOUT</span></div>
+            <div className="big-title">REPAIR<br /><span style={{ color: "#4ade80" }}>SCOUT</span></div>
             <div className="step-line" style={{ color: "#4ade80", opacity: .45 }}>DESCRIBE · DIAGNOSE · COMPARE · VERIFY</div>
 
             <RepairScoutMockup active={h("rs")} />
@@ -437,7 +437,7 @@ export default function Chooser() {
               Drivers research symptoms, parts, labor, and nearby shops while repair businesses receive organized quote requests with diagnostic context.
             </p>
             <div className="pills" style={{ opacity: h("rs") ? 1 : 0.3 }}>
-              {["VIN Lookup","AI Assessment","Parts Research","Verified Quotes"].map(f => (
+              {["🔍 VIN Lookup","🔧 AI Diagnosis","🔩 Parts Research","✅ Verified Quotes"].map(f => (
                 <span key={f} className="pill" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,.3)", background: "rgba(34,197,94,.07)" }}>{f}</span>
               ))}
             </div>

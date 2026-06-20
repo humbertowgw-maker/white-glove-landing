@@ -140,15 +140,15 @@ export default function WirelessLanding() {
           <div style={{padding:"60px 40px",maxWidth:1100,margin:"0 auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
               {[
-                {icon:"AI",title:"AI Leadership Team",desc:"Sophia, Scout, Atlas, Pulse, and Director think independently, share context, and coordinate the next best move."},
-                {icon:"360",title:"Closed-Loop Sales",desc:"Lead discovery, outreach, consent, appointments, order tracking, coaching, and follow-up stay connected."},
-                {icon:"LIVE",title:"Talk to Your AI Team",desc:"Use live meetings, microphone input, individual AI personalities, transcripts, and owner approval controls."},
-                {icon:"FIELD",title:"Offline-Capable Field App",desc:"Install WGW on a phone and keep the app shell and key field workflows available through weak connectivity."},
-                {icon:"SAFE",title:"Backups and Restore",desc:"Create owner-controlled workspace backups and restore business records without technical deployment knowledge."},
-                {icon:"GROW",title:"Always Improving",desc:"Performance data, coaching plans, scorecards, analytics, and AI memory help the system improve with the team."},
-                {icon:"FIND",title:"Opportunity Discovery",desc:"Search Google businesses, run Apollo workflows, research owners, scout community events, and import qualified leads."},
-                {icon:"COACH",title:"Team Development",desc:"Rep KPIs, monthly coaching plans, three-month trends, onboarding, and realistic AI sales practice live together."},
-                {icon:"OWNER",title:"Owner Control",desc:"Approvals, audit trails, permissions, platform health, personal assistance, and business-wide visibility stay in your hands."},
+                {icon:"🤖",title:"AI Leadership Team",desc:"Sophia, Scout, Atlas, Pulse, and Director think independently, share context, and coordinate the next best move."},
+                {icon:"🔄",title:"Closed-Loop Sales",desc:"Lead discovery, outreach, consent, appointments, order tracking, coaching, and follow-up stay connected."},
+                {icon:"🎙️",title:"Talk to Your AI Team",desc:"Use live meetings, microphone input, individual AI personalities, transcripts, and owner approval controls."},
+                {icon:"📱",title:"Offline-Capable Field App",desc:"Install WGW on a phone and keep the app shell and key field workflows available through weak connectivity."},
+                {icon:"🔒",title:"Backups and Restore",desc:"Create owner-controlled workspace backups and restore business records without technical deployment knowledge."},
+                {icon:"📈",title:"Always Improving",desc:"Performance data, coaching plans, scorecards, analytics, and AI memory help the system improve with the team."},
+                {icon:"🔍",title:"Opportunity Discovery",desc:"Search Google businesses, run Apollo workflows, research owners, scout community events, and import qualified leads."},
+                {icon:"🏆",title:"Team Development",desc:"Rep KPIs, monthly coaching plans, three-month trends, onboarding, and realistic AI sales practice live together."},
+                {icon:"👤",title:"Owner Control",desc:"Approvals, audit trails, permissions, platform health, personal assistance, and business-wide visibility stay in your hands."},
               ].map(f=>(
                 <div key={f.title} className="card" style={{padding:24}}>
                   <div style={{fontSize:28,marginBottom:12}}>{f.icon}</div>
