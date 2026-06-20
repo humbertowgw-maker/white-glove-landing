@@ -6,16 +6,16 @@ const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-prod
 
 const PLANS = [
   {
-    id: "starter", name: "Starter", price: 99, color: "#60a5fa",
-    features: ["1 Sales Rep", "500 AI Calls/month", "Lead Search", "FCC Broadband Intelligence", "AI Sales Trainer", "Email Support"],
+    id: "starter", name: "Launch", price: 149, color: "#60a5fa",
+    features: ["1 Sales Rep", "500 AI Calls/month", "AI sales team", "Google lead discovery", "Offline field access", "Sales trainer", "Workspace backups"],
   },
   {
-    id: "growth", name: "Growth", price: 199, color: "#f97316", popular: true,
-    features: ["5 Sales Reps", "2,000 AI Calls/month", "Everything in Starter", "Multi-language Sofia (EN/ES)", "AI Sales Assistant", "Priority Support"],
+    id: "growth", name: "Growth", price: 349, color: "#f97316", popular: true,
+    features: ["5 Sales Reps", "2,500 AI Calls/month", "Everything in Launch", "Closed-loop AI workflows", "Live AI leadership meetings", "Team coaching and analytics", "Priority support"],
   },
   {
-    id: "pro", name: "Pro", price: 299, color: "#a78bfa",
-    features: ["Unlimited Reps", "Unlimited AI Calls", "Everything in Growth", "Custom Branding", "White-label Domain", "Dedicated Support"],
+    id: "pro", name: "Scale", price: 699, color: "#a78bfa",
+    features: ["Unlimited reps", "7,500 AI Calls/month", "Everything in Growth", "Apollo workflow", "Custom branding and domain", "Advanced controls", "Dedicated support"],
   },
 ];
 
@@ -92,6 +92,8 @@ export default function WirelessLanding() {
         .input{background:#0a1020;border:1px solid #1e2d47;color:#e2e8f0;padding:12px 16px;font-family:inherit;font-size:12px;outline:none;transition:border .15s;width:100%;border-radius:4px}
         .input:focus{border-color:#f97316}
         .card{border:1px solid #151c2a;background:#0c1018;border-radius:8px}
+        .value-band{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1100px;margin:0 auto;padding:0 40px 40px}
+        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 20px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}}
       `}</style>
 
       {step === "landing" && (
@@ -112,12 +114,12 @@ export default function WirelessLanding() {
           </nav>
 
           <div style={{textAlign:"center",padding:"80px 40px 60px",maxWidth:800,margin:"0 auto"}}>
-            <div style={{fontSize:10,color:"#f97316",letterSpacing:".2em",marginBottom:20}}>FOR AT&T AUTHORIZED DEALERS</div>
+            <div style={{fontSize:10,color:"#f97316",letterSpacing:".2em",marginBottom:20}}>AI SALES OPERATING SYSTEM</div>
             <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:52,fontWeight:800,lineHeight:1.1,marginBottom:24,color:"#f1f5f9"}}>
-              Your AI Sales Team,<br /><span style={{color:"#f97316"}}>Working 24/7</span>
+              One System That Helps<br /><span style={{color:"#f97316"}}>Your Team Keep Selling</span>
             </h1>
             <p style={{fontSize:14,color:"#64748b",lineHeight:1.8,marginBottom:40,maxWidth:600,margin:"0 auto 40px"}}>
-              Sofia calls your leads, speaks English and Spanish, books appointments automatically, and gives your reps real-time competitor intelligence — all powered by AT&T-specific AI.
+              White Glove connects prospecting, AI outreach, live coaching, appointments, orders, follow-up, analytics, and backups. Sophia, Scout, Atlas, Pulse, and Director work together so opportunities do not disappear between tools.
             </p>
             <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
               <button className="btn" style={{fontSize:13,padding:"16px 36px"}} onClick={()=>setStep("signup")}>Start 14-Day Free Trial</button>
@@ -126,15 +128,27 @@ export default function WirelessLanding() {
             <div style={{marginTop:16,fontSize:10,color:"#334155"}}>No credit card required during trial · Cancel anytime</div>
           </div>
 
+          <div className="value-band">
+            {[
+              ["5 AI leaders","Coordinate sales, research, operations, performance, and owner priorities."],
+              ["Closed loop","Every call, task, appointment, and outcome creates the next action."],
+              ["Field ready","Installable mobile experience keeps key screens available when service drops."],
+              ["Protected","Owner-controlled backups and safe restore points protect business records."],
+            ].map(([value,label])=><div key={value} className="card" style={{padding:"16px 18px"}}><div style={{fontFamily:"'Syne',sans-serif",fontSize:16,fontWeight:800,color:"#f1f5f9",marginBottom:6}}>{value}</div><div style={{fontSize:10,color:"#64748b",lineHeight:1.55}}>{label}</div></div>)}
+          </div>
+
           <div style={{padding:"60px 40px",maxWidth:1100,margin:"0 auto"}}>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:20}}>
               {[
-                {icon:"🤖",title:"Sofia AI Caller",desc:"Makes real cold calls to small businesses. Speaks English & Spanish. Books appointments automatically."},
-                {icon:"📶",title:"FCC Intelligence",desc:"Know every ISP at any US address before your rep walks in. Real-time competitor pricing from 3 AI sources."},
-                {icon:"🎯",title:"Sales Trainer",desc:"Your reps practice WGW B2B cold calls with AI prospects. Live coaching co-pilot during practice."},
-                {icon:"👥",title:"Rep Management",desc:"Assign leads, track call counts, manage territories. Role-based access for your entire team."},
-                {icon:"📅",title:"Auto-Calendar",desc:"Sofia books appointments directly into your reps' calendars. No manual scheduling needed."},
-                {icon:"🧠",title:"AI Assistant",desc:"Ask about AT&T promotions, competitor pricing, how to close — get verified answers from 3 AI sources."},
+                {icon:"AI",title:"AI Leadership Team",desc:"Sophia, Scout, Atlas, Pulse, and Director think independently, share context, and coordinate the next best move."},
+                {icon:"360",title:"Closed-Loop Sales",desc:"Lead discovery, outreach, consent, appointments, order tracking, coaching, and follow-up stay connected."},
+                {icon:"LIVE",title:"Talk to Your AI Team",desc:"Use live meetings, microphone input, individual AI personalities, transcripts, and owner approval controls."},
+                {icon:"FIELD",title:"Offline-Capable Field App",desc:"Install WGW on a phone and keep the app shell and key field workflows available through weak connectivity."},
+                {icon:"SAFE",title:"Backups and Restore",desc:"Create owner-controlled workspace backups and restore business records without technical deployment knowledge."},
+                {icon:"GROW",title:"Always Improving",desc:"Performance data, coaching plans, scorecards, analytics, and AI memory help the system improve with the team."},
+                {icon:"FIND",title:"Opportunity Discovery",desc:"Search Google businesses, run Apollo workflows, research owners, scout community events, and import qualified leads."},
+                {icon:"COACH",title:"Team Development",desc:"Rep KPIs, monthly coaching plans, three-month trends, onboarding, and realistic AI sales practice live together."},
+                {icon:"OWNER",title:"Owner Control",desc:"Approvals, audit trails, permissions, platform health, personal assistance, and business-wide visibility stay in your hands."},
               ].map(f=>(
                 <div key={f.title} className="card" style={{padding:24}}>
                   <div style={{fontSize:28,marginBottom:12}}>{f.icon}</div>
@@ -147,8 +161,8 @@ export default function WirelessLanding() {
 
           <div id="pricing" style={{padding:"60px 40px",maxWidth:1000,margin:"0 auto"}}>
             <div style={{textAlign:"center",marginBottom:48}}>
-              <div style={{fontFamily:"'Syne',sans-serif",fontSize:32,fontWeight:800,color:"#f1f5f9",marginBottom:12}}>Simple Pricing</div>
-              <div style={{fontSize:12,color:"#475569"}}>14-day free trial on all plans. No credit card required to start.</div>
+              <div style={{fontFamily:"'Syne',sans-serif",fontSize:32,fontWeight:800,color:"#f1f5f9",marginBottom:12}}>Platform Pricing, Not Another Tool Fee</div>
+              <div style={{fontSize:12,color:"#475569",lineHeight:1.7}}>Replace disconnected CRM, dialer, coaching, research, task, and reporting subscriptions with one operating system. Every plan includes a 14-day trial.</div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {PLANS.map(plan=>(
@@ -166,7 +180,7 @@ export default function WirelessLanding() {
                     </div>
                   ))}
                   <button className="btn" style={{width:"100%",marginTop:20,background:plan.popular?plan.color:"transparent",color:plan.popular?"#000":plan.color,border:`1px solid ${plan.color}`}} onClick={()=>{setSelectedPlan(plan.id);setStep("signup");}}>
-                    Start Free Trial
+                    Start 14-Day Trial
                   </button>
                 </div>
               ))}

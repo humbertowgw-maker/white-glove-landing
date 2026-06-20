@@ -18,7 +18,7 @@ export default function Chooser() {
     <>
       <Head>
         <title>Humberto Labs — White Glove Wireless & SpendSense</title>
-        <meta name="description" content="Two powerful platforms: White Glove Wireless for AT&T sales teams, and SpendSense for smart personal finance." />
+        <meta name="description" content="White Glove Wireless is an AI sales operating system. SpendSense brings AI-powered clarity to personal finance." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
       <style>{`
@@ -86,7 +86,7 @@ export default function Chooser() {
               letterSpacing: ".24em",
               marginBottom: 20,
               opacity: .7,
-            }}>FOR AT&T AUTHORIZED DEALERS</div>
+            }}>AI SALES OPERATING SYSTEM</div>
 
             <div style={{
               fontFamily: "'Syne', sans-serif",
@@ -98,7 +98,7 @@ export default function Chooser() {
             }}>WHITE GLOVE<br /><span style={{ color: "#f97316" }}>WIRELESS</span></div>
 
             <div style={{ fontSize: 10, color: "#334155", letterSpacing: ".18em", marginBottom: 32 }}>
-              AI SALES PLATFORM
+              FIND · ENGAGE · COACH · CLOSE · IMPROVE
             </div>
 
             <p style={{
@@ -109,11 +109,11 @@ export default function Chooser() {
               maxWidth: 340,
               margin: "0 auto 36px",
             }}>
-              Sofia calls your leads, books appointments, and arms your reps with live competitor intelligence — all powered by AT&amp;T-specific AI.
+              A coordinated AI team helps find opportunities, guide outreach, coach reps, protect follow-up, and turn every outcome into the next best action.
             </p>
 
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 32 }}>
-              {["🤖 AI Caller Sofia","📅 Auto-Calendar","📶 FCC Intel","🎯 Sales Trainer","👥 Rep Management"].map(f => (
+              {["AI Leadership Team","Closed-Loop Sales","Offline Field Access","Live Voice Meetings","One-Click Backups","Rep Coaching"].map(f => (
                 <span key={f} style={{
                   fontSize: 10,
                   color: "#475569",
@@ -140,7 +140,7 @@ export default function Chooser() {
               transition: "background .15s, transform .15s",
               transform: hover === "wgw" ? "translateY(-2px)" : "none",
             }}>
-              Enter Platform →
+              Explore WGW →
             </div>
 
             <div style={{ marginTop: 12, fontSize: 9, color: "#1e2d47", letterSpacing: ".1em" }}>
