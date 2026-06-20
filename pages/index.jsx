@@ -3,16 +3,16 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 
 export default function Chooser() {
-  const [hover, setHover] = useState(null); // "wgw" | "ss" | null
+  const [hover, setHover] = useState(null); // "wgw" | "ss" | "sp" | null
   const router = useRouter();
 
   const go = (side) => {
     if (side === "wgw") router.push("/wireless");
-    else router.push("/spendsense");
+    else if (side === "ss") router.push("/spendsense");
+    else window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
   };
 
-  const leftW  = hover === "wgw" ? "60%" : hover === "ss" ? "40%" : "50%";
-  const rightW = hover === "ss"  ? "60%" : hover === "wgw" ? "40%" : "50%";
+  const w = (side) => hover === side ? "50%" : hover ? "25%" : "33.333%";
 
   return (
     <>
@@ -47,7 +47,7 @@ export default function Chooser() {
           onMouseEnter={() => setHover("wgw")}
           onMouseLeave={() => setHover(null)}
           style={{
-            width: leftW,
+            width: w("wgw"),
             transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
             background: hover === "wgw"
               ? "radial-gradient(ellipse at 30% 50%, #1a0a00 0%, #070910 70%)"
@@ -156,7 +156,7 @@ export default function Chooser() {
           onMouseEnter={() => setHover("ss")}
           onMouseLeave={() => setHover(null)}
           style={{
-            width: rightW,
+            width: w("ss"),
             transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
             background: hover === "ss"
               ? "radial-gradient(ellipse at 70% 50%, #001a1a 0%, #060a12 70%)"
@@ -256,6 +256,111 @@ export default function Chooser() {
             </div>
           </div>
         </div>
+        {/* ── SALES PLATFORM ── */}
+        <div
+          className="side-sp"
+          onClick={() => go("sp")}
+          onMouseEnter={() => setHover("sp")}
+          onMouseLeave={() => setHover(null)}
+          style={{
+            width: w("sp"),
+            transition: "width .45s cubic-bezier(.4,0,.2,1), background .3s",
+            background: hover === "sp"
+              ? "radial-gradient(ellipse at 70% 50%, #0a0a2e 0%, #07070f 70%)"
+              : "#07070f",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            padding: "60px 48px",
+            position: "relative",
+            overflow: "hidden",
+            borderLeft: "1px solid #1a1a2e",
+          }}
+        >
+          {/* Glow orb */}
+          <div style={{
+            position: "absolute",
+            width: 420,
+            height: 420,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(99,102,241,.18) 0%, transparent 70%)",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%,-50%)",
+            pointerEvents: "none",
+            transition: "opacity .4s",
+            opacity: hover === "sp" ? 1 : 0.4,
+          }}/>
+
+          {/* Content */}
+          <div style={{ position: "relative", zIndex: 1, maxWidth: 420, width: "100%", textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "#6366f1", letterSpacing: ".24em", marginBottom: 20, opacity: .7 }}>
+              WHITE-LABEL · AI CRM PLATFORM
+            </div>
+
+            <div style={{
+              fontFamily: "'Syne', sans-serif",
+              fontSize: 44,
+              fontWeight: 800,
+              color: "#f1f5f9",
+              lineHeight: 1.05,
+              marginBottom: 8,
+            }}>SALES<br /><span style={{ color: "#6366f1" }}>PLATFORM</span></div>
+
+            <div style={{ fontSize: 10, color: "#1e1e45", letterSpacing: ".18em", marginBottom: 32 }}>
+              BUILD · BRAND · DEPLOY · SCALE
+            </div>
+
+            <p style={{
+              fontSize: 13,
+              color: "#3d3d6b",
+              lineHeight: 1.8,
+              marginBottom: 36,
+              maxWidth: 340,
+              margin: "0 auto 36px",
+            }}>
+              A fully white-label AI sales CRM you can brand and deploy for your own teams or resell to clients — complete with AI assistant, lead management, and 14-day trials.
+            </p>
+
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 32 }}>
+              {["White-Label Branding","AI Sales Assistant","Lead Pipeline","14-Day Trial","Multi-Tenant","Agency Ready"].map(f => (
+                <span key={f} style={{
+                  fontSize: 10,
+                  color: "#2d2d5e",
+                  border: "1px solid #1e1e45",
+                  borderRadius: 4,
+                  padding: "4px 10px",
+                  letterSpacing: ".04em",
+                }}>{f}</span>
+              ))}
+            </div>
+
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#6366f1",
+              color: "#fff",
+              padding: "13px 28px",
+              borderRadius: 4,
+              fontSize: 11,
+              fontWeight: 500,
+              letterSpacing: ".1em",
+              textTransform: "uppercase",
+              transition: "background .15s, transform .15s",
+              transform: hover === "sp" ? "translateY(-2px)" : "none",
+            }}>
+              Sign In →
+            </div>
+
+            <div style={{ marginTop: 12, fontSize: 9, color: "#1e1e45", letterSpacing: ".1em" }}>
+              🚧 UNDER CONSTRUCTION · EARLY ACCESS
+            </div>
+          </div>
+        </div>
+
       </div>
     </>
   );
