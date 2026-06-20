@@ -193,57 +193,54 @@ export default function Chooser() {
 
         .eyebrow {
           display: inline-flex; align-items: center; gap: 6px;
-          font-size: 8px; letter-spacing: .2em;
+          font-size: 9.5px; letter-spacing: .2em;
           border: 1px solid; border-radius: 20px;
-          padding: 4px 11px; margin-bottom: 12px;
+          padding: 5px 14px; margin-bottom: 14px;
           font-family: 'DM Mono', monospace;
         }
 
         .big-title {
           font-family: 'Syne', sans-serif;
-          font-size: clamp(20px, 2vw, 34px);
+          font-size: clamp(28px, 2.8vw, 46px);
           font-weight: 800; color: #f1f5f9;
           line-height: 1; letter-spacing: -.01em;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
 
         .step-line {
-          font-size: 7.5px; letter-spacing: .2em;
-          margin-bottom: 14px; font-family: 'DM Mono', monospace;
+          font-size: 9px; letter-spacing: .2em;
+          margin-bottom: 16px; font-family: 'DM Mono', monospace;
         }
 
         .desc {
-          font-size: 10.5px; line-height: 1.7; color: #94a3b8;
-          margin: 0 auto; font-family: 'DM Mono', monospace;
-          max-width: 280px;
-          max-height: 0; overflow: hidden; opacity: 0;
-          transition: max-height .35s ease, opacity .3s ease, margin .3s ease;
+          font-size: 12px; line-height: 1.75; color: #94a3b8;
+          margin: 0 auto 14px; font-family: 'DM Mono', monospace;
+          max-width: 300px;
+          transition: opacity .3s ease;
         }
-        .desc.show { max-height: 80px; opacity: 1; margin-bottom: 12px; }
 
         .pills {
-          display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;
-          max-height: 0; overflow: hidden; opacity: 0;
-          transition: max-height .35s ease .05s, opacity .3s ease .05s, margin .3s ease;
+          display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
+          margin-bottom: 16px;
+          transition: opacity .3s ease;
         }
-        .pills.show { max-height: 60px; opacity: 1; margin-bottom: 14px; }
 
         .pill {
-          font-size: 7.5px; letter-spacing: .05em;
-          padding: 3px 8px; border-radius: 3px; border: 1px solid;
+          font-size: 9px; letter-spacing: .05em;
+          padding: 4px 10px; border-radius: 3px; border: 1px solid;
           font-family: 'DM Mono', monospace;
         }
 
         .cta {
           display: inline-flex; align-items: center; gap: 8px;
-          padding: 10px 24px; border-radius: 6px; border: none;
-          font-size: 9.5px; font-weight: 600; letter-spacing: .14em;
+          padding: 13px 30px; border-radius: 6px; border: none;
+          font-size: 11px; font-weight: 600; letter-spacing: .14em;
           text-transform: uppercase; cursor: pointer;
           transition: all .2s; font-family: 'DM Mono', monospace;
         }
 
         .fine-print {
-          margin-top: 8px; font-size: 7.5px; letter-spacing: .1em;
+          margin-top: 10px; font-size: 8.5px; letter-spacing: .1em;
           font-family: 'DM Mono', monospace; opacity: .4;
         }
 
@@ -255,8 +252,6 @@ export default function Chooser() {
           html, body { overflow-y: auto; }
           .grid-wrap { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); height: auto; }
           .panel { min-height: 65svh; }
-          .desc { max-height: 80px; opacity: 1; margin-bottom: 12px; }
-          .pills { max-height: 60px; opacity: 1; margin-bottom: 14px; }
         }
       `}</style>
 
@@ -291,10 +286,10 @@ export default function Chooser() {
 
             <WGWMockup active={h("wgw")} />
 
-            <p className={`desc${h("wgw") ? " show" : ""}`}>
+            <p className="desc" style={{ opacity: h("wgw") ? 1 : 0.3 }}>
               A coordinated AI team that finds opportunities, guides outreach, coaches reps in real time, and turns every outcome into the next best action.
             </p>
-            <div className={`pills${h("wgw") ? " show" : ""}`}>
+            <div className="pills" style={{ opacity: h("wgw") ? 1 : 0.3 }}>
               {["AI Leadership","Live Voice","Rep Coaching","Closed-Loop"].map(f => (
                 <span key={f} className="pill" style={{ color: "#f97316", borderColor: "rgba(249,115,22,.3)", background: "rgba(249,115,22,.06)" }}>{f}</span>
               ))}
@@ -340,10 +335,10 @@ export default function Chooser() {
 
             <SpendSenseMockup active={h("ss")} />
 
-            <p className={`desc${h("ss") ? " show" : ""}`}>
+            <p className="desc" style={{ opacity: h("ss") ? 1 : 0.3 }}>
               Connect your bank, let AI categorize every transaction, and finally understand where your money actually goes — in real time.
             </p>
-            <div className={`pills${h("ss") ? " show" : ""}`}>
+            <div className="pills" style={{ opacity: h("ss") ? 1 : 0.3 }}>
               {["Bank Sync","AI Insights","Receipt Scan","Smart Alerts"].map(f => (
                 <span key={f} className="pill" style={{ color: "#14b8a6", borderColor: "rgba(20,184,166,.3)", background: "rgba(20,184,166,.06)" }}>{f}</span>
               ))}
@@ -389,10 +384,10 @@ export default function Chooser() {
 
             <SalesPlatformMockup active={h("sp")} />
 
-            <p className={`desc${h("sp") ? " show" : ""}`}>
+            <p className="desc" style={{ opacity: h("sp") ? 1 : 0.3 }}>
               A fully white-label AI sales CRM — brand it, deploy it for your team, or resell to clients with AI assistant, lead pipeline, and 14-day trials built in.
             </p>
-            <div className={`pills${h("sp") ? " show" : ""}`}>
+            <div className="pills" style={{ opacity: h("sp") ? 1 : 0.3 }}>
               {["White-Label","AI Assistant","Lead Pipeline","Multi-Tenant"].map(f => (
                 <span key={f} className="pill" style={{ color: "#818cf8", borderColor: "rgba(99,102,241,.3)", background: "rgba(99,102,241,.07)" }}>{f}</span>
               ))}
@@ -438,10 +433,10 @@ export default function Chooser() {
 
             <RepairScoutMockup active={h("rs")} />
 
-            <p className={`desc${h("rs") ? " show" : ""}`}>
+            <p className="desc" style={{ opacity: h("rs") ? 1 : 0.3 }}>
               Drivers research symptoms, parts, labor, and nearby shops while repair businesses receive organized quote requests with diagnostic context.
             </p>
-            <div className={`pills${h("rs") ? " show" : ""}`}>
+            <div className="pills" style={{ opacity: h("rs") ? 1 : 0.3 }}>
               {["VIN Lookup","AI Assessment","Parts Research","Verified Quotes"].map(f => (
                 <span key={f} className="pill" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,.3)", background: "rgba(34,197,94,.07)" }}>{f}</span>
               ))}
