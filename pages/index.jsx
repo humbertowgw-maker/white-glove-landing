@@ -128,6 +128,39 @@ function RepairScoutMockup({ active }) {
   );
 }
 
+function TruckTrackerMockup({ active }) {
+  const updates = [
+    { icon: "🚚", title: "Taco Trail", meta: "LIVE · 0.8 mi" },
+    { icon: "📸", title: "Birria snap", meta: "posted 4m ago" },
+    { icon: "🗼", title: "Space Needle", meta: "landmark nearby" },
+  ];
+  return (
+    <div style={{
+      background: "rgba(244,63,94,.04)", border: "1px solid rgba(244,63,94,.14)",
+      borderRadius: 8, padding: "10px", maxWidth: 250, margin: "0 auto 12px",
+      opacity: active ? 1 : 0.45, transition: "opacity .4s",
+    }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+        <span style={{ fontSize: 8, color: "#fb7185", letterSpacing: ".14em", opacity: .8 }}>LIVE FOOD FEED</span>
+        <span style={{ fontSize: 8, color: "#4ade80" }}>● 3 NEARBY</span>
+      </div>
+      {updates.map(item => (
+        <div key={item.title} style={{
+          display: "flex", alignItems: "center", gap: 8, padding: "5px 7px",
+          borderRadius: 5, marginBottom: 4, background: "rgba(244,63,94,.06)",
+          border: "1px solid rgba(244,63,94,.1)", textAlign: "left",
+        }}>
+          <span style={{ fontSize: 15 }}>{item.icon}</span>
+          <span style={{ flex: 1 }}>
+            <strong style={{ display: "block", color: "#cbd5e1", fontSize: 9 }}>{item.title}</strong>
+            <span style={{ color: "#64748b", fontSize: 7.5 }}>{item.meta}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /* ── Main component ── */
 export default function Chooser() {
   const [hover, setHover] = useState(null);
@@ -137,7 +170,8 @@ export default function Chooser() {
     if (side === "wgw") router.push("/wireless");
     else if (side === "ss") router.push("/spendsense");
     else if (side === "sp") window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
-    else window.open("https://repairscout-smoky.vercel.app", "_blank");
+    else if (side === "rs") window.open("https://repairscout-smoky.vercel.app", "_blank");
+    else window.open("https://trucktracker-eight.vercel.app", "_blank");
   };
 
   const BG = {
@@ -145,35 +179,33 @@ export default function Chooser() {
     ss:  "radial-gradient(ellipse at 70% 40%,#001f1d 0%,#060a12 65%)",
     sp:  "radial-gradient(ellipse at 50% 40%,#0d0d30 0%,#07070f 65%)",
     rs:  "radial-gradient(ellipse at 60% 40%,#05200f 0%,#060a0a 65%)",
+    tt:  "radial-gradient(ellipse at 50% 40%,#2a0712 0%,#0c070b 65%)",
   };
-  const DEFAULT_BG = { wgw: "#070910", ss: "#060a12", sp: "#07070f", rs: "#060a0a" };
+  const DEFAULT_BG = { wgw: "#070910", ss: "#060a12", sp: "#07070f", rs: "#060a0a", tt: "#0c070b" };
 
   const dotGrid = `radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px)`;
   const h = (id) => hover === id;
 
-  const glowColor = { wgw: "249,115,22", ss: "20,184,166", sp: "99,102,241", rs: "34,197,94" };
-  const accentColor = { wgw: "#f97316", ss: "#14b8a6", sp: "#6366f1", rs: "#22c55e" };
-  const accentColorHover = { wgw: "#f97316", ss: "#14b8a6", sp: "#818cf8", rs: "#4ade80" };
+  const glowColor = { wgw: "249,115,22", ss: "20,184,166", sp: "99,102,241", rs: "34,197,94", tt: "244,63,94" };
 
   return (
     <>
       <Head>
-        <title>Humberto Labs — WGW · SpendSense · Sales Platform · RepairScout</title>
-        <meta name="description" content="Four AI-powered platforms for sales, personal finance, white-label CRM, and transparent automotive repair research." />
+        <title>Humberto Labs — WGW · SpendSense · Sales Platform · RepairScout · TruckTracker</title>
+        <meta name="description" content="Five connected platforms for sales, personal finance, white-label CRM, automotive repair research, and live food-truck discovery." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
 
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; overflow: hidden; background: #050509; }
+        html, body { min-height: 100%; overflow-x: hidden; background: #050509; }
 
         @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
 
         .grid-wrap {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: 1fr 1fr;
-          height: 100svh;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          min-height: 100svh;
         }
 
         .panel {
@@ -182,6 +214,13 @@ export default function Chooser() {
           align-items: center; justify-content: center;
           border: 1px solid #0f0f1a;
           transition: background .4s ease;
+          grid-column: span 2;
+          min-height: 560px;
+        }
+
+        .panel:nth-child(4),
+        .panel:nth-child(5) {
+          grid-column: span 3;
         }
 
         .panel-content {
@@ -248,10 +287,15 @@ export default function Chooser() {
           position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 3;
         }
 
+        @media (max-width: 1050px) {
+          .grid-wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .panel, .panel:nth-child(4), .panel:nth-child(5) { grid-column: span 1; }
+          .panel:last-child { grid-column: 1 / -1; }
+        }
+
         @media (max-width: 640px) {
-          html, body { overflow-y: auto; }
-          .grid-wrap { grid-template-columns: 1fr; grid-template-rows: repeat(4, 1fr); height: auto; }
-          .panel { min-height: 65svh; }
+          .grid-wrap { grid-template-columns: 1fr; }
+          .panel, .panel:nth-child(4), .panel:nth-child(5), .panel:last-child { grid-column: 1; min-height: 650px; }
         }
       `}</style>
 
@@ -450,6 +494,55 @@ export default function Chooser() {
               transform: h("rs") ? "translateY(-2px)" : "none",
             }}>Explore RepairScout →</button>
             <div className="fine-print" style={{ color: "#4ade80" }}>LIVE BETA · DRIVER + SHOP PORTALS</div>
+          </div>
+        </div>
+
+        {/* ── TRUCKTRACKER ── */}
+        <div
+          className="panel"
+          style={{ background: h("tt") ? BG.tt : DEFAULT_BG.tt }}
+          onClick={() => go("tt")}
+          onMouseEnter={() => setHover("tt")}
+          onMouseLeave={() => setHover(null)}
+        >
+          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
+          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#fb7185,transparent)", opacity: h("tt") ? 1 : 0.3, transition: "opacity .4s" }}/>
+          <div style={{
+            position: "absolute", width: 420, height: 420, borderRadius: "50%",
+            background: `radial-gradient(circle,rgba(${glowColor.tt},.22) 0%,transparent 65%)`,
+            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
+            pointerEvents: "none", zIndex: 1,
+            opacity: h("tt") ? 1 : 0.2, transition: "opacity .5s",
+            animation: h("tt") ? "pulse 3s ease-in-out infinite" : "none",
+          }}/>
+
+          <div className="panel-content">
+            <div className="eyebrow" style={{ color: "#fb7185", borderColor: "rgba(244,63,94,.28)", background: "rgba(244,63,94,.07)" }}>
+              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#fb7185", display: "inline-block", animation: h("tt") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
+              LIVE FOOD · SOCIAL DISCOVERY
+            </div>
+            <div className="big-title">TRUCK<br /><span style={{ color: "#fb7185" }}>TRACKER</span></div>
+            <div className="step-line" style={{ color: "#fb7185", opacity: .45 }}>GO LIVE · DISCOVER · SNAP · RATE · FOLLOW</div>
+
+            <TruckTrackerMockup active={h("tt")} />
+
+            <p className="desc" style={{ opacity: h("tt") ? 1 : 0.3 }}>
+              A live social network for mobile food. Customers find trucks, fresh snaps, reviews, wait times, and landmark-based locations while owners turn their location into a crowd.
+            </p>
+            <div className="pills" style={{ opacity: h("tt") ? 1 : 0.3 }}>
+              {["📍 Live GPS","📸 Food Feed","⭐ Real Ratings","🗼 Landmark Map"].map(f => (
+                <span key={f} className="pill" style={{ color: "#fb7185", borderColor: "rgba(244,63,94,.3)", background: "rgba(244,63,94,.07)" }}>{f}</span>
+              ))}
+            </div>
+
+            <button className="cta" style={{
+              background: h("tt") ? "linear-gradient(135deg,#fb7185,#e11d48)" : "rgba(244,63,94,.1)",
+              color: h("tt") ? "#190308" : "#fb7185",
+              border: `1px solid ${h("tt") ? "transparent" : "rgba(244,63,94,.22)"}`,
+              boxShadow: h("tt") ? "0 0 28px rgba(244,63,94,.42),0 4px 16px rgba(244,63,94,.22)" : "none",
+              transform: h("tt") ? "translateY(-2px)" : "none",
+            }}>Find Food Trucks →</button>
+            <div className="fine-print" style={{ color: "#fb7185" }}>FREE FOR FOOD LOVERS · LOW-COST TRUCK PLANS</div>
           </div>
         </div>
 
