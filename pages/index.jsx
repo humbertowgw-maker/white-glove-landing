@@ -62,7 +62,7 @@ const PRODUCTS = [
       "linear-gradient(135deg, rgba(167,139,250,.09) 25%, transparent 25% 50%, rgba(99,102,241,.08) 50% 75%, transparent 75%)",
     status: "PRIVATE BETA",
     action: "Open Platform",
-    destination: "https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app",
+    destination: "sales-platform",
   },
   {
     id: "rs",
@@ -82,7 +82,7 @@ const PRODUCTS = [
       "repeating-radial-gradient(circle at 50% 90%, rgba(200,255,24,.08) 0 1px, transparent 2px 15px)",
     status: "LIVE",
     action: "Launch RepairScout",
-    destination: "https://repairscout-smoky.vercel.app",
+    destination: "repairscout",
   },
   {
     id: "tt",
@@ -102,7 +102,7 @@ const PRODUCTS = [
       "radial-gradient(circle at 25% 25%, rgba(255,69,56,.12) 0 2px, transparent 3px), radial-gradient(circle at 75% 70%, rgba(255,178,28,.1) 0 2px, transparent 3px)",
     status: "LIVE",
     action: "Find Food Trucks",
-    destination: "https://trucktracker-eight.vercel.app",
+    destination: "trucktracker",
   },
   {
     id: "pass",
