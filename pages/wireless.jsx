@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
+import Image from "next/image";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
 
@@ -96,17 +97,20 @@ export default function WirelessLanding() {
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#070910;color:#e2e8f0;font-family:'DM Mono',monospace}
-        .btn{background:#f97316;color:#000;border:none;padding:14px 28px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;border-radius:4px}
-        .btn:hover{background:#fb923c;transform:translateY(-1px)}
+        body{background:radial-gradient(circle at 50% 0%,rgba(245,158,11,.11),transparent 28%),#090806;color:#eee9df;font-family:'DM Mono',monospace}
+        .btn{background:#d7a75b;color:#090806;border:none;padding:14px 28px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;border-radius:4px}
+        .btn:hover{background:#edc786;transform:translateY(-1px)}
         .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
         .btn-outline{background:transparent;color:#e2e8f0;border:1px solid #1e2d47;padding:12px 24px;font-family:inherit;font-size:11px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;border-radius:4px}
-        .btn-outline:hover{border-color:#f97316;color:#f97316}
+        .btn-outline:hover{border-color:#d7a75b;color:#d7a75b}
         .input{background:#0a1020;border:1px solid #1e2d47;color:#e2e8f0;padding:12px 16px;font-family:inherit;font-size:12px;outline:none;transition:border .15s;width:100%;border-radius:4px}
-        .input:focus{border-color:#f97316}
-        .card{border:1px solid #151c2a;background:#0c1018;border-radius:8px}
+        .input:focus{border-color:#d7a75b}
+        .card{border:1px solid rgba(215,167,91,.14);background:rgba(17,15,12,.88);border-radius:12px}
+        .brand-logo{width:72px;height:72px;border-radius:20px;object-fit:cover;box-shadow:0 15px 35px rgba(0,0,0,.45)}
+        .hero-brand{display:grid;grid-template-columns:1fr 300px;gap:48px;text-align:left!important;max-width:980px!important;align-items:center}
+        .hero-brand-logo{width:300px;height:auto;border-radius:24%;filter:drop-shadow(0 25px 42px rgba(0,0,0,.5))}
         .value-band{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1100px;margin:0 auto;padding:0 40px 40px}
-        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 20px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}.feature-grid{grid-template-columns:1fr!important}.feature-preview{display:none!important}}
+        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 14px!important}nav>div:last-child a{display:none}nav>div:last-child{gap:0!important}nav .btn{padding:11px 12px!important;font-size:9px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}.feature-grid{grid-template-columns:1fr!important}.feature-preview{display:none!important}.hero-brand{grid-template-columns:1fr;text-align:center!important}.hero-brand-logo{width:240px;margin:auto}.brand-logo{width:46px;height:46px}.brand-logo+div{display:none}}
       `}</style>
 
       {step === "landing" && (
@@ -115,6 +119,7 @@ export default function WirelessLanding() {
             <div style={{display:"flex",alignItems:"center",gap:16}}>
               <Link href="/" style={{color:"#334155",textDecoration:"none",fontSize:10,letterSpacing:".1em"}}>← All Products</Link>
               <div style={{width:1,height:16,background:"#1e2d47"}}/>
+              <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless logo" width={72} height={72} className="brand-logo"/>
               <div>
                 <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#f97316"}}>WHITE GLOVE</div>
                 <div style={{fontSize:9,color:"#334155",letterSpacing:".18em"}}>WIRELESS · AI PLATFORM</div>
@@ -126,8 +131,9 @@ export default function WirelessLanding() {
             </div>
           </nav>
 
-          <div style={{textAlign:"center",padding:"80px 40px 60px",maxWidth:800,margin:"0 auto"}}>
-            <div style={{fontSize:10,color:"#f97316",letterSpacing:".2em",marginBottom:20}}>AI SALES OPERATING SYSTEM</div>
+          <div className="hero hero-brand" style={{padding:"80px 40px 60px",margin:"0 auto"}}>
+            <div>
+            <div style={{fontSize:10,color:"#d7a75b",letterSpacing:".2em",marginBottom:20}}>PREMIUM AI SALES OPERATING SYSTEM</div>
             <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:52,fontWeight:800,lineHeight:1.1,marginBottom:24,color:"#f1f5f9"}}>
               One System That Helps<br /><span style={{color:"#f97316"}}>Your Team Keep Selling</span>
             </h1>
@@ -139,6 +145,8 @@ export default function WirelessLanding() {
               <button className="btn-outline" onClick={()=>document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}>View Pricing</button>
             </div>
             <div style={{marginTop:16,fontSize:10,color:"#334155"}}>No credit card required during trial · Cancel anytime</div>
+            </div>
+            <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless premium phone service logo" width={360} height={360} priority className="hero-brand-logo"/>
           </div>
 
           <div className="value-band">
@@ -151,7 +159,7 @@ export default function WirelessLanding() {
           </div>
 
           <div style={{padding:"60px 40px",maxWidth:1100,margin:"0 auto"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"start"}}>
+            <div className="feature-grid" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:32,alignItems:"start"}}>
 
               {/* Feature list */}
               <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -183,7 +191,7 @@ export default function WirelessLanding() {
               </div>
 
               {/* Screenshot preview */}
-              <div style={{position:"sticky",top:40}}>
+              <div className="feature-preview" style={{position:"sticky",top:40}}>
                 {FEATURES.filter(f => f.key === activeFeature).map(f => (
                   <div key={f.key} className="card" style={{overflow:"hidden",border:"1px solid rgba(249,115,22,.2)"}}>
                     <div style={{padding:"12px 16px",borderBottom:"1px solid #151c2a",display:"flex",alignItems:"center",gap:10}}>

@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 
 const APP_URL = "https://purple-beach-0c1e8a510.7.azurestaticapps.net/";
@@ -29,7 +30,7 @@ export default function ThePassLanding() {
         .back-link,.nav-launch,.ticket-label,.micro{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase}
         .back-link{color:#8f8575;text-decoration:none}.back-link:hover{color:var(--ink)}
         .nav-launch{padding:11px 15px;color:#16130f;background:var(--fire);text-decoration:none;font-weight:500}
-        .hero{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:86px 0 76px;display:grid;grid-template-columns:1.08fr .92fr;gap:70px;align-items:center}
+        .hero{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:86px 0 76px;display:grid;grid-template-columns:1.08fr .92fr;gap:70px;align-items:center}.pass-logo{width:70px;height:70px;border-radius:18px;margin-bottom:24px;box-shadow:0 15px 40px rgba(0,0,0,.45)}
         .micro{color:var(--gold);margin-bottom:20px}h1,h2,h3{font-family:"Oswald",sans-serif;text-transform:uppercase}
         h1{margin:0 0 24px;font-size:clamp(76px,11vw,156px);line-height:.82;letter-spacing:-.055em}h1 span{color:var(--fire)}
         .hero-copy>p{max-width:610px;margin:0 0 32px;color:#b9ad9b;font-size:17px;line-height:1.7}
@@ -57,6 +58,7 @@ export default function ThePassLanding() {
 
         <section className="hero">
           <div className="hero-copy">
+            <Image src="/logos/the-pass-app-icon.svg" alt="The Pass logo" width={70} height={70} className="pass-logo"/>
             <div className="micro">Multi-model kitchen brigade</div>
             <h1>The <span>Pass</span></h1>
             <p>Stop staring into the fridge waiting for inspiration. Tell The Pass what you have on hand and three AI kitchen roles work together to turn it into dinner.</p>
