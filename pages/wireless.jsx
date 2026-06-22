@@ -109,8 +109,12 @@ export default function WirelessLanding() {
         .brand-logo{width:72px;height:72px;border-radius:20px;object-fit:cover;box-shadow:0 15px 35px rgba(0,0,0,.45)}
         .hero-brand{display:grid;grid-template-columns:1fr 300px;gap:48px;text-align:left!important;max-width:980px!important;align-items:center}
         .hero-brand-logo{width:300px;height:auto;border-radius:24%;filter:drop-shadow(0 25px 42px rgba(0,0,0,.5))}
+        .concierge{max-width:1180px;margin:0 auto 70px;padding:0 40px;display:grid;grid-template-columns:.9fr 1.1fr;border-top:1px solid rgba(215,167,91,.16);border-bottom:1px solid rgba(215,167,91,.16)}
+        .concierge-intro{padding:45px 45px 45px 0;border-right:1px solid rgba(215,167,91,.16)}
+        .concierge-intro span{color:#d7a75b;font-size:9px;letter-spacing:.18em}.concierge-intro h2{font-family:'Syne',sans-serif;font-size:42px;line-height:1;margin:18px 0;color:#f4efe5}.concierge-intro p{color:#777064;font-size:11px;line-height:1.8}
+        .service-menu{display:grid;grid-template-columns:1fr 1fr}.service-item{padding:30px;border-right:1px solid rgba(215,167,91,.1);border-bottom:1px solid rgba(215,167,91,.1)}.service-item:nth-child(even){border-right:0}.service-item b{display:block;color:#d7a75b;font-size:10px;margin-bottom:12px}.service-item strong{display:block;color:#eee9df;font-family:'Syne',sans-serif;margin-bottom:8px}.service-item p{font-size:10px;color:#6f695e;line-height:1.6}
         .value-band{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1100px;margin:0 auto;padding:0 40px 40px}
-        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 14px!important}nav>div:last-child a{display:none}nav>div:last-child{gap:0!important}nav .btn{padding:11px 12px!important;font-size:9px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}.feature-grid{grid-template-columns:1fr!important}.feature-preview{display:none!important}.hero-brand{grid-template-columns:1fr;text-align:center!important}.hero-brand-logo{width:240px;margin:auto}.brand-logo{width:46px;height:46px}.brand-logo+div{display:none}}
+        @media(max-width:760px){.value-band{grid-template-columns:repeat(2,1fr);padding:0 20px 30px}nav{padding:16px 14px!important}nav>div:last-child a{display:none}nav>div:last-child{gap:0!important}nav .btn{padding:11px 12px!important;font-size:9px!important}.hero{padding:60px 20px 40px!important}.hero h1{font-size:38px!important}.feature-grid{grid-template-columns:1fr!important}.feature-preview{display:none!important}.hero-brand{grid-template-columns:1fr;text-align:center!important}.hero-brand-logo{width:240px;margin:auto}.brand-logo{width:46px;height:46px}.brand-logo+div{display:none}.concierge{grid-template-columns:1fr;padding:0 20px}.concierge-intro{border-right:0;padding:35px 0}.service-menu{grid-template-columns:1fr}.service-item{border-right:0}}
       `}</style>
 
       {step === "landing" && (
@@ -148,6 +152,22 @@ export default function WirelessLanding() {
             </div>
             <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless premium phone service logo" width={360} height={360} priority className="hero-brand-logo"/>
           </div>
+
+          <section className="concierge">
+            <div className="concierge-intro">
+              <span>THE WHITE-GLOVE STANDARD</span>
+              <h2>Technology that serves the sale.</h2>
+              <p>The logo is the operating idea: a premium mobile sales system presented with the care of a concierge. The platform stays behind the rep, ready with the next lead, answer, task, or coaching move.</p>
+            </div>
+            <div className="service-menu">
+              {[
+                ["01","THE GLOVE","Personal service around every rep and owner."],
+                ["02","THE PHONE","A field-ready command center built for selling anywhere."],
+                ["03","THE TRAY","One place for leads, calls, appointments, orders, and follow-up."],
+                ["04","THE INTELLIGENCE","Five AI leaders coordinating the next best move."],
+              ].map(([n,title,copy])=><div className="service-item" key={n}><b>{n}</b><strong>{title}</strong><p>{copy}</p></div>)}
+            </div>
+          </section>
 
           <div className="value-band">
             {[
