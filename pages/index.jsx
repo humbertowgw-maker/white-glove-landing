@@ -1,552 +1,730 @@
 import { useState } from "react";
 import Head from "next/head";
+import Image from "next/image";
 import { useRouter } from "next/router";
 
-/* ── Mini mockup sub-components ── */
-function WGWMockup({ active }) {
-  const rows = [
-    { name: "Sarah K.", stage: "Cold Call", color: "#f97316", icon: "📞" },
-    { name: "Mike R.",  stage: "Follow-Up", color: "#fbbf24", icon: "💬" },
-    { name: "Ana L.",   stage: "Closing",   color: "#4ade80", icon: "🤝" },
-  ];
+const PRODUCTS = [
+  {
+    id: "wgw",
+    eyebrow: "AI SALES OPERATING SYSTEM",
+    name: "White Glove Wireless",
+    shortName: "WGW",
+    description:
+      "A premium AI sales command center that helps wireless teams find opportunities, coach reps, manage follow-up, and close more business.",
+    steps: ["FIND", "ENGAGE", "COACH", "CLOSE"],
+    logo: "/logos/white-glove-wireless-app-icon-selected.png",
+    accent: "#f59e0b",
+    accent2: "#f97316",
+    rgb: "245,158,11",
+    surface: "#17120d",
+    glow: "radial-gradient(circle at 50% 28%, rgba(245,158,11,.27), transparent 43%)",
+    pattern:
+      "linear-gradient(135deg, rgba(255,255,255,.035) 0 1px, transparent 1px 18px)",
+    status: "LIVE",
+    action: "Explore WGW",
+    destination: "wireless",
+  },
+  {
+    id: "ss",
+    eyebrow: "AI FINANCIAL INTELLIGENCE",
+    name: "SpendSense",
+    shortName: "SS",
+    description:
+      "An AI finance guide that connects accounts, understands spending, reveals patterns, and helps people make smarter money decisions.",
+    steps: ["CONNECT", "UNDERSTAND", "PLAN", "GROW"],
+    logo: "/logos/spendsense-brand-lockup-selected.png",
+    accent: "#2dd4bf",
+    accent2: "#0f9f8f",
+    rgb: "45,212,191",
+    surface: "#071b1a",
+    glow: "radial-gradient(circle at 50% 30%, rgba(45,212,191,.25), transparent 44%)",
+    pattern:
+      "radial-gradient(circle, rgba(45,212,191,.16) 1px, transparent 1.5px)",
+    status: "LIVE",
+    action: "Explore SpendSense",
+    destination: "spendsense",
+  },
+  {
+    id: "sp",
+    eyebrow: "CONFIGURABLE WHITE-LABEL CRM",
+    name: "Sales Platform",
+    shortName: "SP",
+    description:
+      "A modular business platform that can be branded, configured, and launched for different industries without rebuilding the foundation.",
+    steps: ["BUILD", "BRAND", "CONFIGURE", "SCALE"],
+    logo: "/logos/sales-platform-app-icon-selected.png",
+    accent: "#a78bfa",
+    accent2: "#6366f1",
+    rgb: "167,139,250",
+    surface: "#100c24",
+    glow: "radial-gradient(circle at 50% 30%, rgba(139,92,246,.3), transparent 45%)",
+    pattern:
+      "linear-gradient(135deg, rgba(167,139,250,.09) 25%, transparent 25% 50%, rgba(99,102,241,.08) 50% 75%, transparent 75%)",
+    status: "PRIVATE BETA",
+    action: "Open Platform",
+    destination: "https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app",
+  },
+  {
+    id: "rs",
+    eyebrow: "AI AUTOMOTIVE REPAIR SCOUT",
+    name: "RepairScout",
+    shortName: "RS",
+    description:
+      "A mechanic-focused repair guide that helps drivers understand warning signs, compare likely repairs, and find trustworthy local shops.",
+    steps: ["DESCRIBE", "DIAGNOSE", "COMPARE", "VERIFY"],
+    logo: "/logos/repairscout-brand-lockup-selected.png",
+    accent: "#c8ff18",
+    accent2: "#84cc16",
+    rgb: "200,255,24",
+    surface: "#111907",
+    glow: "radial-gradient(circle at 50% 30%, rgba(200,255,24,.22), transparent 45%)",
+    pattern:
+      "repeating-radial-gradient(circle at 50% 90%, rgba(200,255,24,.08) 0 1px, transparent 2px 15px)",
+    status: "LIVE",
+    action: "Launch RepairScout",
+    destination: "https://repairscout-smoky.vercel.app",
+  },
+  {
+    id: "tt",
+    eyebrow: "LIVE FOOD TRUCK DISCOVERY",
+    name: "TruckTracker",
+    shortName: "TT",
+    description:
+      "A social discovery map where food trucks go live, customers find what is nearby, and local food communities grow in real time.",
+    steps: ["GO LIVE", "DISCOVER", "VISIT", "FOLLOW"],
+    logo: "/logos/trucktracker-app-icon-selected.png",
+    accent: "#ffb21c",
+    accent2: "#ff4538",
+    rgb: "255,178,28",
+    surface: "#201307",
+    glow: "radial-gradient(circle at 50% 30%, rgba(255,178,28,.25), transparent 43%)",
+    pattern:
+      "radial-gradient(circle at 25% 25%, rgba(255,69,56,.12) 0 2px, transparent 3px), radial-gradient(circle at 75% 70%, rgba(255,178,28,.1) 0 2px, transparent 3px)",
+    status: "LIVE",
+    action: "Find Food Trucks",
+    destination: "https://trucktracker-eight.vercel.app",
+  },
+  {
+    id: "pass",
+    eyebrow: "MULTI-MODEL AI KITCHEN",
+    name: "The Pass",
+    shortName: "TP",
+    description:
+      "Tell the kitchen what ingredients you have. An AI chef brigade invents, refines, and critiques a recipe you can actually make.",
+    steps: ["LIST", "CREATE", "REFINE", "SERVE"],
+    logo: "/logos/the-pass-app-icon.svg",
+    accent: "#e8541e",
+    accent2: "#f3b562",
+    rgb: "232,84,30",
+    surface: "#17130f",
+    glow: "radial-gradient(circle at 50% 30%, rgba(232,84,30,.24), transparent 45%)",
+    pattern:
+      "repeating-linear-gradient(0deg, rgba(242,235,221,.04) 0 1px, transparent 1px 22px)",
+    status: "LIVE",
+    action: "Enter The Kitchen",
+    destination: "the-pass",
+  },
+];
+
+function ProductCard({ product, featured, active, onEnter, onLeave, onOpen }) {
   return (
-    <div style={{
-      background: "rgba(249,115,22,.04)", border: "1px solid rgba(249,115,22,.12)",
-      borderRadius: 8, padding: "10px", maxWidth: 240, margin: "0 auto 12px",
-      opacity: active ? 1 : 0.45, transition: "opacity .4s",
-    }}>
-      <div style={{ fontSize: 8, color: "#f97316", letterSpacing: ".14em", marginBottom: 8, opacity: .7 }}>AI REP BOARD</div>
-      {rows.map(r => (
-        <div key={r.name} style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "5px 8px", borderRadius: 4, marginBottom: 3,
-          background: "rgba(249,115,22,.05)", border: "1px solid rgba(249,115,22,.08)",
-        }}>
-          <span style={{ fontSize: 10, color: "#94a3b8" }}>{r.icon} {r.name}</span>
-          <span style={{ fontSize: 8, color: r.color, letterSpacing: ".06em", border: `1px solid ${r.color}44`, borderRadius: 3, padding: "2px 5px" }}>{r.stage}</span>
+    <article
+      className={`product-card ${featured ? "featured" : ""} ${active ? "active" : ""}`}
+      style={{
+        "--accent": product.accent,
+        "--accent-2": product.accent2,
+        "--rgb": product.rgb,
+        "--surface": product.surface,
+        "--brand-glow": product.glow,
+        "--brand-pattern": product.pattern,
+      }}
+      onMouseEnter={onEnter}
+      onMouseLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={onLeave}
+    >
+      <div className="card-aura" />
+      <div className="card-pattern" />
+
+      <div className="card-topline">
+        <span className="project-index">0{PRODUCTS.indexOf(product) + 1}</span>
+        <span className="status">
+          <i />
+          {product.status}
+        </span>
+      </div>
+
+      <div className="logo-stage">
+        <div className="logo-halo" />
+        <Image
+          src={product.logo}
+          alt={`${product.name} logo`}
+          width={featured ? 420 : 330}
+          height={featured ? 420 : 330}
+          sizes={featured ? "(max-width: 760px) 82vw, 420px" : "(max-width: 760px) 78vw, 330px"}
+          className="project-logo"
+          priority={featured}
+        />
+      </div>
+
+      <div className="card-copy">
+        <div className="eyebrow">{product.eyebrow}</div>
+        <h2>{product.name}</h2>
+        <p>{product.description}</p>
+
+        <div className="steps" aria-label={`${product.name} workflow`}>
+          {product.steps.map((step, index) => (
+            <span key={step}>
+              {step}
+              {index < product.steps.length - 1 && <b>·</b>}
+            </span>
+          ))}
         </div>
-      ))}
-    </div>
+
+        <button className="launch-button" onClick={() => onOpen(product)}>
+          <span>{product.action}</span>
+          <span className="arrow">↗</span>
+        </button>
+      </div>
+    </article>
   );
 }
 
-function SpendSenseMockup({ active }) {
-  const cats = [
-    { label: "Dining",    pct: 52, amt: "$420" },
-    { label: "Transport", pct: 22, amt: "$180" },
-    { label: "Shopping",  pct: 73, amt: "$590" },
-  ];
-  return (
-    <div style={{
-      background: "rgba(20,184,166,.04)", border: "1px solid rgba(20,184,166,.12)",
-      borderRadius: 8, padding: "10px", maxWidth: 240, margin: "0 auto 12px",
-      opacity: active ? 1 : 0.45, transition: "opacity .4s",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ fontSize: 8, color: "#14b8a6", letterSpacing: ".14em", opacity: .7 }}>MAY BUDGET</span>
-        <span style={{ fontSize: 10, color: "#f1f5f9", fontWeight: 500 }}>$3,240</span>
-      </div>
-      <div style={{ height: 4, background: "rgba(20,184,166,.12)", borderRadius: 2, marginBottom: 10, overflow: "hidden" }}>
-        <div style={{ height: "100%", width: "76%", background: "linear-gradient(90deg,#14b8a6,#0d9488)", borderRadius: 2 }}/>
-      </div>
-      {cats.map(c => (
-        <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-          <span style={{ fontSize: 8, color: "#475569", width: 56, flexShrink: 0 }}>{c.label}</span>
-          <div style={{ flex: 1, height: 3, background: "rgba(20,184,166,.1)", borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${c.pct}%`, background: "#14b8a6", borderRadius: 2 }}/>
-          </div>
-          <span style={{ fontSize: 8, color: "#64748b", width: 30, textAlign: "right" }}>{c.amt}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function SalesPlatformMockup({ active }) {
-  const cols = [
-    { label: "QUALIFY",  deals: ["Acme Corp", "Bright Co"], color: "#6366f1" },
-    { label: "PROPOSAL", deals: ["TechFlow", "Metro AI"],   color: "#818cf8" },
-    { label: "CLOSE",    deals: ["Zenith", "BluePeak"],       color: "#4ade80" },
-  ];
-  return (
-    <div style={{
-      background: "rgba(99,102,241,.04)", border: "1px solid rgba(99,102,241,.12)",
-      borderRadius: 8, padding: "10px", maxWidth: 260, margin: "0 auto 12px",
-      opacity: active ? 1 : 0.45, transition: "opacity .4s",
-    }}>
-      <div style={{ fontSize: 8, color: "#6366f1", letterSpacing: ".14em", marginBottom: 8, opacity: .7 }}>AI PIPELINE</div>
-      <div style={{ display: "flex", gap: 4 }}>
-        {cols.map(c => (
-          <div key={c.label} style={{ flex: 1 }}>
-            <div style={{ fontSize: 7, color: c.color, letterSpacing: ".08em", marginBottom: 4, opacity: .8 }}>{c.label}</div>
-            {c.deals.map(d => (
-              <div key={d} style={{
-                fontSize: 8, color: "#94a3b8", background: "rgba(99,102,241,.08)",
-                border: "1px solid rgba(99,102,241,.15)", borderRadius: 3,
-                padding: "4px 5px", marginBottom: 3,
-              }}>{d}</div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function RepairScoutMockup({ active }) {
-  const causes = [
-    { label: "Brake pads",    pct: 78, color: "#4ade80" },
-    { label: "Rotors",        pct: 54, color: "#fbbf24" },
-    { label: "Wheel bearing", pct: 21, color: "#94a3b8" },
-  ];
-  return (
-    <div style={{
-      background: "rgba(34,197,94,.04)", border: "1px solid rgba(34,197,94,.13)",
-      borderRadius: 8, padding: "10px", maxWidth: 250, margin: "0 auto 12px",
-      opacity: active ? 1 : 0.45, transition: "opacity .4s",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ fontSize: 8, color: "#4ade80", letterSpacing: ".14em", opacity: .75 }}>AI REPAIR CHECK</span>
-        <span style={{ fontSize: 8, color: "#94a3b8" }}>2019 ACCORD</span>
-      </div>
-      {causes.map(c => (
-        <div key={c.label} style={{ marginBottom: 5 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
-            <span style={{ fontSize: 8, color: "#94a3b8" }}>{c.label}</span>
-            <span style={{ fontSize: 8, color: c.color }}>{c.pct}%</span>
-          </div>
-          <div style={{ height: 3, background: "rgba(34,197,94,.1)", borderRadius: 2, overflow: "hidden" }}>
-            <div style={{ height: "100%", width: `${c.pct}%`, background: c.color, borderRadius: 2 }}/>
-          </div>
-        </div>
-      ))}
-      <div style={{ display: "flex", justifyContent: "space-between", borderTop: "1px solid rgba(34,197,94,.12)", paddingTop: 6, marginTop: 6 }}>
-        <span style={{ fontSize: 8, color: "#64748b" }}>EST. REPAIR</span>
-        <span style={{ fontSize: 10, color: "#f1f5f9", fontWeight: 600 }}>$230–$540</span>
-      </div>
-    </div>
-  );
-}
-
-function TruckTrackerMockup({ active }) {
-  const updates = [
-    { icon: "🚚", title: "Taco Trail", meta: "LIVE · 0.8 mi" },
-    { icon: "📸", title: "Birria snap", meta: "posted 4m ago" },
-    { icon: "🗼", title: "Space Needle", meta: "landmark nearby" },
-  ];
-  return (
-    <div style={{
-      background: "rgba(244,63,94,.04)", border: "1px solid rgba(244,63,94,.14)",
-      borderRadius: 8, padding: "10px", maxWidth: 250, margin: "0 auto 12px",
-      opacity: active ? 1 : 0.45, transition: "opacity .4s",
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ fontSize: 8, color: "#fb7185", letterSpacing: ".14em", opacity: .8 }}>LIVE FOOD FEED</span>
-        <span style={{ fontSize: 8, color: "#4ade80" }}>● 3 NEARBY</span>
-      </div>
-      {updates.map(item => (
-        <div key={item.title} style={{
-          display: "flex", alignItems: "center", gap: 8, padding: "5px 7px",
-          borderRadius: 5, marginBottom: 4, background: "rgba(244,63,94,.06)",
-          border: "1px solid rgba(244,63,94,.1)", textAlign: "left",
-        }}>
-          <span style={{ fontSize: 15 }}>{item.icon}</span>
-          <span style={{ flex: 1 }}>
-            <strong style={{ display: "block", color: "#cbd5e1", fontSize: 9 }}>{item.title}</strong>
-            <span style={{ color: "#64748b", fontSize: 7.5 }}>{item.meta}</span>
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* ── Main component ── */
 export default function Chooser() {
-  const [hover, setHover] = useState(null);
+  const [hovered, setHovered] = useState("wgw");
   const router = useRouter();
 
-  const go = (side) => {
-    if (side === "wgw") router.push("/wireless");
-    else if (side === "ss") router.push("/spendsense");
-    else if (side === "sp") window.open("https://salesplatform-frontend-1zyqk0c1t-humberto-s-projects7.vercel.app", "_blank");
-    else if (side === "rs") window.open("https://repairscout-smoky.vercel.app", "_blank");
-    else window.open("https://trucktracker-eight.vercel.app", "_blank");
+  const openProduct = (product) => {
+    if (product.destination.startsWith("http")) {
+      window.open(product.destination, "_blank", "noopener,noreferrer");
+      return;
+    }
+    router.push(`/${product.destination}`);
   };
-
-  const BG = {
-    wgw: "radial-gradient(ellipse at 30% 40%,#200e00 0%,#080910 65%)",
-    ss:  "radial-gradient(ellipse at 70% 40%,#001f1d 0%,#060a12 65%)",
-    sp:  "radial-gradient(ellipse at 50% 40%,#0d0d30 0%,#07070f 65%)",
-    rs:  "radial-gradient(ellipse at 60% 40%,#05200f 0%,#060a0a 65%)",
-    tt:  "radial-gradient(ellipse at 50% 40%,#2a0712 0%,#0c070b 65%)",
-  };
-  const DEFAULT_BG = { wgw: "#070910", ss: "#060a12", sp: "#07070f", rs: "#060a0a", tt: "#0c070b" };
-
-  const dotGrid = `radial-gradient(circle, rgba(255,255,255,.04) 1px, transparent 1px)`;
-  const h = (id) => hover === id;
-
-  const glowColor = { wgw: "249,115,22", ss: "20,184,166", sp: "99,102,241", rs: "34,197,94", tt: "244,63,94" };
 
   return (
     <>
       <Head>
-        <title>Humberto Labs — WGW · SpendSense · Sales Platform · RepairScout · TruckTracker</title>
-        <meta name="description" content="Five connected platforms for sales, personal finance, white-label CRM, automotive repair research, and live food-truck discovery." />
-        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+        <title>Humberto Labs — Six Products, One Builder</title>
+        <meta
+          name="description"
+          content="Explore White Glove Wireless, SpendSense, Sales Platform, RepairScout, TruckTracker, and The Pass."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
       </Head>
 
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { min-height: 100%; overflow-x: hidden; background: #050509; }
+      <style jsx global>{`
+        :root {
+          color-scheme: dark;
+          --page: #050507;
+          --ink: #f7f7f5;
+          --muted: #92929c;
+          --line: rgba(255, 255, 255, 0.09);
+        }
 
-        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+        * {
+          box-sizing: border-box;
+        }
 
-        .grid-wrap {
+        html {
+          background: var(--page);
+          scroll-behavior: smooth;
+        }
+
+        body {
+          margin: 0;
+          min-width: 320px;
+          color: var(--ink);
+          background:
+            radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.075), transparent 35%),
+            #050507;
+          font-family: "Manrope", sans-serif;
+        }
+
+        button,
+        a {
+          font: inherit;
+        }
+
+        .site-shell {
+          min-height: 100vh;
+          overflow: hidden;
+        }
+
+        .site-header {
+          width: min(1440px, calc(100% - 64px));
+          margin: 0 auto;
+          padding: 28px 0 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .wordmark {
+          display: flex;
+          align-items: center;
+          gap: 13px;
+        }
+
+        .wordmark-mark {
+          width: 34px;
+          height: 34px;
+          border-radius: 11px;
           display: grid;
-          grid-template-columns: repeat(6, minmax(0, 1fr));
-          min-height: 100svh;
+          place-items: center;
+          color: #0a0a0c;
+          font-weight: 800;
+          letter-spacing: -0.08em;
+          background: linear-gradient(145deg, #ffffff, #9b9ba4);
+          box-shadow: 0 8px 30px rgba(255, 255, 255, 0.12);
         }
 
-        .panel {
-          position: relative; overflow: hidden; cursor: pointer;
-          display: flex; flex-direction: column;
-          align-items: center; justify-content: center;
-          border: 1px solid #0f0f1a;
-          transition: background .4s ease;
-          grid-column: span 2;
-          min-height: 560px;
+        .wordmark strong {
+          display: block;
+          font-size: 13px;
+          letter-spacing: 0.16em;
+          text-transform: uppercase;
         }
 
-        .panel:nth-child(4),
-        .panel:nth-child(5) {
-          grid-column: span 3;
+        .wordmark small,
+        .header-meta {
+          color: #676772;
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
         }
 
-        .panel-content {
-          position: relative; z-index: 2;
-          max-width: 360px; width: 90%;
+        .hero {
+          width: min(1180px, calc(100% - 64px));
+          margin: 0 auto;
+          padding: 90px 0 74px;
           text-align: center;
-          padding: 8px 0;
+          position: relative;
+        }
+
+        .hero::before {
+          content: "";
+          position: absolute;
+          width: 720px;
+          height: 320px;
+          left: 50%;
+          top: 26px;
+          transform: translateX(-50%);
+          background: radial-gradient(ellipse, rgba(255, 255, 255, 0.07), transparent 66%);
+          pointer-events: none;
+        }
+
+        .kicker {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 24px;
+          color: #a8a8b2;
+          font-family: "DM Mono", monospace;
+          font-size: 10px;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+        }
+
+        .kicker::before,
+        .kicker::after {
+          content: "";
+          width: 36px;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, #74747e);
+        }
+
+        .kicker::after {
+          transform: rotate(180deg);
+        }
+
+        .hero h1 {
+          position: relative;
+          max-width: 920px;
+          margin: 0 auto 24px;
+          font-size: clamp(48px, 7.2vw, 96px);
+          line-height: 0.95;
+          letter-spacing: -0.065em;
+          text-wrap: balance;
+        }
+
+        .hero h1 span {
+          color: #777782;
+        }
+
+        .hero p {
+          position: relative;
+          max-width: 650px;
+          margin: 0 auto;
+          color: #85858f;
+          font-size: 15px;
+          line-height: 1.8;
+          text-wrap: balance;
+        }
+
+        .portfolio {
+          width: min(1440px, calc(100% - 64px));
+          margin: 0 auto 72px;
+          display: grid;
+          grid-template-columns: repeat(12, minmax(0, 1fr));
+          gap: 18px;
+        }
+
+        .product-card {
+          --accent: #fff;
+          --accent-2: #aaa;
+          --rgb: 255,255,255;
+          grid-column: span 4;
+          min-height: 650px;
+          position: relative;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          isolation: isolate;
+          border: 1px solid rgba(255, 255, 255, 0.09);
+          border-radius: 28px;
+          background:
+            linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 32%),
+            var(--surface);
+          transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        .product-card.active {
+          transform: translateY(-6px);
+          border-color: rgba(var(--rgb), 0.42);
+          box-shadow:
+            0 28px 80px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(var(--rgb), 0.06) inset;
+        }
+
+        .card-aura,
+        .card-pattern {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          z-index: -1;
+        }
+
+        .card-aura {
+          background: var(--brand-glow);
+          opacity: 0.72;
+          transition: opacity 0.35s ease, transform 0.5s ease;
+        }
+
+        .active .card-aura {
+          opacity: 1;
+          transform: scale(1.07);
+        }
+
+        .card-pattern {
+          background-image: var(--brand-pattern);
+          background-size: 24px 24px;
+          mask-image: linear-gradient(to bottom, #000, transparent 68%);
+          opacity: 0.45;
+        }
+
+        .card-topline {
+          position: absolute;
+          z-index: 3;
+          top: 22px;
+          left: 24px;
+          right: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.12em;
+        }
+
+        .project-index {
+          color: rgba(255, 255, 255, 0.28);
+        }
+
+        .status {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: rgba(255, 255, 255, 0.46);
+        }
+
+        .status i {
+          width: 5px;
+          height: 5px;
+          border-radius: 50%;
+          background: var(--accent);
+          box-shadow: 0 0 10px var(--accent);
+        }
+
+        .logo-stage {
+          min-height: 365px;
+          padding: 54px 30px 10px;
+          display: grid;
+          place-items: center;
+          position: relative;
+        }
+
+        .logo-halo {
+          position: absolute;
+          width: 64%;
+          aspect-ratio: 1;
+          border-radius: 50%;
+          border: 1px solid rgba(var(--rgb), 0.13);
+          box-shadow:
+            0 0 0 28px rgba(var(--rgb), 0.025),
+            0 0 0 58px rgba(var(--rgb), 0.018);
+          opacity: 0.5;
+          transform: scale(0.88);
+          transition: transform 0.5s ease, opacity 0.5s ease;
+        }
+
+        .active .logo-halo {
+          opacity: 1;
+          transform: scale(1);
+        }
+
+        .project-logo {
+          position: relative;
+          z-index: 2;
+          width: min(100%, 330px);
+          height: auto;
+          border-radius: 23%;
+          object-fit: contain;
+          filter: saturate(0.94) drop-shadow(0 22px 36px rgba(0, 0, 0, 0.5));
+          transition: transform 0.48s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
+        }
+
+        .active .project-logo {
+          transform: translateY(-5px) scale(1.025);
+          filter: saturate(1.08) drop-shadow(0 28px 42px rgba(0, 0, 0, 0.52));
+        }
+
+        .card-copy {
+          flex: 1;
+          padding: 16px 30px 30px;
+          display: flex;
+          flex-direction: column;
         }
 
         .eyebrow {
-          display: inline-flex; align-items: center; gap: 6px;
-          font-size: 9.5px; letter-spacing: .2em;
-          border: 1px solid; border-radius: 20px;
-          padding: 5px 14px; margin-bottom: 14px;
-          font-family: 'DM Mono', monospace;
+          margin-bottom: 12px;
+          color: var(--accent);
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          font-weight: 500;
+          letter-spacing: 0.16em;
         }
 
-        .big-title {
-          font-family: 'Syne', sans-serif;
-          font-size: clamp(28px, 2.8vw, 46px);
-          font-weight: 800; color: #f1f5f9;
-          line-height: 1; letter-spacing: -.01em;
-          margin-bottom: 10px;
+        .card-copy h2 {
+          margin: 0 0 12px;
+          color: #fff;
+          font-size: clamp(27px, 2.5vw, 38px);
+          line-height: 1;
+          letter-spacing: -0.045em;
         }
 
-        .step-line {
-          font-size: 9px; letter-spacing: .2em;
-          margin-bottom: 16px; font-family: 'DM Mono', monospace;
+        .card-copy p {
+          margin: 0 0 22px;
+          color: rgba(255, 255, 255, 0.55);
+          font-size: 12px;
+          line-height: 1.75;
         }
 
-        .desc {
-          font-size: 12px; line-height: 1.75; color: #94a3b8;
-          margin: 0 auto 14px; font-family: 'DM Mono', monospace;
-          max-width: 300px;
-          transition: opacity .3s ease;
+        .steps {
+          margin-top: auto;
+          padding: 14px 0;
+          display: flex;
+          flex-wrap: wrap;
+          gap: 7px;
+          border-top: 1px solid rgba(255, 255, 255, 0.075);
+          color: rgba(255, 255, 255, 0.36);
+          font-family: "DM Mono", monospace;
+          font-size: 8px;
+          letter-spacing: 0.09em;
         }
 
-        .pills {
-          display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
-          margin-bottom: 16px;
-          transition: opacity .3s ease;
+        .steps span {
+          display: flex;
+          gap: 7px;
         }
 
-        .pill {
-          font-size: 9px; letter-spacing: .05em;
-          padding: 4px 10px; border-radius: 3px; border: 1px solid;
-          font-family: 'DM Mono', monospace;
+        .steps b {
+          color: var(--accent);
+          font-weight: 400;
         }
 
-        .cta {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 13px 30px; border-radius: 6px; border: none;
-          font-size: 11px; font-weight: 600; letter-spacing: .14em;
-          text-transform: uppercase; cursor: pointer;
-          transition: all .2s; font-family: 'DM Mono', monospace;
+        .launch-button {
+          width: 100%;
+          margin-top: 4px;
+          padding: 14px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          color: #fff;
+          border: 1px solid rgba(var(--rgb), 0.24);
+          border-radius: 12px;
+          background: rgba(var(--rgb), 0.07);
+          cursor: pointer;
+          font-family: "DM Mono", monospace;
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
 
-        .fine-print {
-          margin-top: 10px; font-size: 8.5px; letter-spacing: .1em;
-          font-family: 'DM Mono', monospace; opacity: .4;
+        .launch-button:hover,
+        .launch-button:focus-visible {
+          outline: none;
+          border-color: rgba(var(--rgb), 0.58);
+          background: rgba(var(--rgb), 0.14);
+          transform: translateY(-1px);
         }
 
-        .top-bar {
-          position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 3;
+        .arrow {
+          color: var(--accent);
+          font-size: 15px;
         }
 
-        @media (max-width: 1050px) {
-          .grid-wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .panel, .panel:nth-child(4), .panel:nth-child(5) { grid-column: span 1; }
-          .panel:last-child { grid-column: 1 / -1; }
+        .site-footer {
+          width: min(1440px, calc(100% - 64px));
+          margin: 0 auto;
+          padding: 28px 0 42px;
+          display: flex;
+          justify-content: space-between;
+          gap: 20px;
+          border-top: 1px solid var(--line);
+          color: #5f5f69;
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
         }
 
-        @media (max-width: 640px) {
-          .grid-wrap { grid-template-columns: 1fr; }
-          .panel, .panel:nth-child(4), .panel:nth-child(5), .panel:last-child { grid-column: 1; min-height: 650px; }
+        @media (max-width: 1100px) {
+          .product-card {
+            grid-column: span 6;
+          }
+
+        }
+
+        @media (max-width: 720px) {
+          .site-header,
+          .hero,
+          .portfolio,
+          .site-footer {
+            width: min(100% - 28px, 640px);
+          }
+
+          .site-header {
+            padding-top: 18px;
+          }
+
+          .header-meta {
+            display: none;
+          }
+
+          .hero {
+            padding: 64px 0 52px;
+          }
+
+          .hero h1 {
+            font-size: clamp(46px, 15vw, 70px);
+          }
+
+          .hero p {
+            font-size: 13px;
+          }
+
+          .portfolio {
+            display: block;
+          }
+
+          .product-card {
+            min-height: 610px;
+            margin-bottom: 14px;
+          }
+
+          .logo-stage {
+            min-height: 330px;
+            padding-left: 22px;
+            padding-right: 22px;
+          }
+
+          .project-logo {
+            width: min(100%, 300px);
+          }
+
+          .card-copy {
+            padding: 12px 24px 24px;
+          }
+
+          .site-footer {
+            flex-direction: column;
+            line-height: 1.7;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * {
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+          }
         }
       `}</style>
 
-      <div className="grid-wrap">
-
-        {/* ── WHITE GLOVE WIRELESS (top-left) ── */}
-        <div
-          className="panel"
-          style={{ background: h("wgw") ? BG.wgw : DEFAULT_BG.wgw }}
-          onClick={() => go("wgw")}
-          onMouseEnter={() => setHover("wgw")}
-          onMouseLeave={() => setHover(null)}
-        >
-          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
-          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#f97316,transparent)", opacity: h("wgw") ? 1 : 0.3, transition: "opacity .4s" }}/>
-          <div style={{
-            position: "absolute", width: 420, height: 420, borderRadius: "50%",
-            background: `radial-gradient(circle,rgba(${glowColor.wgw},.22) 0%,transparent 65%)`,
-            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
-            pointerEvents: "none", zIndex: 1,
-            opacity: h("wgw") ? 1 : 0.2, transition: "opacity .5s",
-            animation: h("wgw") ? "pulse 3s ease-in-out infinite" : "none",
-          }}/>
-
-          <div className="panel-content">
-            <div className="eyebrow" style={{ color: "#f97316", borderColor: "rgba(249,115,22,.25)", background: "rgba(249,115,22,.06)" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#f97316", display: "inline-block", animation: h("wgw") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
-              AI SALES OPERATING SYSTEM
-            </div>
-            <div className="big-title">WHITE GLOVE<br /><span style={{ color: "#f97316" }}>WIRELESS</span></div>
-            <div className="step-line" style={{ color: "#f97316", opacity: .45 }}>FIND · ENGAGE · COACH · CLOSE · IMPROVE</div>
-
-            <WGWMockup active={h("wgw")} />
-
-            <p className="desc" style={{ opacity: h("wgw") ? 1 : 0.3 }}>
-              A coordinated AI team that finds opportunities, guides outreach, coaches reps in real time, and turns every outcome into the next best action.
-            </p>
-            <div className="pills" style={{ opacity: h("wgw") ? 1 : 0.3 }}>
-              {["🤖 AI Leadership","🎙️ Live Voice","🏆 Rep Coaching","🔄 Closed-Loop"].map(f => (
-                <span key={f} className="pill" style={{ color: "#f97316", borderColor: "rgba(249,115,22,.3)", background: "rgba(249,115,22,.06)" }}>{f}</span>
-              ))}
-            </div>
-
-            <button className="cta" style={{
-              background: h("wgw") ? "linear-gradient(135deg,#f97316,#ea580c)" : "rgba(249,115,22,.12)",
-              color: h("wgw") ? "#000" : "#f97316",
-              border: `1px solid ${h("wgw") ? "transparent" : "rgba(249,115,22,.2)"}`,
-              boxShadow: h("wgw") ? "0 0 28px rgba(249,115,22,.4),0 4px 16px rgba(249,115,22,.2)" : "none",
-              transform: h("wgw") ? "translateY(-2px)" : "none",
-            }}>Explore WGW →</button>
-            <div className="fine-print" style={{ color: "#f97316" }}>14-DAY FREE TRIAL · NO CARD REQUIRED</div>
+      <main className="site-shell">
+        <header className="site-header">
+          <div className="wordmark">
+            <span className="wordmark-mark">HL</span>
+            <span>
+              <strong>Humberto Labs</strong>
+              <small>Independent Product Studio</small>
+            </span>
           </div>
-        </div>
+          <span className="header-meta">Six products · one ecosystem</span>
+        </header>
 
-        {/* ── SPENDSENSE (top-right) ── */}
-        <div
-          className="panel"
-          style={{ background: h("ss") ? BG.ss : DEFAULT_BG.ss }}
-          onClick={() => go("ss")}
-          onMouseEnter={() => setHover("ss")}
-          onMouseLeave={() => setHover(null)}
-        >
-          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
-          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#14b8a6,transparent)", opacity: h("ss") ? 1 : 0.3, transition: "opacity .4s" }}/>
-          <div style={{
-            position: "absolute", width: 420, height: 420, borderRadius: "50%",
-            background: `radial-gradient(circle,rgba(${glowColor.ss},.2) 0%,transparent 65%)`,
-            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
-            pointerEvents: "none", zIndex: 1,
-            opacity: h("ss") ? 1 : 0.2, transition: "opacity .5s",
-            animation: h("ss") ? "pulse 3s ease-in-out infinite" : "none",
-          }}/>
+        <section className="hero">
+          <div className="kicker">Built from real problems</div>
+          <h1>
+            Six products.
+            <br />
+            <span>Six distinct worlds.</span>
+          </h1>
+          <p>
+            A growing portfolio of AI-powered tools for sales, money, business operations,
+            automotive repair, local food discovery, and everyday cooking—each designed with
+            its own identity.
+          </p>
+        </section>
 
-          <div className="panel-content">
-            <div className="eyebrow" style={{ color: "#14b8a6", borderColor: "rgba(20,184,166,.25)", background: "rgba(20,184,166,.06)" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#14b8a6", display: "inline-block", animation: h("ss") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
-              PERSONAL FINANCE · AI-POWERED
-            </div>
-            <div className="big-title">SPEND<br /><span style={{ color: "#14b8a6" }}>SENSE</span></div>
-            <div className="step-line" style={{ color: "#14b8a6", opacity: .45 }}>CONNECT · CATEGORIZE · UNDERSTAND · SAVE</div>
+        <section className="portfolio" aria-label="Product portfolio">
+          {PRODUCTS.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              featured={index === 0}
+              active={hovered === product.id}
+              onEnter={() => setHovered(product.id)}
+              onLeave={() => setHovered(null)}
+              onOpen={openProduct}
+            />
+          ))}
+        </section>
 
-            <SpendSenseMockup active={h("ss")} />
-
-            <p className="desc" style={{ opacity: h("ss") ? 1 : 0.3 }}>
-              Connect your bank, let AI categorize every transaction, and finally understand where your money actually goes — in real time.
-            </p>
-            <div className="pills" style={{ opacity: h("ss") ? 1 : 0.3 }}>
-              {["🔗 Bank Sync","✨ AI Insights","📸 Receipt Scan","🔔 Smart Alerts"].map(f => (
-                <span key={f} className="pill" style={{ color: "#14b8a6", borderColor: "rgba(20,184,166,.3)", background: "rgba(20,184,166,.06)" }}>{f}</span>
-              ))}
-            </div>
-
-            <button className="cta" style={{
-              background: h("ss") ? "linear-gradient(135deg,#14b8a6,#0d9488)" : "rgba(20,184,166,.1)",
-              color: h("ss") ? "#000" : "#14b8a6",
-              border: `1px solid ${h("ss") ? "transparent" : "rgba(20,184,166,.18)"}`,
-              boxShadow: h("ss") ? "0 0 28px rgba(20,184,166,.4),0 4px 16px rgba(20,184,166,.2)" : "none",
-              transform: h("ss") ? "translateY(-2px)" : "none",
-            }}>Get Started →</button>
-            <div className="fine-print" style={{ color: "#14b8a6" }}>FREE TO TRY · CONNECT IN SECONDS</div>
-          </div>
-        </div>
-
-        {/* ── SALES PLATFORM (bottom-left) ── */}
-        <div
-          className="panel"
-          style={{ background: h("sp") ? BG.sp : DEFAULT_BG.sp }}
-          onClick={() => go("sp")}
-          onMouseEnter={() => setHover("sp")}
-          onMouseLeave={() => setHover(null)}
-        >
-          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
-          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#6366f1,transparent)", opacity: h("sp") ? 1 : 0.3, transition: "opacity .4s" }}/>
-          <div style={{
-            position: "absolute", width: 420, height: 420, borderRadius: "50%",
-            background: `radial-gradient(circle,rgba(${glowColor.sp},.22) 0%,transparent 65%)`,
-            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
-            pointerEvents: "none", zIndex: 1,
-            opacity: h("sp") ? 1 : 0.2, transition: "opacity .5s",
-            animation: h("sp") ? "pulse 3s ease-in-out infinite" : "none",
-          }}/>
-
-          <div className="panel-content">
-            <div className="eyebrow" style={{ color: "#6366f1", borderColor: "rgba(99,102,241,.25)", background: "rgba(99,102,241,.06)" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#6366f1", display: "inline-block", animation: h("sp") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
-              WHITE-LABEL · AI CRM PLATFORM
-            </div>
-            <div className="big-title">SALES<br /><span style={{ color: "#6366f1" }}>PLATFORM</span></div>
-            <div className="step-line" style={{ color: "#6366f1", opacity: .45 }}>BUILD · BRAND · DEPLOY · SCALE</div>
-
-            <SalesPlatformMockup active={h("sp")} />
-
-            <p className="desc" style={{ opacity: h("sp") ? 1 : 0.3 }}>
-              A fully white-label AI sales CRM — brand it, deploy it for your team, or resell to clients with AI assistant, lead pipeline, and 14-day trials built in.
-            </p>
-            <div className="pills" style={{ opacity: h("sp") ? 1 : 0.3 }}>
-              {["🏷️ White-Label","🤖 AI Assistant","📊 Lead Pipeline","👥 Multi-Tenant"].map(f => (
-                <span key={f} className="pill" style={{ color: "#818cf8", borderColor: "rgba(99,102,241,.3)", background: "rgba(99,102,241,.07)" }}>{f}</span>
-              ))}
-            </div>
-
-            <button className="cta" style={{
-              background: h("sp") ? "linear-gradient(135deg,#6366f1,#4f46e5)" : "rgba(99,102,241,.1)",
-              color: h("sp") ? "#fff" : "#818cf8",
-              border: `1px solid ${h("sp") ? "transparent" : "rgba(99,102,241,.2)"}`,
-              boxShadow: h("sp") ? "0 0 28px rgba(99,102,241,.5),0 4px 16px rgba(99,102,241,.25)" : "none",
-              transform: h("sp") ? "translateY(-2px)" : "none",
-            }}>Sign In →</button>
-            <div className="fine-print" style={{ color: "#6366f1" }}>EARLY ACCESS · 14-DAY FREE TRIAL</div>
-          </div>
-        </div>
-
-        {/* ── REPAIRSCOUT (bottom-right) ── */}
-        <div
-          className="panel"
-          style={{ background: h("rs") ? BG.rs : DEFAULT_BG.rs }}
-          onClick={() => go("rs")}
-          onMouseEnter={() => setHover("rs")}
-          onMouseLeave={() => setHover(null)}
-        >
-          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
-          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#22c55e,transparent)", opacity: h("rs") ? 1 : 0.3, transition: "opacity .4s" }}/>
-          <div style={{
-            position: "absolute", width: 420, height: 420, borderRadius: "50%",
-            background: `radial-gradient(circle,rgba(${glowColor.rs},.2) 0%,transparent 65%)`,
-            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
-            pointerEvents: "none", zIndex: 1,
-            opacity: h("rs") ? 1 : 0.2, transition: "opacity .5s",
-            animation: h("rs") ? "pulse 3s ease-in-out infinite" : "none",
-          }}/>
-
-          <div className="panel-content">
-            <div className="eyebrow" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,.25)", background: "rgba(34,197,94,.06)" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#4ade80", display: "inline-block", animation: h("rs") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
-              AI AUTO REPAIR · TWO-SIDED
-            </div>
-            <div className="big-title">REPAIR<br /><span style={{ color: "#4ade80" }}>SCOUT</span></div>
-            <div className="step-line" style={{ color: "#4ade80", opacity: .45 }}>DESCRIBE · DIAGNOSE · COMPARE · VERIFY</div>
-
-            <RepairScoutMockup active={h("rs")} />
-
-            <p className="desc" style={{ opacity: h("rs") ? 1 : 0.3 }}>
-              Drivers research symptoms, parts, labor, and nearby shops while repair businesses receive organized quote requests with diagnostic context.
-            </p>
-            <div className="pills" style={{ opacity: h("rs") ? 1 : 0.3 }}>
-              {["🔍 VIN Lookup","🔧 AI Diagnosis","🔩 Parts Research","✅ Verified Quotes"].map(f => (
-                <span key={f} className="pill" style={{ color: "#4ade80", borderColor: "rgba(34,197,94,.3)", background: "rgba(34,197,94,.07)" }}>{f}</span>
-              ))}
-            </div>
-
-            <button className="cta" style={{
-              background: h("rs") ? "linear-gradient(135deg,#4ade80,#16a34a)" : "rgba(34,197,94,.1)",
-              color: h("rs") ? "#04140a" : "#4ade80",
-              border: `1px solid ${h("rs") ? "transparent" : "rgba(34,197,94,.2)"}`,
-              boxShadow: h("rs") ? "0 0 28px rgba(34,197,94,.4),0 4px 16px rgba(34,197,94,.2)" : "none",
-              transform: h("rs") ? "translateY(-2px)" : "none",
-            }}>Explore RepairScout →</button>
-            <div className="fine-print" style={{ color: "#4ade80" }}>LIVE BETA · DRIVER + SHOP PORTALS</div>
-          </div>
-        </div>
-
-        {/* ── TRUCKTRACKER ── */}
-        <div
-          className="panel"
-          style={{ background: h("tt") ? BG.tt : DEFAULT_BG.tt }}
-          onClick={() => go("tt")}
-          onMouseEnter={() => setHover("tt")}
-          onMouseLeave={() => setHover(null)}
-        >
-          <div style={{ position: "absolute", inset: 0, backgroundImage: dotGrid, backgroundSize: "22px 22px", opacity: .8, zIndex: 1, pointerEvents: "none" }}/>
-          <div className="top-bar" style={{ background: "linear-gradient(90deg,transparent,#fb7185,transparent)", opacity: h("tt") ? 1 : 0.3, transition: "opacity .4s" }}/>
-          <div style={{
-            position: "absolute", width: 420, height: 420, borderRadius: "50%",
-            background: `radial-gradient(circle,rgba(${glowColor.tt},.22) 0%,transparent 65%)`,
-            top: "50%", left: "50%", transform: "translate(-50%,-52%)",
-            pointerEvents: "none", zIndex: 1,
-            opacity: h("tt") ? 1 : 0.2, transition: "opacity .5s",
-            animation: h("tt") ? "pulse 3s ease-in-out infinite" : "none",
-          }}/>
-
-          <div className="panel-content">
-            <div className="eyebrow" style={{ color: "#fb7185", borderColor: "rgba(244,63,94,.28)", background: "rgba(244,63,94,.07)" }}>
-              <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#fb7185", display: "inline-block", animation: h("tt") ? "pulse 1.4s ease-in-out infinite" : "none" }}/>
-              LIVE FOOD · SOCIAL DISCOVERY
-            </div>
-            <div className="big-title">TRUCK<br /><span style={{ color: "#fb7185" }}>TRACKER</span></div>
-            <div className="step-line" style={{ color: "#fb7185", opacity: .45 }}>GO LIVE · DISCOVER · SNAP · RATE · FOLLOW</div>
-
-            <TruckTrackerMockup active={h("tt")} />
-
-            <p className="desc" style={{ opacity: h("tt") ? 1 : 0.3 }}>
-              A live social network for mobile food. Customers find trucks, fresh snaps, reviews, wait times, and landmark-based locations while owners turn their location into a crowd.
-            </p>
-            <div className="pills" style={{ opacity: h("tt") ? 1 : 0.3 }}>
-              {["📍 Live GPS","📸 Food Feed","⭐ Real Ratings","🗼 Landmark Map"].map(f => (
-                <span key={f} className="pill" style={{ color: "#fb7185", borderColor: "rgba(244,63,94,.3)", background: "rgba(244,63,94,.07)" }}>{f}</span>
-              ))}
-            </div>
-
-            <button className="cta" style={{
-              background: h("tt") ? "linear-gradient(135deg,#fb7185,#e11d48)" : "rgba(244,63,94,.1)",
-              color: h("tt") ? "#190308" : "#fb7185",
-              border: `1px solid ${h("tt") ? "transparent" : "rgba(244,63,94,.22)"}`,
-              boxShadow: h("tt") ? "0 0 28px rgba(244,63,94,.42),0 4px 16px rgba(244,63,94,.22)" : "none",
-              transform: h("tt") ? "translateY(-2px)" : "none",
-            }}>Find Food Trucks →</button>
-            <div className="fine-print" style={{ color: "#fb7185" }}>FREE FOR FOOD LOVERS · LOW-COST TRUCK PLANS</div>
-          </div>
-        </div>
-
-      </div>
+        <footer className="site-footer">
+          <span>© {new Date().getFullYear()} Humberto Labs</span>
+          <span>Designed and built as one connected portfolio</span>
+        </footer>
+      </main>
     </>
   );
 }
