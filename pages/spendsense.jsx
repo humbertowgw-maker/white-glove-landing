@@ -1,12 +1,13 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import AppInstallMeta from "../components/AppInstallMeta";
 
 const APP="https://spendsense-seven.vercel.app";
 const transactions=[["GROCERIES","Whole Foods","-$84.21"],["INCOME","Payroll deposit","+$3,240"],["DINING","Neighborhood cafe","-$18.40"]];
 
 export default function SpendSense(){
- return <><Head><title>SpendSense — Your Financial Signal</title><meta name="description" content="AI financial intelligence that turns transactions into clarity."/><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/></Head>
+ return <><Head><title>SpendSense — Your Financial Signal</title><meta name="description" content="AI financial intelligence that turns transactions into clarity."/><link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet"/></Head><AppInstallMeta slug="spendsense" name="SpendSense" themeColor="#2dd4bf"/>
  <style jsx global>{`
  *{box-sizing:border-box}html{background:#03110f}body{margin:0;color:#ecfffb;background:#03110f;font-family:Manrope,sans-serif}a{color:inherit}.ss{min-height:100vh;overflow:hidden;background:radial-gradient(circle at 80% 10%,rgba(45,212,191,.15),transparent 30%),radial-gradient(circle,rgba(45,212,191,.06) 1px,transparent 1px) 0 0/24px 24px}
  nav{width:min(1320px,calc(100% - 48px));margin:auto;padding:22px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(45,212,191,.15)}.brand{display:flex;align-items:center;gap:12px}.brand img{border-radius:13px}.brand strong{display:block}.mono{font:9px "DM Mono",monospace;letter-spacing:.13em;text-transform:uppercase;color:#67a9a0}.navlinks{display:flex;gap:12px;align-items:center}.navlinks a{text-decoration:none;font:10px "DM Mono",monospace;letter-spacing:.08em;text-transform:uppercase}.launch{padding:12px 16px;background:#2dd4bf;color:#03110f}

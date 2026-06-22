@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import AppInstallMeta from "../components/AppInstallMeta";
 
 const APP_URL = "https://purple-beach-0c1e8a510.7.azurestaticapps.net/";
 
@@ -20,6 +21,7 @@ export default function ThePassLanding() {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
       </Head>
+      <AppInstallMeta slug="the-pass" name="The Pass" themeColor="#e8541e" />
 
       <style jsx global>{`
         :root{color-scheme:dark;--ink:#f2ebdd;--paper:#16130f;--panel:#1c1812;--line:rgba(242,235,221,.13);--muted:#a99e8b;--fire:#e8541e;--gold:#f3b562}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import AppInstallMeta from "../components/AppInstallMeta";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
 
@@ -95,6 +96,7 @@ export default function WirelessLanding() {
         <title>White Glove Wireless — AI-Powered AT&T Sales Platform</title>
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
+      <AppInstallMeta slug="wgw" name="White Glove Wireless" themeColor="#d7a75b" />
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
         body{background:radial-gradient(circle at 50% 0%,rgba(245,158,11,.11),transparent 28%),#090806;color:#eee9df;font-family:'DM Mono',monospace}

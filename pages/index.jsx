@@ -2,6 +2,7 @@ import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
+import AppInstallMeta from "../components/AppInstallMeta";
 
 const PRODUCTS = [
   {
@@ -217,6 +218,7 @@ export default function Chooser() {
           rel="stylesheet"
         />
       </Head>
+      <AppInstallMeta slug="portfolio" name="Humberto Labs" themeColor="#050507" />
 
       <style jsx global>{`
         :root {
