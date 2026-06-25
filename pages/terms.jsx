@@ -1,133 +1,122 @@
 import Head from "next/head";
 import Link from "next/link";
 
+const text = {
+  color: "#d4d4d4",
+  fontSize: 14,
+  lineHeight: 1.85,
+};
+
+const section = {
+  marginBottom: 32,
+  paddingBottom: 32,
+  borderBottom: "1px solid #1f1f1f",
+};
+
 export default function Terms() {
   return (
     <>
       <Head>
-        <title>Terms of Service — White Glove Wireless</title>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+        <title>Terms of Service - White Glove Wireless</title>
+        <meta name="description" content="White Glove Wireless terms of service for platform use and SMS messaging." />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#070910;color:#e2e8f0;font-family:'DM Mono',monospace}
-        a{color:#f97316;text-decoration:none}
+        body{background:#000000;color:#ffffff;font-family:Arial,Helvetica,sans-serif}
+        a{color:#FF6B00;text-decoration:none}
         a:hover{text-decoration:underline}
       `}</style>
 
-      {/* Nav */}
-      <nav style={{padding:"20px 40px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #0d1526"}}>
-        <Link href="/">
+      <nav style={{padding:"22px 40px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #1f1f1f"}}>
+        <Link href="/" style={{textDecoration:"none"}}>
           <div style={{cursor:"pointer"}}>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#f97316"}}>WHITE GLOVE</div>
-            <div style={{fontSize:9,color:"#334155",letterSpacing:".18em"}}>WIRELESS · AI PLATFORM</div>
+            <div style={{fontSize:20,fontWeight:800,color:"#FF6B00",letterSpacing:".04em"}}>WHITE GLOVE WIRELESS</div>
+            <div style={{fontSize:11,color:"#ffffff",letterSpacing:".18em",marginTop:4}}>AI CRM FOR AUTHORIZED DEALERS</div>
           </div>
         </Link>
-        <a href="https://white-glove-frontend.vercel.app" style={{color:"#475569",fontSize:11}}>Sign In</a>
+        <div style={{display:"flex",gap:18,fontSize:12,flexWrap:"wrap"}}>
+          <Link href="/sms-opt-in" style={{color:"#ffffff"}}>SMS Opt-In</Link>
+          <Link href="/privacy" style={{color:"#ffffff"}}>Privacy</Link>
+        </div>
       </nav>
 
-      {/* Content */}
-      <div style={{maxWidth:780,margin:"0 auto",padding:"60px 40px 80px"}}>
-        <div style={{fontSize:10,color:"#f97316",letterSpacing:".2em",marginBottom:16}}>LEGAL</div>
-        <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:36,fontWeight:800,color:"#f1f5f9",marginBottom:8}}>Terms of Service</h1>
-        <div style={{fontSize:11,color:"#475569",marginBottom:48}}>Effective Date: June 4, 2026</div>
+      <main style={{maxWidth:860,margin:"0 auto",padding:"64px 40px 84px"}}>
+        <div style={{fontSize:12,color:"#FF6B00",letterSpacing:".2em",marginBottom:16,fontWeight:700}}>LEGAL</div>
+        <h1 style={{fontSize:42,lineHeight:1.08,fontWeight:800,color:"#ffffff",marginBottom:12}}>Terms of Service</h1>
+        <div style={{fontSize:13,color:"#d4d4d4",marginBottom:42}}>Last updated: June 25, 2026</div>
 
-        <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9,marginBottom:40}}>
-          These Terms of Service govern your interaction with White Glove Wireless LLC, an authorized AT&T dealer. By engaging with our services, you agree to these Terms.
+        <p style={{...text,marginBottom:36}}>
+          These Terms of Service govern use of White Glove Wireless, an AI-powered CRM for AT&amp;T authorized dealers, including website access, platform use, AI-assisted appointment workflows, and SMS messaging.
         </p>
 
-        {[
-          {
-            title: "1. Services",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless LLC provides sales consultation for AT&T wireless and internet products. We are an independent authorized dealer and not a direct employee or subsidiary of AT&T Inc.
-              </p>
-            ),
-          },
-          {
-            title: "2. AI Outreach Consent",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                By engaging with White Glove Wireless, you acknowledge that we use AI-powered tools ("Sofia") to conduct outreach. Sofia identifies herself as an AI. Calls may be recorded. You may opt out or request a human representative at any time.
-              </p>
-            ),
-          },
-          {
-            title: "3. No Obligation",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                All consultations and site visits are completely free. There is no obligation to purchase. Any AT&T product purchase is subject to AT&T's standard terms.
-              </p>
-            ),
-          },
-          {
-            title: "4. SMS Disclosures",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless may send you text messages about appointment reminders, consultations, and AT&T product and service updates.{" "}
-                <strong style={{color:"#e2e8f0"}}>Message frequency varies.</strong>{" "}
-                <strong style={{color:"#e2e8f0"}}>Message and data rates may apply.</strong>{" "}
-                <strong style={{color:"#e2e8f0"}}>Reply STOP to cancel. Reply HELP for help.</strong>
-              </p>
-            ),
-          },
-          {
-            title: "5. Limitation of Liability",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless LLC is not liable for indirect or consequential damages. All pricing is subject to change and must be confirmed with AT&T directly.
-              </p>
-            ),
-          },
-          {
-            title: "6. Opt-Out Rights",
-            content: (
-              <ul style={{paddingLeft:20,color:"#94a3b8",fontSize:12,lineHeight:2}}>
-                <li><strong style={{color:"#e2e8f0"}}>Reply STOP</strong> to any text message to cancel</li>
-                <li><strong style={{color:"#e2e8f0"}}>Reply HELP</strong> to any text message for help</li>
-                <li>Request removal during any phone call</li>
-                <li>Email <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a> — honored within 10 business days</li>
-              </ul>
-            ),
-          },
-          {
-            title: "7. Governing Law",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                These Terms are governed by the laws of the State of Washington. Disputes shall be resolved in Snohomish County, Washington.
-              </p>
-            ),
-          },
-          {
-            title: "8. Contact",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless LLC<br />
-                <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a><br />
-                <a href="https://whitegwireless.com">whitegwireless.com</a>
-              </p>
-            ),
-          },
-        ].map(({ title, content }) => (
-          <div key={title} style={{marginBottom:40,paddingBottom:40,borderBottom:"1px solid #0d1526"}}>
-            <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:700,color:"#f1f5f9",marginBottom:16,letterSpacing:".04em"}}>
-              {title}
-            </h2>
-            {content}
-          </div>
-        ))}
-      </div>
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>1. Platform Use</h2>
+          <p style={text}>
+            White Glove Wireless provides CRM, appointment, lead follow-up, AI voice, and messaging tools for authorized dealer workflows. Users are responsible for using the platform lawfully, maintaining accurate account information, and ensuring their outreach complies with applicable laws and carrier requirements.
+          </p>
+        </section>
 
-      {/* Footer */}
-      <footer style={{padding:"32px 40px",borderTop:"1px solid #0d1526",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
-        <div style={{fontSize:10,color:"#334155"}}>
-          © {new Date().getFullYear()} White Glove Wireless · Authorized AT&T Partner
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>2. SMS Messaging Terms</h2>
+          <p style={text}>
+            White Glove Wireless may send SMS messages for appointment reminders, lead follow-up, and CRM notifications sent on behalf of AT&amp;T authorized dealers. Message frequency varies based on account activity. Message and data rates may apply. Consent to receive SMS messages is not a condition of purchase.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>3. STOP and HELP Commands</h2>
+          <p style={text}>
+            Reply STOP to unsubscribe at any time. Reply HELP for help. White Glove Wireless honors STOP and HELP commands for SMS messages sent through its platform.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>4. Carrier Delivery</h2>
+          <p style={text}>
+            White Glove Wireless does not guarantee that calls, texts, emails, or platform notifications will be delivered by any carrier, provider, device, or network. Delivery may be delayed, blocked, filtered, or unavailable for reasons outside our control.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>5. AI Voice and CRM Notifications</h2>
+          <p style={text}>
+            Sofia, our AI voice agent via Bland.ai, may contact business owners to book appointments and support lead follow-up. Users must review AI-assisted workflows for accuracy and compliance. White Glove Wireless may update or limit platform features at any time.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>6. Limitation of Liability</h2>
+          <p style={text}>
+            To the fullest extent permitted by law, White Glove Wireless is not liable for indirect, incidental, consequential, special, or punitive damages, including lost profits, lost leads, failed message delivery, or interrupted platform access.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>7. Changes to These Terms</h2>
+          <p style={text}>
+            We may update these Terms from time to time. Updates will be posted on this page with a new last updated date.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>8. Contact</h2>
+          <p style={text}>
+            White Glove Wireless<br />
+            <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a><br />
+            <a href="https://whitegwireless.com">whitegwireless.com</a>
+          </p>
+        </section>
+      </main>
+
+      <footer style={{padding:"32px 40px",borderTop:"1px solid #1f1f1f",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div style={{fontSize:12,color:"#d4d4d4"}}>
+          © {new Date().getFullYear()} White Glove Wireless
         </div>
-        <div style={{display:"flex",gap:24,fontSize:10}}>
-          <Link href="/" style={{color:"#475569"}}>Home</Link>
-          <Link href="/privacy" style={{color:"#475569"}}>Privacy Policy</Link>
-          <Link href="/terms" style={{color:"#f97316"}}>Terms of Service</Link>
+        <div style={{display:"flex",gap:20,fontSize:12,flexWrap:"wrap"}}>
+          <Link href="/" style={{color:"#ffffff"}}>Home</Link>
+          <Link href="/sms-opt-in" style={{color:"#ffffff"}}>SMS Opt-In</Link>
+          <Link href="/privacy" style={{color:"#ffffff"}}>Privacy</Link>
+          <Link href="/terms" style={{color:"#FF6B00"}}>Terms</Link>
         </div>
       </footer>
     </>

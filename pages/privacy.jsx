@@ -1,125 +1,135 @@
 import Head from "next/head";
 import Link from "next/link";
 
+const text = {
+  color: "#d4d4d4",
+  fontSize: 14,
+  lineHeight: 1.85,
+};
+
+const section = {
+  marginBottom: 32,
+  paddingBottom: 32,
+  borderBottom: "1px solid #1f1f1f",
+};
+
 export default function Privacy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy — White Glove Wireless</title>
-        <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+        <title>Privacy Policy - White Glove Wireless</title>
+        <meta name="description" content="White Glove Wireless privacy policy for website, CRM, AI voice, and SMS communications." />
       </Head>
       <style>{`
         *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#070910;color:#e2e8f0;font-family:'DM Mono',monospace}
-        a{color:#f97316;text-decoration:none}
+        body{background:#000000;color:#ffffff;font-family:Arial,Helvetica,sans-serif}
+        a{color:#FF6B00;text-decoration:none}
         a:hover{text-decoration:underline}
       `}</style>
 
-      {/* Nav */}
-      <nav style={{padding:"20px 40px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #0d1526"}}>
-        <Link href="/">
+      <nav style={{padding:"22px 40px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid #1f1f1f"}}>
+        <Link href="/" style={{textDecoration:"none"}}>
           <div style={{cursor:"pointer"}}>
-            <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,color:"#f97316"}}>WHITE GLOVE</div>
-            <div style={{fontSize:9,color:"#334155",letterSpacing:".18em"}}>WIRELESS · AI PLATFORM</div>
+            <div style={{fontSize:20,fontWeight:800,color:"#FF6B00",letterSpacing:".04em"}}>WHITE GLOVE WIRELESS</div>
+            <div style={{fontSize:11,color:"#ffffff",letterSpacing:".18em",marginTop:4}}>AI CRM FOR AUTHORIZED DEALERS</div>
           </div>
         </Link>
-        <a href="https://white-glove-frontend.vercel.app" style={{color:"#475569",fontSize:11}}>Sign In</a>
+        <div style={{display:"flex",gap:18,fontSize:12,flexWrap:"wrap"}}>
+          <Link href="/sms-opt-in" style={{color:"#ffffff"}}>SMS Opt-In</Link>
+          <Link href="/terms" style={{color:"#ffffff"}}>Terms</Link>
+        </div>
       </nav>
 
-      {/* Content */}
-      <div style={{maxWidth:780,margin:"0 auto",padding:"60px 40px 80px"}}>
-        <div style={{fontSize:10,color:"#f97316",letterSpacing:".2em",marginBottom:16}}>LEGAL</div>
-        <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:36,fontWeight:800,color:"#f1f5f9",marginBottom:8}}>Privacy Policy</h1>
-        <div style={{fontSize:11,color:"#475569",marginBottom:48}}>Effective Date: June 4, 2026</div>
+      <main style={{maxWidth:860,margin:"0 auto",padding:"64px 40px 84px"}}>
+        <div style={{fontSize:12,color:"#FF6B00",letterSpacing:".2em",marginBottom:16,fontWeight:700}}>LEGAL</div>
+        <h1 style={{fontSize:42,lineHeight:1.08,fontWeight:800,color:"#ffffff",marginBottom:12}}>Privacy Policy</h1>
+        <div style={{fontSize:13,color:"#d4d4d4",marginBottom:42}}>Last updated: June 25, 2026</div>
 
-        <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9,marginBottom:40}}>
-          White Glove Wireless LLC ("Company," "we," "us," or "our") is an authorized AT&T dealer operating in Western Washington. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you interact with our services, website (whitegwireless.com), or AI-powered outreach tools.
+        <p style={{...text,marginBottom:36}}>
+          White Glove Wireless ("Company," "we," "us," or "our") provides an AI-powered CRM for AT&amp;T authorized dealers. This Privacy Policy explains how we collect, use, disclose, and protect information collected through whitegwireless.com, our CRM platform, Sofia AI voice outreach via Bland.ai, and SMS communications.
         </p>
 
-        {[
-          {
-            title: "1. Information We Collect",
-            content: (
-              <ul style={{paddingLeft:20,color:"#94a3b8",fontSize:12,lineHeight:2}}>
-                <li>Business name, address, phone number, and email address</li>
-                <li>Owner or manager name and contact information</li>
-                <li>Current internet and wireless service provider information</li>
-                <li>Call recordings and transcripts from AI-assisted outreach calls</li>
-                <li>Appointment scheduling information</li>
-              </ul>
-            ),
-          },
-          {
-            title: "2. AI-Powered Communications Disclosure",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless uses artificial intelligence (AI) to conduct initial outreach calls and send text messages. Our AI assistant "Sofia" is programmed to disclose that it is an AI at the start of each interaction. All AI calls may be recorded for quality assurance purposes.
-              </p>
-            ),
-          },
-          {
-            title: "3. SMS / Text Message Communications",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                By providing your phone number, you consent to receive text messages from White Glove Wireless regarding AT&T products and services. <strong style={{color:"#e2e8f0"}}>Message and data rates may apply.</strong> <strong style={{color:"#e2e8f0"}}>Reply STOP to opt out at any time. Reply HELP for assistance.</strong> We will not sell your phone number to third parties.
-              </p>
-            ),
-          },
-          {
-            title: "4. TCPA Compliance",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless complies with the Telephone Consumer Protection Act (TCPA). We only contact business phone numbers obtained through legitimate public sources. To be removed from our contact list, reply STOP to any text or email <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a>.
-              </p>
-            ),
-          },
-          {
-            title: "5. Data Sharing",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                We do not sell your personal information. We may share data with AT&T for service fulfillment, and with service providers (Twilio, Bland.ai) solely to operate our business. We may disclose information when required by law.
-              </p>
-            ),
-          },
-          {
-            title: "6. Your Rights",
-            content: (
-              <ul style={{paddingLeft:20,color:"#94a3b8",fontSize:12,lineHeight:2}}>
-                <li>Request access to, correction, or deletion of your information</li>
-                <li>Opt out of marketing communications at any time</li>
-                <li>File a complaint with the FTC or your state attorney general</li>
-              </ul>
-            ),
-          },
-          {
-            title: "7. Contact Us",
-            content: (
-              <p style={{fontSize:12,color:"#94a3b8",lineHeight:1.9}}>
-                White Glove Wireless LLC<br />
-                <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a><br />
-                <a href="https://whitegwireless.com">whitegwireless.com</a>
-              </p>
-            ),
-          },
-        ].map(({ title, content }) => (
-          <div key={title} style={{marginBottom:40,paddingBottom:40,borderBottom:"1px solid #0d1526"}}>
-            <h2 style={{fontFamily:"'Syne',sans-serif",fontSize:14,fontWeight:700,color:"#f1f5f9",marginBottom:16,letterSpacing:".04em"}}>
-              {title}
-            </h2>
-            {content}
-          </div>
-        ))}
-      </div>
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>1. Information We Collect</h2>
+          <ul style={{paddingLeft:22,...text}}>
+            <li>Business name, address, phone number, and email address</li>
+            <li>Owner or manager name and contact information</li>
+            <li>Lead, appointment, account activity, and CRM notification details</li>
+            <li>SMS opt-in status, message logs, STOP/HELP requests, and delivery metadata</li>
+            <li>Call recordings or transcripts from AI-assisted outreach when applicable</li>
+            <li>Website usage data such as page visits, device information, and basic analytics</li>
+          </ul>
+        </section>
 
-      {/* Footer */}
-      <footer style={{padding:"32px 40px",borderTop:"1px solid #0d1526",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
-        <div style={{fontSize:10,color:"#334155"}}>
-          © {new Date().getFullYear()} White Glove Wireless · Authorized AT&T Partner
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>2. How We Use Information</h2>
+          <ul style={{paddingLeft:22,...text}}>
+            <li>To provide and improve the White Glove Wireless CRM platform</li>
+            <li>To send appointment reminders, lead follow-up, and CRM notifications on behalf of AT&amp;T authorized dealers</li>
+            <li>To operate Sofia, our AI voice agent via Bland.ai, for appointment booking and follow-up workflows</li>
+            <li>To respond to support, compliance, privacy, opt-out, and account requests</li>
+            <li>To prevent misuse, maintain security, and comply with legal requirements</li>
+          </ul>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>3. SMS and Mobile Data</h2>
+          <p style={text}>
+            SMS messages may include appointment reminders, lead follow-up, and CRM notifications sent on behalf of AT&amp;T authorized dealers. Message frequency varies based on account activity. Message and data rates may apply. Reply STOP to unsubscribe at any time. Reply HELP for help.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>4. SMS Data Is Not Shared for Third-Party Marketing</h2>
+          <p style={text}>
+            White Glove Wireless does not sell, rent, or share SMS opt-in data, mobile phone numbers, SMS consent records, or text message content with third parties for their own marketing or promotional purposes. We may use trusted service providers, including communications and CRM vendors, only to deliver and support our services.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>5. Service Providers and Required Disclosures</h2>
+          <p style={text}>
+            We may disclose information to vendors that help operate the platform, including hosting, analytics, AI voice, messaging, and customer support providers. These providers may use information only as needed to provide services to White Glove Wireless. We may also disclose information when required by law, legal process, or to protect rights, security, and safety.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>6. Data Protection</h2>
+          <p style={text}>
+            We use reasonable administrative, technical, and organizational safeguards designed to protect information from unauthorized access, loss, misuse, or alteration. No method of transmission or storage is completely secure, so we cannot guarantee absolute security.
+          </p>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>7. Your Choices</h2>
+          <ul style={{paddingLeft:22,...text}}>
+            <li>Request access to, correction, or deletion of your information</li>
+            <li>Opt out of marketing communications at any time</li>
+            <li>Reply STOP to unsubscribe from SMS messages at any time</li>
+            <li>Reply HELP for SMS support</li>
+            <li>Contact us to ask privacy questions or request assistance</li>
+          </ul>
+        </section>
+
+        <section style={section}>
+          <h2 style={{fontSize:20,fontWeight:800,color:"#ffffff",marginBottom:14}}>8. Contact Us</h2>
+          <p style={text}>
+            White Glove Wireless<br />
+            <a href="mailto:humberto.wgw@gmail.com">humberto.wgw@gmail.com</a><br />
+            <a href="https://whitegwireless.com">whitegwireless.com</a>
+          </p>
+        </section>
+      </main>
+
+      <footer style={{padding:"32px 40px",borderTop:"1px solid #1f1f1f",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div style={{fontSize:12,color:"#d4d4d4"}}>
+          © {new Date().getFullYear()} White Glove Wireless
         </div>
-        <div style={{display:"flex",gap:24,fontSize:10}}>
-          <Link href="/" style={{color:"#475569"}}>Home</Link>
-          <Link href="/privacy" style={{color:"#f97316"}}>Privacy Policy</Link>
-          <Link href="/terms" style={{color:"#475569"}}>Terms of Service</Link>
+        <div style={{display:"flex",gap:20,fontSize:12,flexWrap:"wrap"}}>
+          <Link href="/" style={{color:"#ffffff"}}>Home</Link>
+          <Link href="/sms-opt-in" style={{color:"#ffffff"}}>SMS Opt-In</Link>
+          <Link href="/privacy" style={{color:"#FF6B00"}}>Privacy</Link>
+          <Link href="/terms" style={{color:"#ffffff"}}>Terms</Link>
         </div>
       </footer>
     </>
