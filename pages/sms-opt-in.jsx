@@ -72,6 +72,41 @@ export default function SmsOptIn() {
         </section>
 
         <section style={section}>
+          <h2 style={{fontSize:20,color:"#ffffff",marginBottom:14}}>Example Web Opt-In Form</h2>
+          <p style={{...text,marginBottom:18}}>
+            Customers may opt in by entering their mobile phone number and actively selecting the consent checkbox below. This example documents the consent language used for White Glove Wireless SMS registration review.
+          </p>
+          <form style={{background:"#0a0a0a",border:"1px solid #1f1f1f",borderRadius:8,padding:"22px 24px"}}>
+            <label htmlFor="sms-phone" style={{display:"block",fontSize:13,color:"#ffffff",fontWeight:700,marginBottom:8}}>
+              Mobile phone number
+            </label>
+            <input
+              id="sms-phone"
+              name="phone"
+              type="tel"
+              placeholder="[Mobile Phone Number]"
+              style={{width:"100%",maxWidth:420,padding:"12px 14px",border:"1px solid #3a3a3a",borderRadius:6,background:"#000000",color:"#ffffff",fontSize:14,marginBottom:16}}
+            />
+            <label style={{display:"flex",gap:12,alignItems:"flex-start",color:"#d4d4d4",fontSize:13,lineHeight:1.7,marginBottom:16}}>
+              <input
+                type="checkbox"
+                name="smsConsent"
+                style={{marginTop:5,accentColor:"#FF6B00"}}
+              />
+              <span>
+                Yes, I agree to receive SMS messages from White Glove Wireless, including appointment reminders, lead follow-up, and CRM notifications sent on behalf of AT&amp;T authorized dealers. Message frequency varies based on account activity. Message and data rates may apply. Reply STOP to unsubscribe at any time. Reply HELP for help. Consent is not a condition of purchase. View our <Link href="/privacy">Privacy Policy</Link> and <Link href="/terms">Terms of Service</Link>.
+              </span>
+            </label>
+            <button
+              type="button"
+              style={{background:"#FF6B00",color:"#000000",border:"none",borderRadius:6,padding:"12px 18px",fontSize:13,fontWeight:800,cursor:"default"}}
+            >
+              Yes, sign me up
+            </button>
+          </form>
+        </section>
+
+        <section style={section}>
           <h2 style={{fontSize:20,color:"#ffffff",marginBottom:14}}>Opt Out and Help</h2>
           <p style={text}>
             You may unsubscribe at any time by replying STOP to any message. You may request help by replying HELP. White Glove Wireless honors STOP and HELP commands for SMS messages sent through its platform.
