@@ -20,16 +20,16 @@ const FEATURES = [
 
 const PLANS = [
   {
-    id: "starter", name: "Launch", price: 149, color: "#60a5fa",
-    features: ["1 Sales Rep", "500 AI Calls/month", "AI sales team", "Google lead discovery", "Offline field access", "Sales trainer", "Workspace backups"],
+    id: "starter", name: "Starter", price: 299, color: "#60a5fa",
+    features: ["Up to 3 reps", "500 AI Calls/month", "Unlimited leads", "AI sales team", "Google lead discovery", "Offline field access", "Sales trainer", "Workspace backups"],
   },
   {
-    id: "growth", name: "Growth", price: 349, color: "#f97316", popular: true,
-    features: ["5 Sales Reps", "2,500 AI Calls/month", "Everything in Launch", "Closed-loop AI workflows", "Live AI leadership meetings", "Team coaching and analytics", "Priority support"],
+    id: "growth", name: "Growth", price: 699, color: "#f97316", popular: true,
+    features: ["Up to 10 reps", "2,500 AI Calls/month", "Everything in Starter", "Closed-loop AI workflows", "Live AI leadership meetings", "Team coaching and analytics", "Priority support"],
   },
   {
-    id: "pro", name: "Scale", price: 699, color: "#a78bfa",
-    features: ["Unlimited reps", "7,500 AI Calls/month", "Everything in Growth", "Apollo workflow", "Custom branding and domain", "Advanced controls", "Dedicated support"],
+    id: "scale", name: "Scale", price: 1499, color: "#a78bfa",
+    features: ["Up to 25 reps", "7,500 AI Calls/month", "Everything in Growth", "Apollo workflow", "Custom branding and domain", "Advanced controls", "Dedicated support"],
   },
 ];
 
@@ -133,7 +133,7 @@ export default function WirelessLanding() {
             </div>
             <div style={{display:"flex",gap:16,alignItems:"center"}}>
               <a href="https://white-glove-frontend.vercel.app" style={{color:"#475569",textDecoration:"none",fontSize:11}}>Sign In</a>
-              <button className="btn" onClick={()=>setStep("signup")}>Start Free Trial</button>
+              <button className="btn" onClick={()=>setStep("signup")}>Choose Plan</button>
             </div>
           </nav>
 
@@ -147,10 +147,10 @@ export default function WirelessLanding() {
               White Glove connects prospecting, AI outreach, live coaching, appointments, orders, follow-up, analytics, and backups. Sophia, Scout, Atlas, Pulse, and Director work together so opportunities do not disappear between tools.
             </p>
             <div style={{display:"flex",gap:16,justifyContent:"center",flexWrap:"wrap"}}>
-              <button className="btn" style={{fontSize:13,padding:"16px 36px"}} onClick={()=>setStep("signup")}>Start 14-Day Free Trial</button>
+              <button className="btn" style={{fontSize:13,padding:"16px 36px"}} onClick={()=>setStep("signup")}>Choose Your Plan</button>
               <button className="btn-outline" onClick={()=>document.getElementById("pricing").scrollIntoView({behavior:"smooth"})}>View Pricing</button>
             </div>
-            <div style={{marginTop:16,fontSize:10,color:"#334155"}}>No credit card required during trial · Cancel anytime</div>
+            <div style={{marginTop:16,fontSize:10,color:"#334155"}}>Starter, Growth, and Scale plans for serious WGW teams.</div>
             </div>
             <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless premium phone service logo" width={360} height={360} priority className="hero-brand-logo"/>
           </div>
@@ -243,7 +243,7 @@ export default function WirelessLanding() {
           <div id="pricing" style={{padding:"60px 40px",maxWidth:1000,margin:"0 auto"}}>
             <div style={{textAlign:"center",marginBottom:48}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:32,fontWeight:800,color:"#f1f5f9",marginBottom:12}}>Platform Pricing, Not Another Tool Fee</div>
-              <div style={{fontSize:12,color:"#475569",lineHeight:1.7}}>Replace disconnected CRM, dialer, coaching, research, task, and reporting subscriptions with one operating system. Every plan includes a 14-day trial.</div>
+              <div style={{fontSize:12,color:"#475569",lineHeight:1.7}}>Replace disconnected CRM, dialer, coaching, research, task, and reporting subscriptions with one operating system.</div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {PLANS.map(plan=>(
@@ -261,7 +261,7 @@ export default function WirelessLanding() {
                     </div>
                   ))}
                   <button className="btn" style={{width:"100%",marginTop:20,background:plan.popular?plan.color:"transparent",color:plan.popular?"#000":plan.color,border:`1px solid ${plan.color}`}} onClick={()=>{setSelectedPlan(plan.id);setStep("signup");}}>
-                    Start 14-Day Trial
+                    Choose {plan.name}
                   </button>
                 </div>
               ))}
@@ -286,8 +286,8 @@ export default function WirelessLanding() {
             <button onClick={()=>setStep("landing")} style={{background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:11,marginBottom:24,letterSpacing:".08em"}}>← BACK</button>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f97316",marginBottom:4}}>WHITE GLOVE</div>
             <div style={{fontSize:10,color:"#334155",letterSpacing:".18em",marginBottom:28}}>WIRELESS · AI PLATFORM</div>
-            <div style={{fontSize:14,fontWeight:600,color:"#f1f5f9",marginBottom:6}}>Start your free trial</div>
-            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>14 days free · No credit card charged until trial ends · Cancel anytime</div>
+            <div style={{fontSize:14,fontWeight:600,color:"#f1f5f9",marginBottom:6}}>Choose your WGW plan</div>
+            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>Select the plan that matches your team size and AI calling volume.</div>
 
             <div style={{display:"flex",gap:8,marginBottom:24}}>
               {PLANS.map(p=>(
@@ -315,11 +315,11 @@ export default function WirelessLanding() {
             {error&&<div style={{marginTop:16,padding:"10px 14px",background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",borderRadius:4,fontSize:11,color:"#ef4444"}}>{error}</div>}
 
             <button className="btn" style={{width:"100%",marginTop:20,padding:14}} onClick={handleSignup} disabled={loading}>
-              {loading ? "Setting up your account..." : "Start Free Trial → Checkout"}
+              {loading ? "Setting up your account..." : "Continue to Checkout"}
             </button>
 
             <div style={{marginTop:12,fontSize:10,color:"#334155",textAlign:"center",lineHeight:1.6}}>
-              By continuing you agree to our terms. You'll be redirected to Stripe to enter payment details. Your card won't be charged for 14 days.
+              By continuing you agree to our terms. You'll be redirected to Stripe to finish checkout.
             </div>
 
             <div style={{marginTop:16,fontSize:10,color:"#334155",textAlign:"center"}}>
@@ -334,7 +334,7 @@ export default function WirelessLanding() {
           <div className="card" style={{width:"100%",maxWidth:480,padding:48,textAlign:"center"}}>
             <div style={{fontSize:48,marginBottom:20}}>🎉</div>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f1f5f9",marginBottom:8}}>Welcome to White Glove Wireless!</div>
-            <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:32}}>Your 14-day free trial has started. Check your email to confirm your account, then sign into your dashboard.</div>
+            <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:32}}>Your WGW workspace is ready. Check your email to confirm your account, then sign into your dashboard.</div>
             <a href="https://white-glove-frontend.vercel.app"><button className="btn" style={{width:"100%",padding:14}}>Go to Dashboard →</button></a>
           </div>
         </div>
