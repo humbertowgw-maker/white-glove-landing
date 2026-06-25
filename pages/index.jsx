@@ -1,215 +1,163 @@
 import { useState } from "react";
 import Head from "next/head";
 import Image from "next/image";
-import { useRouter } from "next/router";
+import Link from "next/link";
 import AppInstallMeta from "../components/AppInstallMeta";
+
+const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
 
 const PRODUCTS = [
   {
     id: "wgw",
-    eyebrow: "AI SALES OPERATING SYSTEM",
     name: "White Glove Wireless",
-    shortName: "WGW",
-    description:
-      "A premium AI sales command center that helps wireless teams find opportunities, coach reps, manage follow-up, and close more business.",
-    steps: ["FIND", "ENGAGE", "COACH", "CLOSE"],
+    label: "Sales OS",
+    description: "AI sales, bill review, field reps, outreach, appointments, and owner controls for wireless teams.",
     logo: "/logos/white-glove-wireless-app-icon-selected.png",
+    href: "/wireless",
     accent: "#f59e0b",
-    accent2: "#f97316",
-    rgb: "245,158,11",
-    surface: "#17120d",
-    glow: "radial-gradient(circle at 50% 28%, rgba(245,158,11,.27), transparent 43%)",
-    pattern:
-      "linear-gradient(135deg, rgba(255,255,255,.035) 0 1px, transparent 1px 18px)",
-    status: "LIVE",
-    action: "Explore WGW",
-    destination: "wireless",
   },
   {
-    id: "ss",
-    eyebrow: "AI FINANCIAL INTELLIGENCE",
+    id: "spendsense",
     name: "SpendSense",
-    shortName: "SS",
-    description:
-      "An AI finance guide that connects accounts, understands spending, reveals patterns, and helps people make smarter money decisions.",
-    steps: ["CONNECT", "UNDERSTAND", "PLAN", "GROW"],
+    label: "Finance OS",
+    description: "Connected spending intelligence, financial guidance, and owner-level money visibility.",
     logo: "/logos/spendsense-brand-lockup-selected.png",
+    href: "/spendsense",
     accent: "#2dd4bf",
-    accent2: "#0f9f8f",
-    rgb: "45,212,191",
-    surface: "#071b1a",
-    glow: "radial-gradient(circle at 50% 30%, rgba(45,212,191,.25), transparent 44%)",
-    pattern:
-      "radial-gradient(circle, rgba(45,212,191,.16) 1px, transparent 1.5px)",
-    status: "LIVE",
-    action: "Explore SpendSense",
-    destination: "spendsense",
   },
   {
-    id: "sp",
-    eyebrow: "CONFIGURABLE WHITE-LABEL CRM",
+    id: "sales-platform",
     name: "Sales Platform",
-    shortName: "SP",
-    description:
-      "A modular business platform that can be branded, configured, and launched for different industries without rebuilding the foundation.",
-    steps: ["BUILD", "BRAND", "CONFIGURE", "SCALE"],
+    label: "Configurable CRM",
+    description: "A white-label SaaS foundation for industry-specific pipelines, roles, and workflows.",
     logo: "/logos/sales-platform-app-icon-selected.png",
+    href: "/sales-platform",
     accent: "#a78bfa",
-    accent2: "#6366f1",
-    rgb: "167,139,250",
-    surface: "#100c24",
-    glow: "radial-gradient(circle at 50% 30%, rgba(139,92,246,.3), transparent 45%)",
-    pattern:
-      "linear-gradient(135deg, rgba(167,139,250,.09) 25%, transparent 25% 50%, rgba(99,102,241,.08) 50% 75%, transparent 75%)",
-    status: "PRIVATE BETA",
-    action: "Open Platform",
-    destination: "sales-platform",
   },
   {
-    id: "rs",
-    eyebrow: "AI AUTOMOTIVE REPAIR SCOUT",
+    id: "repairscout",
     name: "RepairScout",
-    shortName: "RS",
-    description:
-      "A mechanic-focused repair guide that helps drivers understand warning signs, compare likely repairs, and find trustworthy local shops.",
-    steps: ["DESCRIBE", "DIAGNOSE", "COMPARE", "VERIFY"],
+    label: "Repair intelligence",
+    description: "AI diagnostics and quote context for drivers who need a clearer repair path.",
     logo: "/logos/repairscout-brand-lockup-selected.png",
+    href: "/repairscout",
     accent: "#c8ff18",
-    accent2: "#84cc16",
-    rgb: "200,255,24",
-    surface: "#111907",
-    glow: "radial-gradient(circle at 50% 30%, rgba(200,255,24,.22), transparent 45%)",
-    pattern:
-      "repeating-radial-gradient(circle at 50% 90%, rgba(200,255,24,.08) 0 1px, transparent 2px 15px)",
-    status: "LIVE",
-    action: "Launch RepairScout",
-    destination: "repairscout",
   },
   {
-    id: "tt",
-    eyebrow: "LIVE FOOD TRUCK DISCOVERY",
+    id: "trucktracker",
     name: "TruckTracker",
-    shortName: "TT",
-    description:
-      "A social discovery map where food trucks go live, customers find what is nearby, and local food communities grow in real time.",
-    steps: ["GO LIVE", "DISCOVER", "VISIT", "FOLLOW"],
+    label: "Local discovery",
+    description: "Live food truck maps, follow signals, and local commerce discovery tools.",
     logo: "/logos/trucktracker-app-icon-selected.png",
+    href: "/trucktracker",
     accent: "#ffb21c",
-    accent2: "#ff4538",
-    rgb: "255,178,28",
-    surface: "#201307",
-    glow: "radial-gradient(circle at 50% 30%, rgba(255,178,28,.25), transparent 43%)",
-    pattern:
-      "radial-gradient(circle at 25% 25%, rgba(255,69,56,.12) 0 2px, transparent 3px), radial-gradient(circle at 75% 70%, rgba(255,178,28,.1) 0 2px, transparent 3px)",
-    status: "LIVE",
-    action: "Find Food Trucks",
-    destination: "trucktracker",
   },
   {
-    id: "pass",
-    eyebrow: "MULTI-MODEL AI KITCHEN",
+    id: "poopsense",
+    name: "PoopSense",
+    label: "Pet health AI",
+    description: "Browser-based clinical image analysis for pet stool health and urgency reports.",
+    logo: "/logos/poopsense-app-icon.svg",
+    href: "https://web-production-fb2d1.up.railway.app/",
+    accent: "#fb7185",
+  },
+  {
+    id: "the-pass",
     name: "The Pass",
-    shortName: "TP",
-    description:
-      "Tell the kitchen what ingredients you have. An AI chef brigade invents, refines, and critiques a recipe you can actually make.",
-    steps: ["LIST", "CREATE", "REFINE", "SERVE"],
+    label: "AI kitchen",
+    description: "A multi-model chef brigade that turns ingredients into usable recipes.",
     logo: "/logos/the-pass-app-icon.svg",
+    href: "/the-pass",
     accent: "#e8541e",
-    accent2: "#f3b562",
-    rgb: "232,84,30",
-    surface: "#17130f",
-    glow: "radial-gradient(circle at 50% 30%, rgba(232,84,30,.24), transparent 45%)",
-    pattern:
-      "repeating-linear-gradient(0deg, rgba(242,235,221,.04) 0 1px, transparent 1px 22px)",
-    status: "LIVE",
-    action: "Enter The Kitchen",
-    destination: "the-pass",
   },
 ];
 
-function ProductCard({ product, featured, active, onEnter, onLeave, onOpen }) {
-  return (
-    <article
-      className={`product-card ${featured ? "featured" : ""} ${active ? "active" : ""}`}
-      style={{
-        "--accent": product.accent,
-        "--accent-2": product.accent2,
-        "--rgb": product.rgb,
-        "--surface": product.surface,
-        "--brand-glow": product.glow,
-        "--brand-pattern": product.pattern,
-      }}
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
-      onFocus={onEnter}
-      onBlur={onLeave}
-    >
-      <div className="card-aura" />
-      <div className="card-pattern" />
+const SYSTEM_STEPS = [
+  ["01", "Upload the bill", "A customer sends a bill photo, PDF, or text file from the homepage."],
+  ["02", "Route the record", "WGW separates household reviews from business telecom opportunities."],
+  ["03", "Assign the work", "The right AI teammates receive follow-up, research, readiness, and risk tasks."],
+  ["04", "Prepare the quote", "The rep sees a bill-review record with context instead of a loose website form."],
+];
 
-      <div className="card-topline">
-        <span className="project-index">0{PRODUCTS.indexOf(product) + 1}</span>
-        <span className="status">
-          <i />
-          {product.status}
-        </span>
-      </div>
-
-      <div className="logo-stage">
-        <div className="logo-halo" />
-        <Image
-          src={product.logo}
-          alt={`${product.name} logo`}
-          width={featured ? 420 : 330}
-          height={featured ? 420 : 330}
-          sizes={featured ? "(max-width: 760px) 82vw, 420px" : "(max-width: 760px) 78vw, 330px"}
-          className="project-logo"
-          priority={featured}
-        />
-      </div>
-
-      <div className="card-copy">
-        <div className="eyebrow">{product.eyebrow}</div>
-        <h2>{product.name}</h2>
+function ProductLink({ product }) {
+  const external = product.href.startsWith("http");
+  const content = (
+    <article className="product" style={{ "--accent": product.accent }}>
+      <Image src={product.logo} alt={`${product.name} logo`} width={56} height={56} className="product-logo" />
+      <div>
+        <span>{product.label}</span>
+        <h3>{product.name}</h3>
         <p>{product.description}</p>
-
-        <div className="steps" aria-label={`${product.name} workflow`}>
-          {product.steps.map((step, index) => (
-            <span key={step}>
-              {step}
-              {index < product.steps.length - 1 && <b>·</b>}
-            </span>
-          ))}
-        </div>
-
-        <button className="launch-button" onClick={() => onOpen(product)}>
-          <span>{product.action}</span>
-          <span className="arrow">↗</span>
-        </button>
       </div>
     </article>
   );
+  if (external) return <a href={product.href} target="_blank" rel="noreferrer">{content}</a>;
+  return <Link href={product.href}>{content}</Link>;
 }
 
-export default function Chooser() {
-  const [hovered, setHovered] = useState("wgw");
-  const router = useRouter();
+export default function Home() {
+  const [form, setForm] = useState({
+    customer_type: "consumer",
+    name: "",
+    business_name: "",
+    phone: "",
+    email: "",
+    current_provider: "",
+    monthly_bill: "",
+    lines: "",
+    zip: "",
+    notes: "",
+    permission_to_contact: false,
+  });
+  const [file, setFile] = useState(null);
+  const [status, setStatus] = useState({ kind: "idle", message: "" });
 
-  const openProduct = (product) => {
-    if (product.destination.startsWith("http")) {
-      window.open(product.destination, "_blank", "noopener,noreferrer");
-      return;
+  const update = event => {
+    const { name, value, type, checked } = event.target;
+    setForm(current => ({ ...current, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  const submitBill = async event => {
+    event.preventDefault();
+    setStatus({ kind: "loading", message: "Sending the bill review to the AI team..." });
+    try {
+      const body = new FormData();
+      Object.entries(form).forEach(([key, value]) => body.append(key, String(value)));
+      if (file) body.append("bill", file);
+      const res = await fetch(`${API}/api/public-bill-intake`, { method: "POST", body });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Bill upload failed.");
+      setStatus({
+        kind: "success",
+        message: `Submitted to the ${data.pipeline} pipeline. ${data.ai_assignments?.length || 0} AI team task(s) created.`,
+      });
+      setForm(current => ({
+        ...current,
+        name: "",
+        business_name: "",
+        phone: "",
+        email: "",
+        current_provider: "",
+        monthly_bill: "",
+        lines: "",
+        zip: "",
+        notes: "",
+        permission_to_contact: false,
+      }));
+      setFile(null);
+      event.target.reset();
+    } catch (error) {
+      setStatus({ kind: "error", message: error.message });
     }
-    router.push(`/${product.destination}`);
   };
 
   return (
     <>
       <Head>
-        <title>Humberto Labs — Six Products, One Builder</title>
+        <title>White Glove Wireless - Solution-Based SaaS Products</title>
         <meta
           name="description"
-          content="Explore White Glove Wireless, SpendSense, Sales Platform, RepairScout, TruckTracker, and The Pass."
+          content="White Glove Wireless builds solution-based SaaS products led by an AI sales operating system for wireless teams, bill review, pipelines, and owner workflows."
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -218,513 +166,406 @@ export default function Chooser() {
           rel="stylesheet"
         />
       </Head>
-      <AppInstallMeta slug="portfolio" name="Humberto Labs" themeColor="#050507" />
+      <AppInstallMeta slug="portfolio" name="White Glove Wireless" themeColor="#070707" />
 
       <style jsx global>{`
         :root {
           color-scheme: dark;
-          --page: #050507;
-          --ink: #f7f7f5;
-          --muted: #92929c;
-          --line: rgba(255, 255, 255, 0.09);
+          --page: #070707;
+          --ink: #f8fafc;
+          --muted: #94a3b8;
+          --soft: #cbd5e1;
+          --line: rgba(255,255,255,.12);
+          --amber: #f59e0b;
+          --green: #34d399;
+          --blue: #60a5fa;
         }
-
-        * {
-          box-sizing: border-box;
-        }
-
-        html {
-          background: var(--page);
-          scroll-behavior: smooth;
-        }
-
+        * { box-sizing: border-box; }
+        html { background: var(--page); scroll-behavior: smooth; }
         body {
           margin: 0;
           min-width: 320px;
           color: var(--ink);
-          background:
-            radial-gradient(circle at 50% -20%, rgba(255, 255, 255, 0.075), transparent 35%),
-            #050507;
           font-family: "Manrope", sans-serif;
+          background:
+            radial-gradient(circle at 82% 8%, rgba(96,165,250,.17), transparent 31%),
+            radial-gradient(circle at 8% 18%, rgba(245,158,11,.18), transparent 28%),
+            linear-gradient(180deg, #070707 0%, #101114 58%, #070707 100%);
         }
-
-        button,
-        a {
-          font: inherit;
-        }
-
-        .site-shell {
-          min-height: 100vh;
-          overflow: hidden;
-        }
-
-        .site-header {
-          width: min(1440px, calc(100% - 64px));
+        a { color: inherit; text-decoration: none; }
+        button, input, select, textarea { font: inherit; }
+        .shell { min-height: 100vh; overflow: hidden; }
+        .nav {
+          width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
-          padding: 28px 0 22px;
+          padding: 22px 0;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          border-bottom: 1px solid var(--line);
-        }
-
-        .wordmark {
-          display: flex;
-          align-items: center;
-          gap: 13px;
-        }
-
-        .wordmark-mark {
-          width: 34px;
-          height: 34px;
-          border-radius: 11px;
-          display: grid;
-          place-items: center;
-          color: #0a0a0c;
-          font-weight: 800;
-          letter-spacing: -0.08em;
-          background: linear-gradient(145deg, #ffffff, #9b9ba4);
-          box-shadow: 0 8px 30px rgba(255, 255, 255, 0.12);
-        }
-
-        .wordmark strong {
-          display: block;
-          font-size: 13px;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
-        }
-
-        .wordmark small,
-        .header-meta {
-          color: #676772;
-          font-family: "DM Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-        }
-
-        .hero {
-          width: min(1180px, calc(100% - 64px));
-          margin: 0 auto;
-          padding: 90px 0 74px;
-          text-align: center;
-          position: relative;
-        }
-
-        .hero::before {
-          content: "";
-          position: absolute;
-          width: 720px;
-          height: 320px;
-          left: 50%;
-          top: 26px;
-          transform: translateX(-50%);
-          background: radial-gradient(ellipse, rgba(255, 255, 255, 0.07), transparent 66%);
-          pointer-events: none;
-        }
-
-        .kicker {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          margin-bottom: 24px;
-          color: #a8a8b2;
-          font-family: "DM Mono", monospace;
-          font-size: 10px;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-        }
-
-        .kicker::before,
-        .kicker::after {
-          content: "";
-          width: 36px;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, #74747e);
-        }
-
-        .kicker::after {
-          transform: rotate(180deg);
-        }
-
-        .hero h1 {
-          position: relative;
-          max-width: 920px;
-          margin: 0 auto 24px;
-          font-size: clamp(48px, 7.2vw, 96px);
-          line-height: 0.95;
-          letter-spacing: -0.065em;
-          text-wrap: balance;
-        }
-
-        .hero h1 span {
-          color: #777782;
-        }
-
-        .hero p {
-          position: relative;
-          max-width: 650px;
-          margin: 0 auto;
-          color: #85858f;
-          font-size: 15px;
-          line-height: 1.8;
-          text-wrap: balance;
-        }
-
-        .portfolio {
-          width: min(1440px, calc(100% - 64px));
-          margin: 0 auto 72px;
-          display: grid;
-          grid-template-columns: repeat(12, minmax(0, 1fr));
           gap: 18px;
         }
-
-        .product-card {
-          --accent: #fff;
-          --accent-2: #aaa;
-          --rgb: 255,255,255;
-          grid-column: span 4;
-          min-height: 650px;
-          position: relative;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          isolation: isolate;
-          border: 1px solid rgba(255, 255, 255, 0.09);
-          border-radius: 28px;
-          background:
-            linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 32%),
-            var(--surface);
-          transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-        }
-
-        .product-card.active {
-          transform: translateY(-6px);
-          border-color: rgba(var(--rgb), 0.42);
-          box-shadow:
-            0 28px 80px rgba(0, 0, 0, 0.4),
-            0 0 0 1px rgba(var(--rgb), 0.06) inset;
-        }
-
-        .card-aura,
-        .card-pattern {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          z-index: -1;
-        }
-
-        .card-aura {
-          background: var(--brand-glow);
-          opacity: 0.72;
-          transition: opacity 0.35s ease, transform 0.5s ease;
-        }
-
-        .active .card-aura {
-          opacity: 1;
-          transform: scale(1.07);
-        }
-
-        .card-pattern {
-          background-image: var(--brand-pattern);
-          background-size: 24px 24px;
-          mask-image: linear-gradient(to bottom, #000, transparent 68%);
-          opacity: 0.45;
-        }
-
-        .card-topline {
-          position: absolute;
-          z-index: 3;
-          top: 22px;
-          left: 24px;
-          right: 24px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          font-family: "DM Mono", monospace;
-          font-size: 9px;
-          letter-spacing: 0.12em;
-        }
-
-        .project-index {
-          color: rgba(255, 255, 255, 0.28);
-        }
-
-        .status {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          color: rgba(255, 255, 255, 0.46);
-        }
-
-        .status i {
-          width: 5px;
-          height: 5px;
-          border-radius: 50%;
-          background: var(--accent);
-          box-shadow: 0 0 10px var(--accent);
-        }
-
-        .logo-stage {
-          min-height: 365px;
-          padding: 54px 30px 10px;
-          display: grid;
-          place-items: center;
-          position: relative;
-        }
-
-        .logo-halo {
-          position: absolute;
-          width: 64%;
-          aspect-ratio: 1;
-          border-radius: 50%;
-          border: 1px solid rgba(var(--rgb), 0.13);
-          box-shadow:
-            0 0 0 28px rgba(var(--rgb), 0.025),
-            0 0 0 58px rgba(var(--rgb), 0.018);
-          opacity: 0.5;
-          transform: scale(0.88);
-          transition: transform 0.5s ease, opacity 0.5s ease;
-        }
-
-        .active .logo-halo {
-          opacity: 1;
-          transform: scale(1);
-        }
-
-        .project-logo {
-          position: relative;
-          z-index: 2;
-          width: min(100%, 330px);
-          height: auto;
-          border-radius: 23%;
-          object-fit: contain;
-          filter: saturate(0.94) drop-shadow(0 22px 36px rgba(0, 0, 0, 0.5));
-          transition: transform 0.48s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.4s ease;
-        }
-
-        .active .project-logo {
-          transform: translateY(-5px) scale(1.025);
-          filter: saturate(1.08) drop-shadow(0 28px 42px rgba(0, 0, 0, 0.52));
-        }
-
-        .card-copy {
-          flex: 1;
-          padding: 16px 30px 30px;
-          display: flex;
-          flex-direction: column;
-        }
-
-        .eyebrow {
-          margin-bottom: 12px;
-          color: var(--accent);
-          font-family: "DM Mono", monospace;
-          font-size: 9px;
-          font-weight: 500;
-          letter-spacing: 0.16em;
-        }
-
-        .card-copy h2 {
-          margin: 0 0 12px;
-          color: #fff;
-          font-size: clamp(27px, 2.5vw, 38px);
-          line-height: 1;
-          letter-spacing: -0.045em;
-        }
-
-        .card-copy p {
-          margin: 0 0 22px;
-          color: rgba(255, 255, 255, 0.55);
-          font-size: 12px;
-          line-height: 1.75;
-        }
-
-        .steps {
-          margin-top: auto;
-          padding: 14px 0;
-          display: flex;
-          flex-wrap: wrap;
-          gap: 7px;
-          border-top: 1px solid rgba(255, 255, 255, 0.075);
-          color: rgba(255, 255, 255, 0.36);
-          font-family: "DM Mono", monospace;
-          font-size: 8px;
-          letter-spacing: 0.09em;
-        }
-
-        .steps span {
-          display: flex;
-          gap: 7px;
-        }
-
-        .steps b {
-          color: var(--accent);
-          font-weight: 400;
-        }
-
-        .launch-button {
-          width: 100%;
-          margin-top: 4px;
-          padding: 14px 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: #fff;
-          border: 1px solid rgba(var(--rgb), 0.24);
-          border-radius: 12px;
-          background: rgba(var(--rgb), 0.07);
-          cursor: pointer;
+        .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .brand img { border-radius: 8px; }
+        .brand strong { display: block; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+        .brand span, .mono {
+          color: var(--muted);
           font-family: "DM Mono", monospace;
           font-size: 10px;
-          letter-spacing: 0.08em;
+          letter-spacing: .08em;
           text-transform: uppercase;
-          transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
         }
-
-        .launch-button:hover,
-        .launch-button:focus-visible {
-          outline: none;
-          border-color: rgba(var(--rgb), 0.58);
-          background: rgba(var(--rgb), 0.14);
-          transform: translateY(-1px);
+        .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-actions a, .primary-link {
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 10px 13px;
+          font-size: 11px;
+          font-weight: 800;
+          background: rgba(255,255,255,.04);
         }
-
-        .arrow {
-          color: var(--accent);
-          font-size: 15px;
-        }
-
-        .site-footer {
-          width: min(1440px, calc(100% - 64px));
+        .primary-link { border-color: rgba(245,158,11,.45); background: rgba(245,158,11,.12); color: #fde68a; }
+        .hero {
+          width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
-          padding: 28px 0 42px;
+          min-height: calc(100vh - 88px);
+          padding: 42px 0 54px;
+          display: grid;
+          grid-template-columns: minmax(0, 1.02fr) minmax(360px, .78fr);
+          gap: 36px;
+          align-items: center;
+        }
+        .hero-copy h1 {
+          margin: 18px 0 22px;
+          font-size: clamp(48px, 7vw, 92px);
+          line-height: .94;
+          letter-spacing: 0;
+          max-width: 760px;
+        }
+        .hero-copy h1 span { color: #fbbf24; }
+        .hero-copy p {
+          margin: 0;
+          max-width: 640px;
+          color: var(--soft);
+          font-size: 17px;
+          line-height: 1.72;
+        }
+        .proof {
+          margin-top: 28px;
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 10px;
+          max-width: 740px;
+        }
+        .proof div {
+          border-top: 1px solid var(--line);
+          padding-top: 13px;
+        }
+        .proof b { display: block; color: #fff; font-size: 21px; }
+        .proof span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+        .bill-panel {
+          border: 1px solid rgba(255,255,255,.16);
+          border-radius: 8px;
+          background: rgba(9,12,18,.86);
+          box-shadow: 0 34px 90px rgba(0,0,0,.36);
+          overflow: hidden;
+        }
+        .panel-head {
+          padding: 18px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          border-bottom: 1px solid var(--line);
+          background: linear-gradient(135deg, rgba(245,158,11,.14), rgba(96,165,250,.1));
+        }
+        .panel-head img { border-radius: 8px; flex: 0 0 auto; }
+        .panel-head h2 { margin: 0 0 4px; font-size: 20px; line-height: 1.05; }
+        .panel-head p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+        .bill-form { padding: 18px; display: grid; gap: 12px; }
+        .segmented {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .segmented label {
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 10px;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          color: var(--soft);
+          font-size: 12px;
+          cursor: pointer;
+          background: rgba(255,255,255,.035);
+        }
+        .segmented input { accent-color: var(--amber); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .field, .file-field {
+          width: 100%;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: rgba(255,255,255,.045);
+          color: #fff;
+          padding: 11px 12px;
+          font-size: 13px;
+          outline: none;
+        }
+        .field:focus, .file-field:focus-within {
+          border-color: rgba(245,158,11,.55);
+          box-shadow: 0 0 0 3px rgba(245,158,11,.12);
+        }
+        textarea.field { min-height: 84px; resize: vertical; grid-column: 1 / -1; }
+        .file-field { display: grid; gap: 7px; color: var(--muted); }
+        .file-field input { color: var(--muted); font-size: 12px; }
+        .consent { display: flex; gap: 9px; color: var(--soft); font-size: 11px; line-height: 1.5; }
+        .consent input { margin-top: 2px; accent-color: var(--amber); }
+        .submit {
+          border: 0;
+          border-radius: 8px;
+          padding: 13px 16px;
+          color: #111827;
+          background: linear-gradient(135deg, #fbbf24, #34d399);
+          font-weight: 900;
+          cursor: pointer;
+        }
+        .submit:disabled { cursor: progress; opacity: .72; }
+        .status-line {
+          min-height: 20px;
+          color: var(--muted);
+          font-size: 11px;
+          line-height: 1.5;
+        }
+        .status-line.success { color: #86efac; }
+        .status-line.error { color: #fca5a5; }
+        .section {
+          width: min(1180px, calc(100% - 48px));
+          margin: 0 auto;
+          padding: 70px 0;
+        }
+        .section-head {
           display: flex;
           justify-content: space-between;
-          gap: 20px;
+          gap: 24px;
+          align-items: end;
+          margin-bottom: 22px;
+        }
+        .section h2 {
+          margin: 8px 0 0;
+          font-size: clamp(32px, 4.8vw, 58px);
+          line-height: 1;
+          letter-spacing: 0;
+          max-width: 760px;
+        }
+        .section-head p { margin: 0; color: var(--muted); max-width: 370px; line-height: 1.6; font-size: 13px; }
+        .system-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           border-top: 1px solid var(--line);
-          color: #5f5f69;
+          border-left: 1px solid var(--line);
+        }
+        .system-step {
+          min-height: 220px;
+          padding: 18px;
+          border-right: 1px solid var(--line);
+          border-bottom: 1px solid var(--line);
+          background: rgba(255,255,255,.035);
+        }
+        .system-step span { color: var(--amber); font-family: "DM Mono", monospace; font-size: 10px; }
+        .system-step h3 { margin: 34px 0 9px; font-size: 20px; }
+        .system-step p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+        .products {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .product {
+          min-height: 180px;
+          display: flex;
+          gap: 14px;
+          align-items: flex-start;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 16px;
+          background: rgba(255,255,255,.035);
+          transition: border-color .2s ease, transform .2s ease, background .2s ease;
+        }
+        a:hover .product, a:focus-visible .product {
+          border-color: var(--accent);
+          transform: translateY(-2px);
+          background: rgba(255,255,255,.06);
+        }
+        .product-logo {
+          width: 56px;
+          height: 56px;
+          object-fit: contain;
+          border-radius: 8px;
+          flex: 0 0 auto;
+        }
+        .product span {
+          color: var(--accent);
           font-family: "DM Mono", monospace;
           font-size: 9px;
-          letter-spacing: 0.08em;
+          letter-spacing: .08em;
           text-transform: uppercase;
         }
-
-        @media (max-width: 1100px) {
-          .product-card {
-            grid-column: span 6;
-          }
-
+        .product h3 { margin: 8px 0 8px; font-size: 22px; line-height: 1.05; }
+        .product p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.58; }
+        .footer {
+          width: min(1180px, calc(100% - 48px));
+          margin: 0 auto;
+          padding: 28px 0 44px;
+          border-top: 1px solid var(--line);
+          display: flex;
+          justify-content: space-between;
+          gap: 18px;
+          color: #64748b;
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          letter-spacing: .08em;
+          text-transform: uppercase;
         }
-
-        @media (max-width: 720px) {
-          .site-header,
-          .hero,
-          .portfolio,
-          .site-footer {
-            width: min(100% - 28px, 640px);
-          }
-
-          .site-header {
-            padding-top: 18px;
-          }
-
-          .header-meta {
-            display: none;
-          }
-
-          .hero {
-            padding: 64px 0 52px;
-          }
-
-          .hero h1 {
-            font-size: clamp(46px, 15vw, 70px);
-          }
-
-          .hero p {
-            font-size: 13px;
-          }
-
-          .portfolio {
-            display: block;
-          }
-
-          .product-card {
-            min-height: 610px;
-            margin-bottom: 14px;
-          }
-
-          .logo-stage {
-            min-height: 330px;
-            padding-left: 22px;
-            padding-right: 22px;
-          }
-
-          .project-logo {
-            width: min(100%, 300px);
-          }
-
-          .card-copy {
-            padding: 12px 24px 24px;
-          }
-
-          .site-footer {
-            flex-direction: column;
-            line-height: 1.7;
-          }
+        @media (max-width: 980px) {
+          .hero { grid-template-columns: 1fr; min-height: auto; }
+          .proof, .system-grid, .products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
-
-        @media (prefers-reduced-motion: reduce) {
-          * {
-            scroll-behavior: auto !important;
-            transition-duration: 0.01ms !important;
-          }
+        @media (max-width: 640px) {
+          .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
+          .nav { align-items: flex-start; }
+          .brand span { display: none; }
+          .nav-actions a:not(.primary-link) { display: none; }
+          .hero { padding-top: 28px; }
+          .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
+          .hero-copy p { font-size: 14px; }
+          .proof, .form-grid, .system-grid, .products { grid-template-columns: 1fr; }
+          .section-head { display: block; }
+          .section-head p { margin-top: 14px; }
+          .footer { flex-direction: column; line-height: 1.6; }
         }
       `}</style>
 
-      <main className="site-shell">
-        <header className="site-header">
-          <div className="wordmark">
-            <span className="wordmark-mark">HL</span>
+      <main className="shell">
+        <nav className="nav">
+          <Link className="brand" href="/">
+            <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless logo" width={42} height={42} priority />
             <span>
-              <strong>Humberto Labs</strong>
-              <small>Independent Product Studio</small>
+              <strong>White Glove Wireless</strong>
+              <span>Solution-based SaaS products</span>
             </span>
+          </Link>
+          <div className="nav-actions">
+            <Link href="#products">Products</Link>
+            <Link href="/wireless">WGW platform</Link>
+            <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
-          <span className="header-meta">Six products · one ecosystem</span>
-        </header>
+        </nav>
 
         <section className="hero">
-          <div className="kicker">Built from real problems</div>
-          <h1>
-            Six products.
-            <br />
-            <span>Six distinct worlds.</span>
-          </h1>
-          <p>
-            A growing portfolio of AI-powered tools for sales, money, business operations,
-            automotive repair, local food discovery, and everyday cooking—each designed with
-            its own identity.
-          </p>
+          <div className="hero-copy">
+            <div className="mono">AI software company for real business workflows</div>
+            <h1>
+              We build SaaS products around the problem, <span>not the template.</span>
+            </h1>
+            <p>
+              White Glove Wireless is the flagship operating system: AI sales agents, bill review,
+              field execution, owner controls, and follow-up that turns customer interest into
+              worked opportunities.
+            </p>
+            <div className="proof" aria-label="White Glove Wireless platform proof points">
+              <div><b>2</b><span>Bill paths: consumer savings reviews and business telecom opportunities.</span></div>
+              <div><b>5</b><span>AI teammates for outreach, market research, operations, metrics, and direction.</span></div>
+              <div><b>7</b><span>Products in the portfolio, all shaped around practical workflows.</span></div>
+            </div>
+          </div>
+
+          <aside className="bill-panel" id="bill-review">
+            <div className="panel-head">
+              <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="" width={52} height={52} />
+              <div>
+                <h2>Upload a wireless bill</h2>
+                <p>Send the review to WGW and let the system organize the next step.</p>
+              </div>
+            </div>
+            <form className="bill-form" onSubmit={submitBill}>
+              <div className="segmented" aria-label="Choose bill review type">
+                <label>
+                  <input type="radio" name="customer_type" value="consumer" checked={form.customer_type === "consumer"} onChange={update} />
+                  Consumer
+                </label>
+                <label>
+                  <input type="radio" name="customer_type" value="business" checked={form.customer_type === "business"} onChange={update} />
+                  Business
+                </label>
+              </div>
+              <div className="form-grid">
+                <input className="field" name="name" value={form.name} onChange={update} placeholder="Your name" />
+                <input className="field" name="business_name" value={form.business_name} onChange={update} placeholder="Business name if any" />
+                <input className="field" name="phone" value={form.phone} onChange={update} placeholder="Phone" />
+                <input className="field" name="email" value={form.email} onChange={update} placeholder="Email" />
+                <input className="field" name="current_provider" value={form.current_provider} onChange={update} placeholder="Current provider" />
+                <input className="field" name="monthly_bill" value={form.monthly_bill} onChange={update} placeholder="Monthly bill" />
+                <input className="field" name="lines" value={form.lines} onChange={update} placeholder="Lines or users" />
+                <input className="field" name="zip" value={form.zip} onChange={update} placeholder="ZIP code" />
+                <textarea className="field" name="notes" value={form.notes} onChange={update} placeholder="Anything the team should know?" />
+              </div>
+              <label className="file-field">
+                <span>Bill file: PDF, photo, CSV, or text</span>
+                <input type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.txt,.csv,image/*,application/pdf,text/*" onChange={event => setFile(event.target.files?.[0] || null)} />
+              </label>
+              <label className="consent">
+                <input type="checkbox" name="permission_to_contact" checked={form.permission_to_contact} onChange={update} />
+                I agree White Glove Wireless may contact me about this bill review. Consent is not a condition of purchase.
+              </label>
+              <button className="submit" disabled={status.kind === "loading"}>
+                {status.kind === "loading" ? "Sending..." : "Send to AI team"}
+              </button>
+              <div className={`status-line ${status.kind === "success" ? "success" : status.kind === "error" ? "error" : ""}`}>
+                {status.message || "Choose consumer or business so WGW starts the right workflow."}
+              </div>
+            </form>
+          </aside>
         </section>
 
-        <section className="portfolio" aria-label="Product portfolio">
-          {PRODUCTS.map((product, index) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              featured={index === 0}
-              active={hovered === product.id}
-              onEnter={() => setHovered(product.id)}
-              onLeave={() => setHovered(null)}
-              onOpen={openProduct}
-            />
-          ))}
+        <section className="section" aria-label="Bill upload workflow">
+          <div className="section-head">
+            <div>
+              <div className="mono">Pipeline automation</div>
+              <h2>Front-page intake that becomes rep-ready work.</h2>
+            </div>
+            <p>
+              The upload is only the beginning. The platform turns the submission into a record and
+              keeps the next step visible for the team.
+            </p>
+          </div>
+          <div className="system-grid">
+            {SYSTEM_STEPS.map(([number, title, copy]) => (
+              <div className="system-step" key={number}>
+                <span>{number}</span>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
-        <footer className="site-footer">
-          <span>© {new Date().getFullYear()} Humberto Labs</span>
-          <span>Designed and built as one connected portfolio</span>
+        <section className="section" id="products" aria-label="Solution products">
+          <div className="section-head">
+            <div>
+              <div className="mono">Built by White Glove</div>
+              <h2>Solution-based SaaS products, led by WGW.</h2>
+            </div>
+            <p>
+              The other apps stay available from the main page, but the front door now points at
+              the company, the operating system, and the practical workflow behind the products.
+            </p>
+          </div>
+          <div className="products">
+            {PRODUCTS.map(product => <ProductLink product={product} key={product.id} />)}
+          </div>
+        </section>
+
+        <footer className="footer">
+          <span>© {new Date().getFullYear()} White Glove Wireless</span>
+          <span>Software for sales, service, operations, and AI-assisted pipelines</span>
         </footer>
       </main>
     </>
