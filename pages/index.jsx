@@ -83,7 +83,7 @@ const ATT_FEATURES = [
   {
     icon: "📱",
     title: "Latest iPhone & Android Devices",
-    description: "Get the newest iPhone 17 series, Samsung Galaxy S26, Google Pixel 10, and other premium devices with flexible payment options.",
+    description: "Get the newest iPhone 17 series, Samsung Galaxy S26 series, Google Pixel 10 series, and Motorola Razr with flexible payment options.",
   },
   {
     icon: "🔄",
@@ -115,7 +115,7 @@ const ATT_FEATURES = [
 const PHONE_CATEGORIES = [
   {
     category: "iPhone",
-    phones: ["iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17", "iPhone 16", "iPhone SE"],
+    phones: ["iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17", "iPhone 17e", "iPhone 16"],
     accent: "#f59e0b",
   },
   {
@@ -124,8 +124,8 @@ const PHONE_CATEGORIES = [
     accent: "#3b82f6",
   },
   {
-    category: "Other Premium",
-    phones: ["Google Pixel 10 Pro", "Google Pixel 10", "Motorola Razr"],
+    category: "Google Pixel & More",
+    phones: ["Pixel 10 Pro", "Pixel 10", "Pixel 10a", "Motorola Razr"],
     accent: "#10b981",
   },
 ];
@@ -135,22 +135,26 @@ const TRADE_IN_BRANDS = [
 ];
 
 const DEVICE_VALUES = {
-  "iPhone 17 Pro Max": 900,
-  "iPhone 17 Pro": 750,
-  "iPhone 17": 600,
+  "iPhone 17 Pro Max": 950,
+  "iPhone 17 Pro": 800,
+  "iPhone 17": 650,
+  "iPhone 17e": 500,
   "iPhone 16": 400,
   "iPhone 15": 300,
   "iPhone 14": 200,
   "iPhone SE": 75,
-  "Samsung Galaxy S26 Ultra": 800,
-  "Samsung Galaxy S26+": 650,
-  "Samsung Galaxy S26": 500,
-  "Samsung Galaxy S25": 350,
+  "Samsung Galaxy S26 Ultra": 850,
+  "Samsung Galaxy S26+": 700,
+  "Samsung Galaxy S26": 550,
+  "Samsung Galaxy S25": 400,
   "Samsung Galaxy S24": 250,
-  "Google Pixel 10 Pro": 550,
-  "Google Pixel 10": 400,
-  "Google Pixel 9": 250,
-  "Motorola Razr": 300,
+  "Galaxy Z Fold7": 600,
+  "Galaxy Z Flip7": 450,
+  "Pixel 10 Pro": 600,
+  "Pixel 10": 450,
+  "Pixel 10a": 300,
+  "Pixel 9": 200,
+  "Motorola Razr": 350,
   "Other Premium": 100,
   "Mid-range Device": 50,
   "Budget Device": 25,
@@ -233,7 +237,7 @@ export default function Home() {
       if (lowerInput.includes("switch") || lowerInput.includes("at&t")) {
         aiResponse = "Great question! Switching to AT&T with White Glove Wireless is seamless. We handle the entire porting process, you keep your number, and you'll get access to America's most reliable 5G network. Plus, we have exclusive switching bonuses including bill credits and device deals. Would you like me to help you start the switching process?";
       } else if (lowerInput.includes("phone") || lowerInput.includes("iphone") || lowerInput.includes("samsung")) {
-        aiResponse = "We have the latest devices available! Including iPhone 17 series, Samsung Galaxy S26, Google Pixel 10, Motorola Razr, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
+        aiResponse = "We have the latest devices available! Including iPhone 17 series, Samsung Galaxy S26 series, Google Pixel 10 series, Motorola Razr, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
       } else if (lowerInput.includes("trade") || lowerInput.includes("credit")) {
         aiResponse = "Our trade-in program is fantastic! We accept phones from any carrier regardless of condition - even cracked screens qualify. You get instant credit toward a new device. Just upload your current bill in the form above, and I can help estimate your trade-in value. What device are you currently using?";
       } else if (lowerInput.includes("quote") || lowerInput.includes("price") || lowerInput.includes("cost")) {
@@ -442,6 +446,22 @@ export default function Home() {
           text-transform: uppercase;
         }
         .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .att-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(0,168,224,.35);
+          background: rgba(0,168,224,.08);
+          border-radius: 8px;
+          padding: 7px 11px;
+          color: #7dd3fc;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          white-space: nowrap;
+        }
+        .att-globe { width: 18px; height: 18px; flex-shrink: 0; }
         .nav-actions a, .primary-link {
           border: 1px solid var(--line);
           border-radius: 8px;
@@ -1198,6 +1218,7 @@ export default function Home() {
           .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
           .nav { align-items: flex-start; }
           .brand span { display: none; }
+          .att-badge { display: none; }
           .nav-actions a:not(.primary-link) { display: none; }
           .hero { padding-top: 28px; }
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
@@ -1219,6 +1240,17 @@ export default function Home() {
               <span>Wireless & fiber without the store</span>
             </span>
           </Link>
+          <div className="att-badge">
+            <svg className="att-globe" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="24" cy="24" r="22" fill="#00A8E0"/>
+              <path d="M24 2a22 22 0 0 1 0 44 22 22 0 0 1 0-44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
+              <path d="M24 2c-6 8-6 36 0 44M24 2c6 8 6 36 0 44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
+              <ellipse cx="24" cy="24" rx="10" ry="22" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
+              <path d="M2 24h44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
+            </svg>
+            <span>AT&T Authorized Dealer</span>
+          </div>
+
           <div className="nav-actions">
             <Link href="#att-features">Switch to AT&T</Link>
             <Link href="#phones">New Phones</Link>
