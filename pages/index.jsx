@@ -93,6 +93,45 @@ function applyPlanDiscounts(basePricePerLine, lines, discounts) {
   };
 }
 
+// New phone catalog for financing estimates (36-month device payments).
+const NEW_PHONES = [
+  { id: "iphone_17_pro_max", name: "iPhone 17 Pro Max", fullPrice: 1199, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone_17_pro", name: "iPhone 17 Pro", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone_17", name: "iPhone 17", fullPrice: 799, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone_17e", name: "iPhone 17e", fullPrice: 599, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "iphone_16", name: "iPhone 16", fullPrice: 699, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy_s26_ultra", name: "Samsung Galaxy S26 Ultra", fullPrice: 1299, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy_s26_plus", name: "Samsung Galaxy S26+", fullPrice: 1099, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy_s26", name: "Samsung Galaxy S26", fullPrice: 899, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy_z_fold7", name: "Galaxy Z Fold7", fullPrice: 1899, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy_z_flip7", name: "Galaxy Z Flip7", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "pixel_10_pro", name: "Pixel 10 Pro", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
+  { id: "pixel_10", name: "Pixel 10", fullPrice: 799, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "motorola_razr", name: "Motorola Razr", fullPrice: 699, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+];
+
+const FINANCING_MONTHS = 36;
+const AUTOPAY_DISCOUNT_PER_LINE = 10;
+
+function getPhone(nameOrId) {
+  return NEW_PHONES.find(p => p.id === nameOrId || p.name === nameOrId) || null;
+}
+
+function monthlyDevicePayment(fullPrice, downPayment = 0) {
+  return Math.max(0, (fullPrice - downPayment) / FINANCING_MONTHS);
+}
+
+function promoQualifiesForPlan(planId) {
+  // Max trade-in promo credits require a qualifying AT&T Unlimited 2.0 plan.
+  // Starter SL typically does not qualify for the full promotional credits.
+  return planId === "unlimited_premium" || planId === "unlimited_extra";
+}
+
+function effectivePromoCredit(promoCredit, planId) {
+  if (!promoQualifiesForPlan(planId)) return 0;
+  return promoCredit || 0;
+}
+
 function normalizeDeviceName(name) {
   // Keep letters, numbers, spaces, and '+' (e.g. Razr+ vs Razr). Replace everything else with space.
   return String(name || "").toLowerCase().replace(/[^a-z0-9\s+]/g, " ").replace(/\s+/g, " ").trim();
@@ -376,6 +415,8 @@ export default function Home() {
     currentProvider: "",
     attPlan: "unlimited_extra",
     wantsNewPhone: false,
+    newPhones: [], // { id, phoneId, name, fullPrice }
+    newPhoneSearch: "",
     dataUsage: "medium",
     tradeIns: [], // { id, device, condition, value, promoCredit, promoTier, color }
     tradeInSearch: "",
@@ -383,9 +424,13 @@ export default function Home() {
     isMilitary: false,
     isTeacher: false,
     hasEmployerDiscount: false,
+    autopay: true,
   });
   const [tradeInSuggestions, setTradeInSuggestions] = useState([]);
   const [showTradeInSuggestions, setShowTradeInSuggestions] = useState(false);
+  const [newPhoneSuggestions, setNewPhoneSuggestions] = useState([]);
+  const [showNewPhoneSuggestions, setShowNewPhoneSuggestions] = useState(false);
+  const [quoteStep, setQuoteStep] = useState(0);
   const [quoteResult, setQuoteResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -496,6 +541,31 @@ export default function Home() {
     setCalculator(prev => ({ ...prev, tradeIns: prev.tradeIns.filter(t => t.id !== id) }));
   }
 
+  function getNewPhoneSuggestions(query) {
+    if (!query || query.length < 2) return [];
+    const q = query.toLowerCase();
+    return NEW_PHONES.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+  }
+
+  function addNewPhone(phone) {
+    setCalculator(prev => ({
+      ...prev,
+      newPhones: [...prev.newPhones, {
+        id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+        phoneId: phone.id,
+        name: phone.name,
+        fullPrice: phone.fullPrice,
+      }],
+      newPhoneSearch: "",
+    }));
+    setShowNewPhoneSuggestions(false);
+    setNewPhoneSuggestions([]);
+  }
+
+  function removeNewPhone(id) {
+    setCalculator(prev => ({ ...prev, newPhones: prev.newPhones.filter(p => p.id !== id) }));
+  }
+
   const calculateQuote = async () => {
     setIsCalculating(true);
 
@@ -508,19 +578,44 @@ export default function Home() {
       isTeacher: calculator.isTeacher,
       hasEmployerDiscount: calculator.hasEmployerDiscount,
     });
-    const newMonthlyBill = discounted.pricePerLine * lines;
 
-    // Trade-in totals
-    const tradeInDetails = calculator.tradeIns.map(t => ({
-      ...t,
-      adjustedValue: adjustTradeInValue(t.value, t.condition),
-    }));
+    // Autopay/paperless discount ($10/line on Unlimited 2.0 plans).
+    const autopayDiscount = calculator.autopay ? AUTOPAY_DISCOUNT_PER_LINE * lines : 0;
+    const planTotalAfterAutopay = Math.max(0, discounted.pricePerLine * lines - autopayDiscount);
+    const planPricePerLineAfterAutopay = planTotalAfterAutopay / lines;
+
+    // Trade-in totals — promo credits require a qualifying plan.
+    const tradeInDetails = calculator.tradeIns.map(t => {
+      const adjustedValue = adjustTradeInValue(t.value, t.condition);
+      const promoCredit = effectivePromoCredit(t.promoCredit, calculator.attPlan);
+      return {
+        ...t,
+        adjustedValue,
+        promoCredit,
+        monthlyPromoCredit: promoCredit / FINANCING_MONTHS,
+      };
+    });
     const totalTradeInValue = tradeInDetails.reduce((sum, t) => sum + t.adjustedValue, 0);
-    const totalPromoCredit = tradeInDetails.reduce((sum, t) => sum + (t.promoCredit || 0), 0);
+    const totalPromoCredit = tradeInDetails.reduce((sum, t) => sum + t.promoCredit, 0);
+    const totalMonthlyPromoCredit = totalPromoCredit / FINANCING_MONTHS;
+    const promoRequiresQualifyingPlan = calculator.tradeIns.length > 0 && !promoQualifiesForPlan(calculator.attPlan);
 
+    // New phone financing (36 months). Trade-in value is treated as a down payment,
+    // and promo credits reduce the financed amount evenly over 36 months.
+    const newPhoneDetails = calculator.newPhones.map(p => {
+      const downPayment = 0; // trade-in value is kept separate as bill credits
+      const monthlyPayment = monthlyDevicePayment(p.fullPrice, downPayment);
+      const monthlyCredit = totalMonthlyPromoCredit / calculator.newPhones.length;
+      const netMonthlyPayment = Math.max(0, monthlyPayment - monthlyCredit);
+      return { ...p, monthlyPayment, netMonthlyPayment };
+    });
+    const totalPhoneMonthlyPayment = newPhoneDetails.reduce((sum, p) => sum + p.monthlyPayment, 0);
+    const totalNetPhoneMonthlyPayment = newPhoneDetails.reduce((sum, p) => sum + p.netMonthlyPayment, 0);
+
+    const newMonthlyBill = planTotalAfterAutopay + totalNetPhoneMonthlyPayment;
     const monthlySavings = Math.max(0, currentBill - newMonthlyBill);
     const annualSavings = monthlySavings * 12;
-    const firstBillWithCredit = Math.max(0, newMonthlyBill - totalTradeInValue);
+    const firstBillWithCredit = Math.max(0, planTotalAfterAutopay - totalTradeInValue) + totalNetPhoneMonthlyPayment;
     const firstYearTotalValue = annualSavings + totalTradeInValue + totalPromoCredit;
 
     const quoteData = {
@@ -528,18 +623,27 @@ export default function Home() {
       lines,
       attPlan: ATT_PLANS.find(p => p.id === calculator.attPlan) || ATT_PLANS[1],
       basePlanPricePerLine,
+      planTotalBeforeAutopay: discounted.pricePerLine * lines,
       newMonthlyBill,
       monthlySavings,
       annualSavings,
       totalTradeInValue,
       totalPromoCredit,
+      totalMonthlyPromoCredit,
       tradeInDetails,
+      newPhoneDetails,
+      totalPhoneMonthlyPayment,
+      totalNetPhoneMonthlyPayment,
       firstBillWithCredit,
       firstYearTotalValue,
       perLineSavings: monthlySavings / lines,
-      perLineNewBill: discounted.pricePerLine,
+      perLineNewBill: planPricePerLineAfterAutopay,
       discountLabel: discounted.discountLabel,
       totalDiscount: discounted.totalDiscount,
+      autopayDiscount,
+      autopay: calculator.autopay,
+      promoRequiresQualifyingPlan,
+      financingMonths: FINANCING_MONTHS,
     };
 
     // Try to get real-time quote from API
@@ -1391,29 +1495,78 @@ export default function Home() {
           gap: 40px;
           align-items: start;
         }
-        .calculator-form {
+        .quote-wizard {
           background: rgba(255,255,255,.02);
           border: 1px solid var(--line);
           border-radius: 16px;
-          padding: 32px;
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
         }
-        .calculator-form h3 {
-          margin: 0 0 24px;
+        .quote-wizard-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding-bottom: 18px;
+          border-bottom: 1px solid var(--line);
+        }
+        .quote-wizard-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--att), #0077b6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           font-size: 24px;
+          flex-shrink: 0;
+        }
+        .quote-wizard-header h3 {
+          margin: 0 0 4px;
+          font-size: 18px;
           color: var(--ink);
         }
-        .calculator-form .form-group {
-          margin-bottom: 20px;
-        }
-        .calculator-form label {
-          display: block;
-          margin-bottom: 8px;
-          color: var(--soft);
+        .quote-wizard-header p {
+          margin: 0;
+          color: var(--muted);
           font-size: 13px;
-          font-weight: 600;
+          line-height: 1.5;
         }
-        .calculator-form input,
-        .calculator-form select {
+        .quote-step-list {
+          display: flex;
+          flex-direction: column;
+          gap: 18px;
+        }
+        .quote-step {
+          padding: 16px;
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          background: rgba(255,255,255,.03);
+          opacity: 0.65;
+          transition: opacity .2s ease, border-color .2s ease, background .2s ease;
+        }
+        .quote-step.active {
+          opacity: 1;
+          border-color: var(--att-glow);
+          background: rgba(0,168,224,.06);
+        }
+        .quote-step-question {
+          font-size: 15px;
+          font-weight: 700;
+          color: var(--ink);
+          margin-bottom: 10px;
+          line-height: 1.5;
+        }
+        .quote-step-question b { color: var(--att); }
+        .quote-step-hint {
+          margin: -6px 0 12px;
+          color: var(--muted);
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .quote-step-input input,
+        .quote-step-input select {
           width: 100%;
           padding: 12px 16px;
           border: 1px solid var(--line);
@@ -1423,41 +1576,107 @@ export default function Home() {
           font-size: 14px;
           outline: none;
         }
-        .calculator-form input:focus,
-        .calculator-form select:focus {
-          border-color: rgba(52,211,153,.5);
+        .quote-step-input input:focus,
+        .quote-step-input select:focus {
+          border-color: var(--att-glow);
           background: rgba(255,255,255,.08);
         }
-        .calculator-form .checkbox-group {
+        .quote-step-options {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        .quote-step-option {
           display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .calculator-form .checkbox-group input {
-          width: auto;
-        }
-        .calculator-form .checkbox-group label {
-          margin-bottom: 0;
-        }
-        .calculator-calculate-btn {
-          width: 100%;
-          padding: 16px;
-          background: linear-gradient(135deg, #34d399, #10b981);
-          border: none;
+          flex-direction: column;
+          gap: 4px;
+          padding: 14px;
+          border: 1px solid var(--line);
           border-radius: 8px;
-          color: #111827;
+          background: rgba(255,255,255,.04);
+          color: var(--soft);
+          font-size: 14px;
+          cursor: pointer;
+          transition: border-color .2s ease, background .2s ease;
+        }
+        .quote-step-option:hover {
+          border-color: var(--att-glow);
+          background: rgba(0,168,224,.08);
+        }
+        .quote-step-option.selected {
+          border-color: var(--att);
+          background: rgba(0,168,224,.12);
+        }
+        .quote-step-option b { color: var(--ink); }
+        .quote-step-option span { font-size: 12px; color: var(--muted); }
+        .quote-step-warning {
+          margin-top: 12px;
+          padding: 12px;
+          border: 1px solid rgba(245,158,11,.4);
+          border-radius: 8px;
+          background: rgba(245,158,11,.1);
+          color: #fde68a;
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .quote-step-warning a { color: #7dd3fc; text-decoration: underline; }
+        .quote-wizard-nav {
+          display: flex;
+          gap: 10px;
+          margin-top: auto;
+        }
+        .quote-wizard-nav button {
+          flex: 1;
+          padding: 14px;
+          border-radius: 8px;
           font-weight: 800;
-          font-size: 16px;
+          font-size: 15px;
           cursor: pointer;
           transition: transform .2s ease, box-shadow .2s ease;
         }
-        .calculator-calculate-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(52,211,153,.3);
+        .quote-wizard-back {
+          border: 1px solid var(--line);
+          background: rgba(255,255,255,.04);
+          color: var(--soft);
         }
-        .calculator-calculate-btn:disabled {
+        .quote-wizard-next {
+          border: none;
+          background: linear-gradient(135deg, var(--att), #0077b6);
+          color: #fff;
+        }
+        .quote-wizard-nav button:hover {
+          transform: translateY(-1px);
+        }
+        .quote-wizard-nav button:disabled {
           cursor: progress;
           opacity: 0.7;
+        }
+        .quote-wizard-preview {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 16px;
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          background: rgba(255,255,255,.03);
+          margin-bottom: 16px;
+        }
+        .quote-preview-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, var(--att), #0077b6);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .quote-wizard-preview p {
+          margin: 0;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.5;
         }
         .quote-badge {
           display: inline-block;
@@ -1754,6 +1973,7 @@ export default function Home() {
           .calculator-container {
             grid-template-columns: 1fr;
           }
+          .quote-step-options { grid-template-columns: 1fr; }
           .hero { grid-template-columns: 1fr; min-height: auto; }
           .proof, .system-grid, .products, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .att-features, .phone-categories, .trade-in-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1774,6 +1994,9 @@ export default function Home() {
           .section-head { display: block; }
           .section-head p { margin-top: 14px; }
           .footer { flex-direction: column; line-height: 1.6; }
+          .quote-wizard { padding: 18px; }
+          .quote-wizard-header { flex-direction: column; text-align: center; }
+          .quote-wizard-avatar { margin: 0 auto; }
         }
       `}</style>
 
@@ -2041,176 +2264,282 @@ export default function Home() {
               </p>
             </div>
             <div className="calculator-container">
-              <div className="calculator-form">
-                <h3>A Few Quick Questions</h3>
-                <div className="form-group">
-                  <label>Current Monthly Bill ($)</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 150"
-                    value={calculator.currentBill}
-                    onChange={(e) => updateCalculator('currentBill', e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Number of Lines</label>
-                  <input
-                    type="number"
-                    placeholder="e.g., 4"
-                    value={calculator.lines}
-                    onChange={(e) => updateCalculator('lines', e.target.value)}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>Current Provider</label>
-                  <select
-                    value={calculator.currentProvider}
-                    onChange={(e) => updateCalculator('currentProvider', e.target.value)}
-                  >
-                    <option value="">Select provider</option>
-                    <option value="verizon">Verizon</option>
-                    <option value="tmobile">T-Mobile</option>
-                    <option value="sprint">Sprint</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Choose Your AT&T Plan</label>
-                  <select
-                    value={calculator.attPlan}
-                    onChange={(e) => updateCalculator('attPlan', e.target.value)}
-                  >
-                    {ATT_PLANS.map(plan => (
-                      <option key={plan.id} value={plan.id}>{plan.name} — {plan.features}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Data Usage per Line</label>
-                  <select
-                    value={calculator.dataUsage}
-                    onChange={(e) => updateCalculator('dataUsage', e.target.value)}
-                  >
-                    <option value="low">Low (&lt;5GB)</option>
-                    <option value="medium">Medium (5-20GB)</option>
-                    <option value="high">High (20-50GB)</option>
-                    <option value="unlimited">Unlimited</option>
-                  </select>
-                </div>
-
-                <div className="form-group discount-group">
-                  <label>Do any of these apply to you?</label>
-                  <p className="discount-hint">We’ll automatically apply the best eligible AT&T discount to your quote.</p>
-                  <div className="discount-options">
-                    <label className="discount-option">
-                      <input
-                        type="checkbox"
-                        checked={calculator.is55Plus}
-                        onChange={() => toggleDiscount('is55Plus')}
-                      />
-                      <span>I’m 55 or older</span>
-                    </label>
-                    <label className="discount-option">
-                      <input
-                        type="checkbox"
-                        checked={calculator.isMilitary}
-                        onChange={() => toggleDiscount('isMilitary')}
-                      />
-                      <span>Military or veteran</span>
-                    </label>
-                    <label className="discount-option">
-                      <input
-                        type="checkbox"
-                        checked={calculator.isTeacher}
-                        onChange={() => toggleDiscount('isTeacher')}
-                      />
-                      <span>Teacher or educator</span>
-                    </label>
-                    <label className="discount-option">
-                      <input
-                        type="checkbox"
-                        checked={calculator.hasEmployerDiscount}
-                        onChange={() => toggleDiscount('hasEmployerDiscount')}
-                      />
-                      <span>My employer may offer an AT&T discount</span>
-                    </label>
+              <div className="quote-wizard">
+                <div className="quote-wizard-header">
+                  <div className="quote-wizard-avatar">🤖</div>
+                  <div>
+                    <h3>Sophia, your WGW quote assistant</h3>
+                    <p>I’ll research current AT&T Unlimited 2.0 plans, trade-in promos, and discounts to build your personalized quote.</p>
                   </div>
                 </div>
 
-                <div className="form-group trade-in-group">
-                  <label>Trade-In Devices (Optional)</label>
-                  <div className="trade-in-selector">
-                    <input
-                      type="text"
-                      placeholder="Start typing a device (e.g. iPhone 16)"
-                      value={calculator.tradeInSearch}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        updateCalculator('tradeInSearch', val);
-                        setTradeInSuggestions(getTradeInSuggestions(val));
-                        setShowTradeInSuggestions(val.length >= 2);
-                      }}
-                      onFocus={() => setShowTradeInSuggestions(calculator.tradeInSearch.length >= 2)}
-                      onBlur={() => setTimeout(() => setShowTradeInSuggestions(false), 150)}
-                    />
-                    {showTradeInSuggestions && tradeInSuggestions.length > 0 && (
-                      <div className="trade-in-suggestions">
-                        {tradeInSuggestions.map(device => (
+                <div className="quote-step-list">
+                  {quoteStep >= 0 && (
+                    <div className={`quote-step ${quoteStep === 0 ? 'active' : ''}`}>
+                      <div className="quote-step-question">How many lines do you need?</div>
+                      <div className="quote-step-input">
+                        <input
+                          type="number"
+                          min="1"
+                          placeholder="e.g., 4"
+                          value={calculator.lines}
+                          onChange={(e) => updateCalculator('lines', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {quoteStep >= 1 && (
+                    <div className={`quote-step ${quoteStep === 1 ? 'active' : ''}`}>
+                      <div className="quote-step-question">What’s your current monthly bill?</div>
+                      <div className="quote-step-input">
+                        <input
+                          type="number"
+                          placeholder="e.g., 150"
+                          value={calculator.currentBill}
+                          onChange={(e) => updateCalculator('currentBill', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {quoteStep >= 2 && (
+                    <div className={`quote-step ${quoteStep === 2 ? 'active' : ''}`}>
+                      <div className="quote-step-question">Who’s your current provider?</div>
+                      <div className="quote-step-input">
+                        <select
+                          value={calculator.currentProvider}
+                          onChange={(e) => updateCalculator('currentProvider', e.target.value)}
+                        >
+                          <option value="">Select provider</option>
+                          <option value="verizon">Verizon</option>
+                          <option value="tmobile">T-Mobile</option>
+                          <option value="sprint">Sprint</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {quoteStep >= 3 && (
+                    <div className={`quote-step ${quoteStep === 3 ? 'active' : ''}`}>
+                      <div className="quote-step-question">How much data does each line use?</div>
+                      <div className="quote-step-options">
+                        {[
+                          { value: 'low', label: 'Light', desc: '< 5GB per line' },
+                          { value: 'medium', label: 'Average', desc: '5–20GB per line' },
+                          { value: 'high', label: 'Heavy', desc: '20–50GB per line' },
+                          { value: 'unlimited', label: 'Unlimited', desc: '50GB+ per line' },
+                        ].map(opt => (
                           <button
+                            key={opt.value}
                             type="button"
-                            key={device}
-                            className="trade-in-suggestion"
-                            onMouseDown={(e) => { e.preventDefault(); addTradeIn(device); }}
+                            className={`quote-step-option ${calculator.dataUsage === opt.value ? 'selected' : ''}`}
+                            onClick={() => updateCalculator('dataUsage', opt.value)}
                           >
-                            {device}
+                            <b>{opt.label}</b>
+                            <span>{opt.desc}</span>
                           </button>
                         ))}
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
-                  {calculator.tradeIns.length > 0 && (
-                    <div className="trade-in-list">
-                      {calculator.tradeIns.map(t => (
-                        <div className="trade-in-row" key={t.id} style={{ "--row-color": t.color }}>
-                          <div className="trade-in-row-info">
-                            <span className="trade-in-row-device">{t.device}</span>
-                            <span className="trade-in-row-credit">
-                              ${t.value} value · {t.promoTier} · up to ${t.promoCredit} promo credit
-                            </span>
+                  {quoteStep >= 4 && (
+                    <div className={`quote-step ${quoteStep === 4 ? 'active' : ''}`}>
+                      <div className="quote-step-question">
+                        Based on your answers, I recommend the <b>{ATT_PLANS.find(p => p.id === calculator.attPlan)?.name}</b>. Want to change it?
+                      </div>
+                      <div className="quote-step-input">
+                        <select
+                          value={calculator.attPlan}
+                          onChange={(e) => updateCalculator('attPlan', e.target.value)}
+                        >
+                          {ATT_PLANS.map(plan => (
+                            <option key={plan.id} value={plan.id}>{plan.name} — {plan.features}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  {quoteStep >= 5 && (
+                    <div className={`quote-step ${quoteStep === 5 ? 'active' : ''}`}>
+                      <div className="quote-step-question">Do any of these discounts apply?</div>
+                      <p className="quote-step-hint">I’ll automatically apply the best eligible AT&T discount and the autopay/paperless savings.</p>
+                      <div className="discount-options">
+                        <label className="discount-option">
+                          <input type="checkbox" checked={calculator.autopay} onChange={() => toggleDiscount('autopay')} />
+                          <span>I’ll use autopay & paperless billing <small>— saves $10/line</small></span>
+                        </label>
+                        <label className="discount-option">
+                          <input type="checkbox" checked={calculator.is55Plus} onChange={() => toggleDiscount('is55Plus')} />
+                          <span>I’m 55 or older</span>
+                        </label>
+                        <label className="discount-option">
+                          <input type="checkbox" checked={calculator.isMilitary} onChange={() => toggleDiscount('isMilitary')} />
+                          <span>Military or veteran</span>
+                        </label>
+                        <label className="discount-option">
+                          <input type="checkbox" checked={calculator.isTeacher} onChange={() => toggleDiscount('isTeacher')} />
+                          <span>Teacher or educator</span>
+                        </label>
+                        <label className="discount-option">
+                          <input type="checkbox" checked={calculator.hasEmployerDiscount} onChange={() => toggleDiscount('hasEmployerDiscount')} />
+                          <span>My employer may offer an AT&T discount</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {quoteStep >= 6 && (
+                    <div className={`quote-step ${quoteStep === 6 ? 'active' : ''}`}>
+                      <div className="quote-step-question">Any devices to trade in?</div>
+                      <p className="quote-step-hint">I’ll look up the current AT&T trade-in promo credit for each device.</p>
+                      <div className="trade-in-selector">
+                        <input
+                          type="text"
+                          placeholder="Start typing a device (e.g. iPhone 16)"
+                          value={calculator.tradeInSearch}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateCalculator('tradeInSearch', val);
+                            setTradeInSuggestions(getTradeInSuggestions(val));
+                            setShowTradeInSuggestions(val.length >= 2);
+                          }}
+                          onFocus={() => setShowTradeInSuggestions(calculator.tradeInSearch.length >= 2)}
+                          onBlur={() => setTimeout(() => setShowTradeInSuggestions(false), 150)}
+                        />
+                        {showTradeInSuggestions && tradeInSuggestions.length > 0 && (
+                          <div className="trade-in-suggestions">
+                            {tradeInSuggestions.map(device => (
+                              <button
+                                type="button"
+                                key={device}
+                                className="trade-in-suggestion"
+                                onMouseDown={(e) => { e.preventDefault(); addTradeIn(device); }}
+                              >
+                                {device}
+                              </button>
+                            ))}
                           </div>
-                          <select
-                            value={t.condition}
-                            onChange={(e) => updateTradeIn(t.id, { condition: e.target.value })}
-                            className="trade-in-row-condition"
-                          >
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="fair">Fair</option>
-                            <option value="poor">Poor</option>
-                          </select>
-                          <button
-                            type="button"
-                            className="trade-in-row-remove"
-                            onClick={() => removeTradeIn(t.id)}
-                            aria-label={`Remove ${t.device}`}
-                          >
-                            ×
-                          </button>
+                        )}
+                      </div>
+
+                      {calculator.tradeIns.length > 0 && (
+                        <div className="trade-in-list">
+                          {calculator.tradeIns.map(t => (
+                            <div className="trade-in-row" key={t.id} style={{ "--row-color": t.color }}>
+                              <div className="trade-in-row-info">
+                                <span className="trade-in-row-device">{t.device}</span>
+                                <span className="trade-in-row-credit">
+                                  ${t.value} value · {t.promoTier} · up to ${t.promoCredit} promo credit
+                                </span>
+                              </div>
+                              <select
+                                value={t.condition}
+                                onChange={(e) => updateTradeIn(t.id, { condition: e.target.value })}
+                                className="trade-in-row-condition"
+                              >
+                                <option value="excellent">Excellent</option>
+                                <option value="good">Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                              </select>
+                              <button
+                                type="button"
+                                className="trade-in-row-remove"
+                                onClick={() => removeTradeIn(t.id)}
+                                aria-label={`Remove ${t.device}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
+
+                      {calculator.tradeIns.length > 0 && !promoQualifiesForPlan(calculator.attPlan) && (
+                        <div className="quote-step-warning">
+                          Your selected plan does not qualify for the maximum trade-in promo credits. Choose Extra EL or Premium PL to unlock the full promo amount.
+                          <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer"> See AT&T trade-in terms</a>.
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {quoteStep >= 7 && (
+                    <div className={`quote-step ${quoteStep === 7 ? 'active' : ''}`}>
+                      <div className="quote-step-question">Any new phones to finance?</div>
+                      <p className="quote-step-hint">I’ll split the cost over 36 months and apply your trade-in promo credits as monthly bill credits.</p>
+                      <div className="trade-in-selector">
+                        <input
+                          type="text"
+                          placeholder="Start typing a phone (e.g. iPhone 17)"
+                          value={calculator.newPhoneSearch}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            updateCalculator('newPhoneSearch', val);
+                            setNewPhoneSuggestions(getNewPhoneSuggestions(val));
+                            setShowNewPhoneSuggestions(val.length >= 2);
+                          }}
+                          onFocus={() => setShowNewPhoneSuggestions(calculator.newPhoneSearch.length >= 2)}
+                          onBlur={() => setTimeout(() => setShowNewPhoneSuggestions(false), 150)}
+                        />
+                        {showNewPhoneSuggestions && newPhoneSuggestions.length > 0 && (
+                          <div className="trade-in-suggestions">
+                            {newPhoneSuggestions.map(phone => (
+                              <button
+                                type="button"
+                                key={phone.id}
+                                className="trade-in-suggestion"
+                                onMouseDown={(e) => { e.preventDefault(); addNewPhone(phone); }}
+                              >
+                                {phone.name} — ${phone.fullPrice}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {calculator.newPhones.length > 0 && (
+                        <div className="trade-in-list">
+                          {calculator.newPhones.map(p => (
+                            <div className="trade-in-row" key={p.id}>
+                              <div className="trade-in-row-info">
+                                <span className="trade-in-row-device">{p.name}</span>
+                                <span className="trade-in-row-credit">${p.fullPrice} · 36 mo financing</span>
+                              </div>
+                              <button
+                                type="button"
+                                className="trade-in-row-remove"
+                                onClick={() => removeNewPhone(p.id)}
+                                aria-label={`Remove ${p.name}`}
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-                <button 
-                  className="calculator-calculate-btn" 
-                  onClick={calculateQuote}
-                  disabled={isCalculating}
-                >
-                  {isCalculating ? "Calculating..." : "Calculate Savings"}
-                </button>
+
+                <div className="quote-wizard-nav">
+                  {quoteStep > 0 && (
+                    <button type="button" className="quote-wizard-back" onClick={() => setQuoteStep(s => s - 1)}>Back</button>
+                  )}
+                  {quoteStep < 7 ? (
+                    <button type="button" className="quote-wizard-next" onClick={() => setQuoteStep(s => s + 1)}>Next</button>
+                  ) : (
+                    <button type="button" className="quote-wizard-next" onClick={calculateQuote} disabled={isCalculating}>
+                      {isCalculating ? 'Building your quote...' : 'Get my quote'}
+                    </button>
+                  )}
+                </div>
               </div>
-              
+
               <div className="calculator-results">
                 <h3>Your AT&T Quote</h3>
                 {quoteResult ? (
@@ -2218,32 +2547,53 @@ export default function Home() {
                     <div className={`quote-badge ${quoteResult.isRealQuote ? 'real' : 'estimate'}`}>
                       {quoteResult.isRealQuote ? '✓ Real-Time Quote' : 'Estimate'}
                     </div>
+
                     <div className="result-item">
                       <span className="result-label">Current Monthly Bill</span>
                       <span className="result-value">${quoteResult.currentBill.toFixed(2)}</span>
                     </div>
+
                     <div className="result-item">
                       <span className="result-label">New AT&T Plan</span>
                       <span className="result-value">{quoteResult.attPlan?.name || "AT&T Unlimited 2.0 Extra EL"}</span>
                     </div>
+
                     <div className="result-item">
                       <span className="result-label">Plan Before Discounts</span>
                       <span className="result-value">${(quoteResult.basePlanPricePerLine * quoteResult.lines).toFixed(2)} <small>(${quoteResult.basePlanPricePerLine?.toFixed(2)}/line)</small></span>
                     </div>
+
                     {quoteResult.discountLabel && (
                       <div className="result-item discount-row">
                         <span className="result-label">{quoteResult.discountLabel}</span>
                         <span className="result-value savings">-${quoteResult.totalDiscount.toFixed(2)}</span>
                       </div>
                     )}
+
+                    {quoteResult.autopayDiscount > 0 && (
+                      <div className="result-item discount-row">
+                        <span className="result-label">Autopay & paperless discount</span>
+                        <span className="result-value savings">-${quoteResult.autopayDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    {quoteResult.totalNetPhoneMonthlyPayment > 0 && (
+                      <div className="result-item">
+                        <span className="result-label">New Phone Financing ({quoteResult.newPhoneDetails.length})</span>
+                        <span className="result-value">${quoteResult.totalNetPhoneMonthlyPayment.toFixed(2)}/mo</span>
+                      </div>
+                    )}
+
                     <div className="result-item">
                       <span className="result-label">New Monthly Bill</span>
                       <span className="result-value">${quoteResult.newMonthlyBill.toFixed(2)} <small>(${quoteResult.perLineNewBill?.toFixed(2)}/line)</small></span>
                     </div>
+
                     <div className="result-item">
                       <span className="result-label">Monthly Savings</span>
                       <span className="result-value savings">${quoteResult.monthlySavings.toFixed(2)}</span>
                     </div>
+
                     <div className="result-item">
                       <span className="result-label">Annual Savings</span>
                       <span className="result-value savings highlight">${quoteResult.annualSavings.toFixed(2)}</span>
@@ -2282,15 +2632,27 @@ export default function Home() {
                       <span className="result-label">Savings per Line</span>
                       <span className="result-value">${quoteResult.perLineSavings.toFixed(2)}/line</span>
                     </div>
+
+                    {(quoteResult.totalPromoCredit > 0 || quoteResult.totalNetPhoneMonthlyPayment > 0) && (
+                      <div className="calculator-disclaimer">
+                        <b>Trade-in & financing details:</b> Trade-in promo credits are typically split over {quoteResult.financingMonths} months as bill credits and require an eligible AT&T Unlimited 2.0 plan with autopay/paperless billing. If you cancel service early, remaining credits may be forfeited. Device financing is separate and may require credit approval.
+                        <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer"> See AT&T trade-in terms</a> and <a href="https://www.att.com/support/article/wireless/KM1218200/" target="_blank" rel="noreferrer">installment details</a>.
+                      </div>
+                    )}
+
                     <div className="calculator-disclaimer">
                       {quoteResult.isRealQuote
                         ? "*This is a real-time quote based on current AT&T pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
-                        : "*This is an estimate based on current AT&T plan pricing and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions. For an accurate quote, please upload your bill using the form above or contact our team."
+                        : "*This is an estimate based on current AT&T Unlimited 2.0 plan pricing, autopay discounts, and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions."
                       }
                     </div>
                   </>
                 ) : (
                   <div className="calculator-placeholder">
+                    <div className="quote-wizard-preview">
+                      <div className="quote-preview-avatar">🤖</div>
+                      <p>Answer the questions on the left and I’ll build your personalized AT&T quote here — with plan pricing, autopay savings, trade-in credits, and 36-month financing.</p>
+                    </div>
                     <div className="placeholder-row">
                       <span className="placeholder-label">Current monthly bill</span>
                       <span className="placeholder-value">--</span>
@@ -2307,9 +2669,6 @@ export default function Home() {
                       <span className="placeholder-label">Annual savings</span>
                       <span className="placeholder-value">$0.00</span>
                     </div>
-                    <p className="placeholder-hint">
-                      Fill out the form and click <b>Calculate Savings</b> to see your estimate.
-                    </p>
                   </div>
                 )}
               </div>
