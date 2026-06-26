@@ -1,10 +1,45 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import AppInstallMeta from "../components/AppInstallMeta";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
+
+async function fetchTradeInPromos() {
+  try {
+    const res = await fetch(`${API}/api/trade-in-promos`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data.promos) ? data.promos : [];
+  } catch (err) {
+    console.warn("[landing] could not load trade-in promos:", err.message);
+    return [];
+  }
+}
+
+const DEFAULT_TRADE_IN_TIERS = [
+  { tier: "Premium", promo_credit: 1000, eligible_devices: ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 16 Pro Max", "iPhone 16 Pro", "Galaxy S24 Ultra", "Galaxy Z Fold6", "Galaxy Z Fold7", "Pixel 9 Pro XL", "Pixel 9 Pro", "Motorola Razr+ (2024)"], example_models: ["iPhone 15 Pro Max", "iPhone 16 Pro Max", "Galaxy S24 Ultra", "Galaxy Z Fold7", "Pixel 9 Pro XL"], color: "#34d399" },
+  { tier: "High", promo_credit: 800, eligible_devices: ["iPhone 15 Plus", "iPhone 15", "iPhone 16 Plus", "iPhone 16", "Galaxy S24+", "Galaxy S24", "Galaxy S25+", "Galaxy S25", "Galaxy Z Flip6", "Galaxy Z Flip7", "Pixel 9", "Pixel 9 Pro Fold"], example_models: ["iPhone 15", "iPhone 16", "Galaxy S24", "Galaxy Z Flip7", "Pixel 9 Pro Fold"], color: "#2dd4bf" },
+  { tier: "Mid", promo_credit: 600, eligible_devices: ["iPhone 14 Pro Max", "iPhone 14 Pro", "iPhone 14 Plus", "iPhone 14", "iPhone 13 Pro Max", "iPhone 13 Pro", "Galaxy S23 Ultra", "Galaxy S23+", "Galaxy S23", "Galaxy S22 Ultra", "Galaxy Z Fold5", "Galaxy Z Flip5", "Pixel 8 Pro", "Pixel 8", "Pixel 8a"], example_models: ["iPhone 14", "iPhone 13 Pro", "Galaxy S23", "Pixel 8 Pro"], color: "#fbbf24" },
+  { tier: "Standard", promo_credit: 400, eligible_devices: ["iPhone 13", "iPhone 13 mini", "iPhone 12 Pro Max", "iPhone 12 Pro", "iPhone 12", "Galaxy S22+", "Galaxy S22", "Galaxy S21 Ultra", "Galaxy S21+", "Galaxy S21", "Galaxy Z Fold4", "Galaxy Z Flip4", "Pixel 7 Pro", "Pixel 7", "Pixel 7a", "Motorola Razr (2024)"], example_models: ["iPhone 13", "Galaxy S22", "Pixel 7 Pro", "Motorola Razr (2024)"], color: "#60a5fa" },
+  { tier: "Base", promo_credit: 200, eligible_devices: ["iPhone 11", "iPhone 11 Pro", "iPhone 11 Pro Max", "iPhone SE (3rd gen)", "iPhone SE (2nd gen)", "Galaxy S20", "Galaxy S20+", "Galaxy S20 Ultra", "Galaxy S21 FE", "Galaxy Note20", "Galaxy Note20 Ultra", "Pixel 6", "Pixel 6 Pro", "Pixel 6a", "Pixel 5", "Pixel 5a", "OnePlus 11", "OnePlus 10 Pro", "LG V60", "LG Velvet"], example_models: ["iPhone 11", "Galaxy S20", "Pixel 6", "OnePlus 11"], color: "#94a3b8" },
+  { tier: "Trade-in value only", promo_credit: 0, eligible_devices: ["Older or damaged devices not listed above"], example_models: ["Older iPhone, Android, or feature phones"], color: "#64748b" },
+];
+
+function findPromoForDevice(deviceName, promos) {
+  if (!deviceName || !promos?.length) return null;
+  const normalized = deviceName.toLowerCase().replace(/[\s\-]+/g, " ");
+  for (const promo of promos) {
+    const devices = Array.isArray(promo.eligible_devices) ? promo.eligible_devices : [];
+    const matches = devices.some(d => {
+      const dn = d.toLowerCase().replace(/[\s\-]+/g, " ");
+      return normalized.includes(dn) || dn.includes(normalized);
+    });
+    if (matches) return promo;
+  }
+  return promos.find(p => p.tier === "Trade-in value only") || promos[promos.length - 1] || null;
+}
 
 const PRODUCTS = [
   {
@@ -171,22 +206,11 @@ const DEVICE_VALUES = {
   "Budget Device": 25,
 };
 
-const TRADE_IN_TIERS = [
-  { minValue: 800, promoCredit: 800, label: "Premium", description: "$800+ trade-in value", color: "#34d399" },
-  { minValue: 400, promoCredit: 400, label: "Mid-tier", description: "$400–$799 trade-in value", color: "#fbbf24" },
-  { minValue: 200, promoCredit: 200, label: "Standard", description: "$200–$399 trade-in value", color: "#60a5fa" },
-  { minValue: 0, promoCredit: 0, label: "Base", description: "Under $200 trade-in value", color: "#94a3b8" },
-];
-
 const TRADE_IN_SHOWCASE = [
   "iPhone 16", "iPhone 15", "iPhone 14", "iPhone 13", "iPhone 12", "iPhone 11", "iPhone SE",
   "Samsung Galaxy S25", "Samsung Galaxy S24", "Samsung Galaxy S23", "Samsung Galaxy S22", "Samsung Galaxy S21",
   "Galaxy Z Fold6", "Galaxy Z Flip6", "Pixel 9", "Pixel 8", "Pixel 7", "Motorola Razr (2024)",
 ];
-
-function getTradeInTier(value) {
-  return TRADE_IN_TIERS.find(t => value >= t.minValue) || TRADE_IN_TIERS[TRADE_IN_TIERS.length - 1];
-}
 
 function ProductLink({ product }) {
   const external = product.href.startsWith("http");
@@ -205,6 +229,26 @@ function ProductLink({ product }) {
 }
 
 export default function Home() {
+  const [tradeInPromos, setTradeInPromos] = useState(DEFAULT_TRADE_IN_TIERS);
+  const [promosLoaded, setPromosLoaded] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchTradeInPromos().then(promos => {
+      if (!mounted) return;
+      if (promos.length > 0) {
+        // Preserve color fallback for tiers that come back without a color.
+        const colored = promos.map(p => {
+          const def = DEFAULT_TRADE_IN_TIERS.find(d => d.tier === p.tier);
+          return { ...p, color: p.color || (def && def.color) || "#94a3b8" };
+        });
+        setTradeInPromos(colored);
+      }
+      setPromosLoaded(true);
+    });
+    return () => { mounted = false; };
+  }, []);
+
   const [form, setForm] = useState({
     customer_type: "consumer",
     name: "",
@@ -292,39 +336,42 @@ export default function Home() {
     const currentBill = parseFloat(calculator.currentBill) || 0;
     const lines = parseInt(calculator.lines) || 1;
     const tradeInValue = DEVICE_VALUES[calculator.tradeInDevice] || 0;
-    
-    // Apply condition multiplier
+    const promo = calculator.tradeInDevice ? findPromoForDevice(calculator.tradeInDevice, tradeInPromos) : null;
+    const promoCredit = promo ? promo.promo_credit : 0;
+
+    // Apply condition multiplier to trade-in value only (not promo credit)
     let conditionMultiplier = 1;
     if (calculator.tradeInCondition === "excellent") conditionMultiplier = 1.2;
     else if (calculator.tradeInCondition === "good") conditionMultiplier = 1;
     else if (calculator.tradeInCondition === "fair") conditionMultiplier = 0.7;
     else if (calculator.tradeInCondition === "poor") conditionMultiplier = 0.4;
-    
+
     const adjustedTradeIn = tradeInValue * conditionMultiplier;
-    
+
     // Estimate AT&T savings (typically 15-25% savings for switching)
     const estimatedSavings = currentBill * 0.20;
     const newMonthlyBill = currentBill - estimatedSavings;
-    
+
     // First bill with trade-in credit applied
     const firstBillWithCredit = Math.max(0, newMonthlyBill - adjustedTradeIn);
-    
+
     // Annual savings
     const annualSavings = estimatedSavings * 12;
-    
+
     // Data usage impact on plan pricing
     let dataAdjustment = 0;
     if (calculator.dataUsage === "low") dataAdjustment = -10;
     else if (calculator.dataUsage === "high") dataAdjustment = 15;
     else if (calculator.dataUsage === "unlimited") dataAdjustment = 25;
-    
+
     const adjustedMonthlyBill = newMonthlyBill + (dataAdjustment * lines);
-    
+
     const quoteData = {
       currentBill,
       newMonthlyBill: adjustedMonthlyBill,
       monthlySavings: currentBill - adjustedMonthlyBill,
       tradeInValue: adjustedTradeIn,
+      promoCredit,
       firstBillWithCredit,
       annualSavings: (currentBill - adjustedMonthlyBill) * 12,
       lines,
@@ -1587,12 +1634,12 @@ export default function Home() {
             <div className="trade-in-legend">
               <div className="legend-title">Promotional credit tiers</div>
               <div className="legend-items">
-                {TRADE_IN_TIERS.filter(t => t.promoCredit > 0).map((tier, index) => (
+                {tradeInPromos.filter(t => t.promo_credit > 0).map((tier, index) => (
                   <div className="legend-item" key={index}>
                     <span className="legend-dot" style={{ background: tier.color }} />
-                    <span className="legend-label">{tier.label}</span>
-                    <span className="legend-range">{tier.description}</span>
-                    <span className="legend-credit">Up to ${tier.promoCredit} credit</span>
+                    <span className="legend-label">{tier.tier}</span>
+                    <span className="legend-range">{tier.notes || `Eligible: ${(tier.example_models || tier.eligible_devices || []).slice(0, 3).join(", ")}`}</span>
+                    <span className="legend-credit">Up to ${tier.promo_credit} credit</span>
                   </div>
                 ))}
               </div>
@@ -1601,17 +1648,19 @@ export default function Home() {
             <div className="trade-in-grid">
               {TRADE_IN_SHOWCASE.map((device, index) => {
                 const value = DEVICE_VALUES[device] || 0;
-                const tier = getTradeInTier(value);
+                const tier = findPromoForDevice(device, tradeInPromos) || tradeInPromos[tradeInPromos.length - 1];
                 return (
                   <div className="trade-in-card" key={index} style={{ "--tier-color": tier.color }}>
                     <div className="trade-in-device">{device}</div>
                     <div className="trade-in-value">${value} est. value</div>
                     <div className="trade-in-tier">
                       <span className="tier-dot" style={{ background: tier.color }} />
-                      {tier.label} tier
+                      {tier.tier} tier
                     </div>
                     <div className="trade-in-qualifies">
-                      Qualifies for up to <b>${tier.promoCredit}</b> in credits
+                      {tier.promo_credit > 0
+                        ? <>Qualifies for up to <b>${tier.promo_credit}</b> in promo credits</>
+                        : <>Trade-in value only — no current promo credit</>}
                     </div>
                   </div>
                 );
@@ -1620,13 +1669,13 @@ export default function Home() {
 
             <div className="trade-in-disclaimer">
               <p>
-                <b>Estimates only.</b> Values shown are representative examples based on AT&T’s promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current AT&T promotions.
+                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current AT&T offers. Values shown are representative examples based on AT&T’s promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current AT&T promotions.
               </p>
               <p>
                 Always confirm your actual trade-in value and eligible credits directly with <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">AT&T</a> before making a purchase decision.
               </p>
               <p className="trade-in-source">
-                Source: AT&T Trade-In program (<a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">att.com/trade-in</a>) · Values estimated as of June 26, 2026
+                Source: AT&T Trade-In program (<a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">att.com/trade-in</a>) · Refreshed daily by WGW Director AI
               </p>
             </div>
 
@@ -1761,11 +1810,17 @@ export default function Home() {
                     {quoteResult.tradeInValue > 0 && (
                       <>
                         <div className="result-item">
-                          <span className="result-label">Trade-In Credit</span>
+                          <span className="result-label">Trade-In Value</span>
                           <span className="result-value savings">${quoteResult.tradeInValue.toFixed(2)}</span>
                         </div>
+                        {quoteResult.promoCredit > 0 && (
+                          <div className="result-item">
+                            <span className="result-label">AT&T Promo Credit (est.)</span>
+                            <span className="result-value savings highlight">Up to ${quoteResult.promoCredit.toFixed(2)}</span>
+                          </div>
+                        )}
                         <div className="result-item">
-                          <span className="result-label">First Bill with Credit</span>
+                          <span className="result-label">First Bill with Trade-In Value</span>
                           <span className="result-value">${quoteResult.firstBillWithCredit.toFixed(2)}</span>
                         </div>
                       </>
