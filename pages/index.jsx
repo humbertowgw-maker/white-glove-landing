@@ -27,17 +27,47 @@ const DEFAULT_TRADE_IN_TIERS = [
   { tier: "Trade-in value only", promo_credit: 0, eligible_devices: ["Older or damaged devices not listed above"], example_models: ["Older iPhone, Android, or feature phones"], color: "#64748b" },
 ];
 
+function normalizeDeviceName(name) {
+  // Keep letters, numbers, spaces, and '+' (e.g. Razr+ vs Razr). Replace everything else with space.
+  return String(name || "").toLowerCase().replace(/[^a-z0-9\s+]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function deviceBaseName(name) {
+  return normalizeDeviceName(name)
+    .replace(/\b(pro max|pro|plus|ultra|max|mini|fe|5g|fold|flip)\b/g, "")
+    .replace(/\+\s/g, " ")
+    .replace(/\s\+/g, " ")
+    .replace(/^\+|\+$/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function findPromoForDevice(deviceName, promos) {
   if (!deviceName || !promos?.length) return null;
-  const normalized = deviceName.toLowerCase().replace(/[\s\-]+/g, " ");
+  const target = normalizeDeviceName(deviceName);
+  const targetBase = deviceBaseName(deviceName);
+
+  const candidates = [];
   for (const promo of promos) {
     const devices = Array.isArray(promo.eligible_devices) ? promo.eligible_devices : [];
-    const matches = devices.some(d => {
-      const dn = d.toLowerCase().replace(/[\s\-]+/g, " ");
-      return normalized.includes(dn) || dn.includes(normalized);
-    });
-    if (matches) return promo;
+    for (const d of devices) {
+      const dn = normalizeDeviceName(d);
+      if (!dn) continue;
+      const exact = target === dn;
+      const contains = dn.includes(target) || target.includes(dn);
+      const baseMatch = targetBase && targetBase === deviceBaseName(d);
+      if (exact) return promo;
+      if (contains || baseMatch) {
+        candidates.push({ promo, specificity: dn.split(" ").length, deviceName: d });
+      }
+    }
   }
+
+  if (candidates.length) {
+    candidates.sort((a, b) => b.specificity - a.specificity);
+    return candidates[0].promo;
+  }
+
   return promos.find(p => p.tier === "Trade-in value only") || promos[promos.length - 1] || null;
 }
 
