@@ -2081,7 +2081,7 @@ export default function Home() {
                     onChange={(e) => updateCalculator('attPlan', e.target.value)}
                   >
                     {ATT_PLANS.map(plan => (
-                      <option key={plan.id} value={plan.id}>{plan.shortName} — {plan.features}</option>
+                      <option key={plan.id} value={plan.id}>{plan.name} — {plan.features}</option>
                     ))}
                   </select>
                 </div>
@@ -2224,7 +2224,7 @@ export default function Home() {
                     </div>
                     <div className="result-item">
                       <span className="result-label">New AT&T Plan</span>
-                      <span className="result-value">{quoteResult.attPlan?.shortName || "Extra EL"}</span>
+                      <span className="result-value">{quoteResult.attPlan?.name || "AT&T Unlimited 2.0 Extra EL"}</span>
                     </div>
                     <div className="result-item">
                       <span className="result-label">Plan Before Discounts</span>
