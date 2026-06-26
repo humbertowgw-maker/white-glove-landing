@@ -1111,9 +1111,6 @@ export default function Home() {
           border-radius: 16px;
           padding: 32px;
         }
-        .calculator-results.hidden {
-          display: none;
-        }
         .calculator-results h3 {
           margin: 0 0 24px;
           font-size: 24px;
@@ -1153,6 +1150,43 @@ export default function Home() {
           color: var(--muted);
           font-size: 12px;
           line-height: 1.6;
+        }
+        .calculator-placeholder {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .placeholder-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 0;
+          border-bottom: 1px solid rgba(52,211,153,.15);
+        }
+        .placeholder-row:last-child {
+          border-bottom: none;
+        }
+        .placeholder-label {
+          color: var(--soft);
+          font-size: 14px;
+        }
+        .placeholder-value {
+          font-size: 20px;
+          font-weight: 700;
+          color: rgba(248,250,252,.45);
+        }
+        .placeholder-row.highlight .placeholder-value {
+          color: rgba(52,211,153,.55);
+        }
+        .placeholder-hint {
+          margin: 18px 0 0;
+          padding: 14px;
+          background: rgba(255,255,255,.04);
+          border-radius: 8px;
+          color: var(--muted);
+          font-size: 12px;
+          line-height: 1.6;
+          text-align: center;
         }
         @media (max-width: 980px) {
           .calculator-container {
@@ -1462,9 +1496,9 @@ export default function Home() {
                 </button>
               </div>
               
-              <div className={`calculator-results ${quoteResult ? '' : 'hidden'}`}>
+              <div className="calculator-results">
                 <h3>Your Estimated Savings</h3>
-                {quoteResult && (
+                {quoteResult ? (
                   <>
                     <div className={`quote-badge ${quoteResult.isRealQuote ? 'real' : 'estimate'}`}>
                       {quoteResult.isRealQuote ? '✓ Real-Time Quote' : 'Estimate'}
@@ -1502,12 +1536,34 @@ export default function Home() {
                       <span className="result-value">${quoteResult.perLineSavings.toFixed(2)}/line</span>
                     </div>
                     <div className="calculator-disclaimer">
-                      {quoteResult.isRealQuote 
+                      {quoteResult.isRealQuote
                         ? "*This is a real-time quote based on current AT&T pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
                         : "*This is an estimate based on typical AT&T switching savings. Actual savings may vary based on your specific plan, location, and current promotions. For an accurate quote, please upload your bill using the form above or contact our team."
                       }
                     </div>
                   </>
+                ) : (
+                  <div className="calculator-placeholder">
+                    <div className="placeholder-row">
+                      <span className="placeholder-label">Current monthly bill</span>
+                      <span className="placeholder-value">--</span>
+                    </div>
+                    <div className="placeholder-row">
+                      <span className="placeholder-label">New AT&T bill</span>
+                      <span className="placeholder-value">--</span>
+                    </div>
+                    <div className="placeholder-row highlight">
+                      <span className="placeholder-label">Monthly savings</span>
+                      <span className="placeholder-value">$0.00</span>
+                    </div>
+                    <div className="placeholder-row highlight">
+                      <span className="placeholder-label">Annual savings</span>
+                      <span className="placeholder-value">$0.00</span>
+                    </div>
+                    <p className="placeholder-hint">
+                      Fill out the form and click <b>Calculate Savings</b> to see your estimate.
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
