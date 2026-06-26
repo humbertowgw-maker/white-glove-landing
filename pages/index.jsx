@@ -27,28 +27,29 @@ const DEFAULT_TRADE_IN_TIERS = [
   { tier: "Trade-in value only", promo_credit: 0, eligible_devices: ["Older or damaged devices not listed above"], example_models: ["Older iPhone, Android, or feature phones"], color: "#64748b" },
 ];
 
+// AT&T Unlimited 2.0 consumer plans — per-line pricing for 1, 2, 3, 4, 5+ lines.
 const ATT_PLANS = [
   {
     id: "unlimited_starter",
-    name: "AT&T Unlimited Starter SL",
+    name: "AT&T Unlimited 2.0 Starter SL",
     shortName: "Starter SL",
-    pricePerLine: [65, 60, 50, 45, 35],
+    pricePerLine: [65.99, 60.99, 50.99, 45.99, 35.99],
     features: "Unlimited talk, text & data · SD streaming · 3 GB hotspot",
     recommendedFor: "Light streamers and budget-conscious households",
   },
   {
     id: "unlimited_extra",
-    name: "AT&T Unlimited Extra EL",
+    name: "AT&T Unlimited 2.0 Extra EL",
     shortName: "Extra EL",
-    pricePerLine: [75, 65, 55, 50, 40],
+    pricePerLine: [75.99, 65.99, 55.99, 50.99, 40.99],
     features: "Unlimited talk, text & data · 50 GB premium data · 15 GB hotspot",
     recommendedFor: "Most families and remote workers",
   },
   {
     id: "unlimited_premium",
-    name: "AT&T Unlimited Premium PL",
+    name: "AT&T Unlimited 2.0 Premium PL",
     shortName: "Premium PL",
-    pricePerLine: [85, 75, 65, 60, 50],
+    pricePerLine: [85.99, 75.99, 65.99, 60.99, 50.99],
     features: "Unlimited talk, text & data · Unlimited premium data · 50 GB hotspot · 4K UHD streaming",
     recommendedFor: "Power users and heavy streamers",
   },
@@ -58,6 +59,38 @@ function getAttPlanPrice(planId, lines) {
   const plan = ATT_PLANS.find(p => p.id === planId) || ATT_PLANS[1];
   const idx = Math.max(0, Math.min(lines - 1, plan.pricePerLine.length - 1));
   return plan.pricePerLine[idx];
+}
+
+function applyPlanDiscounts(basePricePerLine, lines, discounts) {
+  // AT&T does not stack most discounts — apply the single best eligible discount.
+  const { is55Plus, isMilitary, isTeacher, hasEmployerDiscount } = discounts || {};
+
+  const candidates = [];
+  if (is55Plus) candidates.push({ type: "55+", amount: 10 * lines, label: "55+ discount" }); // $10 off per line
+  if (isMilitary) candidates.push({ type: "military", factor: 0.25, label: "Military / veteran discount" });
+  if (isTeacher) candidates.push({ type: "teacher", factor: 0.25, label: "Teacher discount" });
+  if (hasEmployerDiscount) candidates.push({ type: "employer", factor: 0.15, label: "Employer discount" });
+
+  if (!candidates.length) return { pricePerLine: basePricePerLine, totalDiscount: 0, discountLabel: null };
+
+  // Choose the discount that saves the most per month.
+  let best = candidates[0];
+  let bestSavings = best.factor ? basePricePerLine * lines * best.factor : best.amount;
+  for (const c of candidates) {
+    const savings = c.factor ? basePricePerLine * lines * c.factor : c.amount;
+    if (savings > bestSavings) {
+      best = c;
+      bestSavings = savings;
+    }
+  }
+
+  const totalDiscount = best.factor ? basePricePerLine * lines * best.factor : best.amount;
+  const newTotal = Math.max(0, basePricePerLine * lines - totalDiscount);
+  return {
+    pricePerLine: newTotal / lines,
+    totalDiscount,
+    discountLabel: best.label,
+  };
 }
 
 function normalizeDeviceName(name) {
@@ -346,6 +379,10 @@ export default function Home() {
     dataUsage: "medium",
     tradeIns: [], // { id, device, condition, value, promoCredit, promoTier, color }
     tradeInSearch: "",
+    is55Plus: false,
+    isMilitary: false,
+    isTeacher: false,
+    hasEmployerDiscount: false,
   });
   const [tradeInSuggestions, setTradeInSuggestions] = useState([]);
   const [showTradeInSuggestions, setShowTradeInSuggestions] = useState(false);
@@ -394,6 +431,10 @@ export default function Home() {
   // Quote Calculator Functions
   const updateCalculator = (field, value) => {
     setCalculator(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleDiscount = (field) => {
+    setCalculator(prev => ({ ...prev, [field]: !prev[field] }));
   };
 
   function getConditionMultiplier(condition) {
@@ -460,8 +501,14 @@ export default function Home() {
 
     const currentBill = parseFloat(calculator.currentBill) || 0;
     const lines = Math.max(1, parseInt(calculator.lines) || 1);
-    const planPricePerLine = getAttPlanPrice(calculator.attPlan, lines);
-    const newMonthlyBill = planPricePerLine * lines;
+    const basePlanPricePerLine = getAttPlanPrice(calculator.attPlan, lines);
+    const discounted = applyPlanDiscounts(basePlanPricePerLine, lines, {
+      is55Plus: calculator.is55Plus,
+      isMilitary: calculator.isMilitary,
+      isTeacher: calculator.isTeacher,
+      hasEmployerDiscount: calculator.hasEmployerDiscount,
+    });
+    const newMonthlyBill = discounted.pricePerLine * lines;
 
     // Trade-in totals
     const tradeInDetails = calculator.tradeIns.map(t => ({
@@ -480,6 +527,7 @@ export default function Home() {
       currentBill,
       lines,
       attPlan: ATT_PLANS.find(p => p.id === calculator.attPlan) || ATT_PLANS[1],
+      basePlanPricePerLine,
       newMonthlyBill,
       monthlySavings,
       annualSavings,
@@ -489,7 +537,9 @@ export default function Home() {
       firstBillWithCredit,
       firstYearTotalValue,
       perLineSavings: monthlySavings / lines,
-      perLineNewBill: newMonthlyBill / lines,
+      perLineNewBill: discounted.pricePerLine,
+      discountLabel: discounted.discountLabel,
+      totalDiscount: discounted.totalDiscount,
     };
 
     // Try to get real-time quote from API
@@ -1502,6 +1552,49 @@ export default function Home() {
         .placeholder-row.highlight .placeholder-value {
           color: rgba(52,211,153,.55);
         }
+        .discount-group { margin-bottom: 20px; }
+        .discount-hint {
+          margin: -4px 0 10px;
+          color: var(--muted);
+          font-size: 12px;
+          line-height: 1.5;
+        }
+        .discount-options {
+          display: grid;
+          gap: 10px;
+        }
+        .discount-option {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: rgba(255,255,255,.04);
+          cursor: pointer;
+          transition: border-color .2s ease, background .2s ease;
+        }
+        .discount-option:hover {
+          border-color: var(--att-glow);
+          background: rgba(0,168,224,.06);
+        }
+        .discount-option input {
+          width: 18px;
+          height: 18px;
+          accent-color: var(--att);
+          flex-shrink: 0;
+        }
+        .discount-option span {
+          color: var(--soft);
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .discount-row {
+          background: rgba(0,168,224,.08);
+          border-radius: 6px;
+          padding: 12px 0;
+        }
+        .discount-row .result-label { color: #7dd3fc; }
         .trade-in-selector { position: relative; }
         .trade-in-selector input {
           width: 100%;
@@ -1941,15 +2034,15 @@ export default function Home() {
             <div className="section-head">
               <div>
                 <div className="mono">Savings Calculator</div>
-                <h2>Estimate Your Savings</h2>
+                <h2>Build Your Personalized AT&T Quote</h2>
               </div>
               <p>
-                Use our interactive calculator to see how much you could save by switching to AT&T with White Glove Wireless. Includes trade-in credit estimates.
+                Answer a few quick questions and we’ll show you exactly what you could save by switching to AT&T with White Glove Wireless — including your eligible trade-in credits and any discounts you qualify for.
               </p>
             </div>
             <div className="calculator-container">
               <div className="calculator-form">
-                <h3>Enter Your Information</h3>
+                <h3>A Few Quick Questions</h3>
                 <div className="form-group">
                   <label>Current Monthly Bill ($)</label>
                   <input
@@ -2003,6 +2096,45 @@ export default function Home() {
                     <option value="high">High (20-50GB)</option>
                     <option value="unlimited">Unlimited</option>
                   </select>
+                </div>
+
+                <div className="form-group discount-group">
+                  <label>Do any of these apply to you?</label>
+                  <p className="discount-hint">We’ll automatically apply the best eligible AT&T discount to your quote.</p>
+                  <div className="discount-options">
+                    <label className="discount-option">
+                      <input
+                        type="checkbox"
+                        checked={calculator.is55Plus}
+                        onChange={() => toggleDiscount('is55Plus')}
+                      />
+                      <span>I’m 55 or older</span>
+                    </label>
+                    <label className="discount-option">
+                      <input
+                        type="checkbox"
+                        checked={calculator.isMilitary}
+                        onChange={() => toggleDiscount('isMilitary')}
+                      />
+                      <span>Military or veteran</span>
+                    </label>
+                    <label className="discount-option">
+                      <input
+                        type="checkbox"
+                        checked={calculator.isTeacher}
+                        onChange={() => toggleDiscount('isTeacher')}
+                      />
+                      <span>Teacher or educator</span>
+                    </label>
+                    <label className="discount-option">
+                      <input
+                        type="checkbox"
+                        checked={calculator.hasEmployerDiscount}
+                        onChange={() => toggleDiscount('hasEmployerDiscount')}
+                      />
+                      <span>My employer may offer an AT&T discount</span>
+                    </label>
+                  </div>
                 </div>
 
                 <div className="form-group trade-in-group">
@@ -2094,6 +2226,16 @@ export default function Home() {
                       <span className="result-label">New AT&T Plan</span>
                       <span className="result-value">{quoteResult.attPlan?.shortName || "Extra EL"}</span>
                     </div>
+                    <div className="result-item">
+                      <span className="result-label">Plan Before Discounts</span>
+                      <span className="result-value">${(quoteResult.basePlanPricePerLine * quoteResult.lines).toFixed(2)} <small>(${quoteResult.basePlanPricePerLine?.toFixed(2)}/line)</small></span>
+                    </div>
+                    {quoteResult.discountLabel && (
+                      <div className="result-item discount-row">
+                        <span className="result-label">{quoteResult.discountLabel}</span>
+                        <span className="result-value savings">-${quoteResult.totalDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
                     <div className="result-item">
                       <span className="result-label">New Monthly Bill</span>
                       <span className="result-value">${quoteResult.newMonthlyBill.toFixed(2)} <small>(${quoteResult.perLineNewBill?.toFixed(2)}/line)</small></span>
