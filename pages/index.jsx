@@ -83,7 +83,7 @@ const ATT_FEATURES = [
   {
     icon: "📱",
     title: "Latest iPhone & Android Devices",
-    description: "Get the newest iPhone 15 series, Samsung Galaxy S24, and other premium devices with flexible payment options.",
+    description: "Get the newest iPhone 17 series, Samsung Galaxy S26, Google Pixel 10, and other premium devices with flexible payment options.",
   },
   {
     icon: "🔄",
@@ -115,17 +115,17 @@ const ATT_FEATURES = [
 const PHONE_CATEGORIES = [
   {
     category: "iPhone",
-    phones: ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15", "iPhone 14", "iPhone SE"],
+    phones: ["iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17", "iPhone 16", "iPhone SE"],
     accent: "#f59e0b",
   },
   {
     category: "Samsung Galaxy",
-    phones: ["Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S24", "Galaxy Z Fold5", "Galaxy Z Flip5"],
+    phones: ["Galaxy S26 Ultra", "Galaxy S26+", "Galaxy S26", "Galaxy Z Fold7", "Galaxy Z Flip7"],
     accent: "#3b82f6",
   },
   {
     category: "Other Premium",
-    phones: ["Google Pixel 8 Pro", "Google Pixel 8", "Motorola Edge+", "OnePlus 12"],
+    phones: ["Google Pixel 10 Pro", "Google Pixel 10", "Motorola Razr"],
     accent: "#10b981",
   },
 ];
@@ -135,24 +135,22 @@ const TRADE_IN_BRANDS = [
 ];
 
 const DEVICE_VALUES = {
-  "iPhone 15 Pro Max": 800,
-  "iPhone 15 Pro": 650,
-  "iPhone 15": 500,
-  "iPhone 14": 350,
-  "iPhone 13": 250,
-  "iPhone 12": 150,
-  "iPhone 11": 100,
+  "iPhone 17 Pro Max": 900,
+  "iPhone 17 Pro": 750,
+  "iPhone 17": 600,
+  "iPhone 16": 400,
+  "iPhone 15": 300,
+  "iPhone 14": 200,
   "iPhone SE": 75,
-  "Samsung Galaxy S24 Ultra": 700,
-  "Samsung Galaxy S24+": 550,
-  "Samsung Galaxy S24": 400,
-  "Samsung Galaxy S23": 300,
-  "Samsung Galaxy S22": 200,
-  "Samsung Galaxy S21": 150,
-  "Google Pixel 8 Pro": 450,
-  "Google Pixel 8": 350,
-  "Google Pixel 7": 200,
-  "Google Pixel 6": 150,
+  "Samsung Galaxy S26 Ultra": 800,
+  "Samsung Galaxy S26+": 650,
+  "Samsung Galaxy S26": 500,
+  "Samsung Galaxy S25": 350,
+  "Samsung Galaxy S24": 250,
+  "Google Pixel 10 Pro": 550,
+  "Google Pixel 10": 400,
+  "Google Pixel 9": 250,
+  "Motorola Razr": 300,
   "Other Premium": 100,
   "Mid-range Device": 50,
   "Budget Device": 25,
@@ -235,7 +233,7 @@ export default function Home() {
       if (lowerInput.includes("switch") || lowerInput.includes("at&t")) {
         aiResponse = "Great question! Switching to AT&T with White Glove Wireless is seamless. We handle the entire porting process, you keep your number, and you'll get access to America's most reliable 5G network. Plus, we have exclusive switching bonuses including bill credits and device deals. Would you like me to help you start the switching process?";
       } else if (lowerInput.includes("phone") || lowerInput.includes("iphone") || lowerInput.includes("samsung")) {
-        aiResponse = "We have the latest devices available! Including iPhone 15 series, Samsung Galaxy S24, Google Pixel 8, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
+        aiResponse = "We have the latest devices available! Including iPhone 17 series, Samsung Galaxy S26, Google Pixel 10, Motorola Razr, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
       } else if (lowerInput.includes("trade") || lowerInput.includes("credit")) {
         aiResponse = "Our trade-in program is fantastic! We accept phones from any carrier regardless of condition - even cracked screens qualify. You get instant credit toward a new device. Just upload your current bill in the form above, and I can help estimate your trade-in value. What device are you currently using?";
       } else if (lowerInput.includes("quote") || lowerInput.includes("price") || lowerInput.includes("cost")) {
