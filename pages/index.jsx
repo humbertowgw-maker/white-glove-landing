@@ -458,6 +458,21 @@ export default function Home() {
   const [quoteResult, setQuoteResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
+  // Contact capture after quote
+  const [contactForm, setContactForm] = useState({
+    lead_type: "consumer",
+    first_name: "",
+    last_name: "",
+    business_name: "",
+    phone: "",
+    email: "",
+    zip_code: "",
+    preferred_contact_method: "text",
+    best_time_to_contact: "",
+    permission_to_contact: false,
+  });
+  const [submissionStatus, setSubmissionStatus] = useState(null);
+
   const update = event => {
     const { name, value, type, checked } = event.target;
     setForm(current => ({ ...current, [name]: type === "checkbox" ? checked : value }));
@@ -700,6 +715,64 @@ export default function Home() {
       setQuoteResult({ ...quoteData, isRealQuote: false });
     } finally {
       setIsCalculating(false);
+    }
+  };
+
+  const submitLandingQuote = async event => {
+    event.preventDefault();
+    setSubmissionStatus({ kind: "loading", message: "Locking in your quote..." });
+    try {
+      const quote_summary = quoteResult ? {
+        currentProvider: calculator.currentProvider,
+        currentBill: quoteResult.currentBill,
+        lines: quoteResult.lines,
+        attPlan: quoteResult.attPlan,
+        basePlanPricePerLine: quoteResult.basePlanPricePerLine,
+        planTotalBeforeAutopay: quoteResult.planTotalBeforeAutopay,
+        newMonthlyBill: quoteResult.newMonthlyBill,
+        monthlySavings: quoteResult.monthlySavings,
+        annualSavings: quoteResult.annualSavings,
+        totalTradeInValue: quoteResult.totalTradeInValue,
+        totalPromoCredit: quoteResult.totalPromoCredit,
+        totalMonthlyPromoCredit: quoteResult.totalMonthlyPromoCredit,
+        tradeInDetails: quoteResult.tradeInDetails,
+        newPhoneDetails: quoteResult.newPhoneDetails,
+        totalPhoneMonthlyPayment: quoteResult.totalPhoneMonthlyPayment,
+        totalNetPhoneMonthlyPayment: quoteResult.totalNetPhoneMonthlyPayment,
+        firstBillWithCredit: quoteResult.firstBillWithCredit,
+        firstYearTotalValue: quoteResult.firstYearTotalValue,
+        perLineSavings: quoteResult.perLineSavings,
+        perLineNewBill: quoteResult.perLineNewBill,
+        discountLabel: quoteResult.discountLabel,
+        totalDiscount: quoteResult.totalDiscount,
+        autopayDiscount: quoteResult.autopayDiscount,
+        autopay: quoteResult.autopay,
+        promoRequiresQualifyingPlan: quoteResult.promoRequiresQualifyingPlan,
+        financingMonths: quoteResult.financingMonths,
+        isRealQuote: quoteResult.isRealQuote,
+      } : null;
+
+      const payload = {
+        ...contactForm,
+        quote_summary,
+        source_url: typeof window !== "undefined" ? window.location.href : "https://whitegwireless.com",
+      };
+
+      const res = await fetch(`${API}/api/landing/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Submission failed.");
+
+      setSubmissionStatus({
+        kind: "success",
+        message: data.message || "Your quote is submitted. A rep will reach out soon.",
+      });
+    } catch (error) {
+      console.error("[landing/submit]", error);
+      setSubmissionStatus({ kind: "error", message: error.message });
     }
   };
 
@@ -1798,6 +1871,123 @@ export default function Home() {
         .placeholder-row.highlight .placeholder-value {
           color: rgba(52,211,153,.55);
         }
+        .contact-capture {
+          margin-top: 32px;
+          padding: 24px;
+          background: rgba(0,168,224,.08);
+          border: 1px solid rgba(0,168,224,.25);
+          border-radius: 16px;
+        }
+        .contact-capture h4 {
+          margin: 0 0 8px;
+          font-size: 20px;
+          color: var(--att);
+        }
+        .capture-subtitle {
+          margin: 0 0 20px;
+          color: var(--muted);
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .capture-form {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .capture-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+        @media (max-width: 480px) {
+          .capture-row { grid-template-columns: 1fr; }
+        }
+        .capture-input,
+        .capture-form select {
+          width: 100%;
+          padding: 12px 14px;
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 10px;
+          color: var(--ink);
+          font-size: 15px;
+          font-family: inherit;
+          outline: none;
+          transition: border-color .15s, box-shadow .15s;
+        }
+        .capture-input::placeholder { color: var(--muted); }
+        .capture-input:focus,
+        .capture-form select:focus {
+          border-color: var(--att);
+          box-shadow: 0 0 0 3px rgba(0,168,224,.15);
+        }
+        .capture-radio {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 14px;
+          background: rgba(255,255,255,.05);
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 10px;
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--soft);
+        }
+        .capture-radio input { accent-color: var(--att); }
+        .capture-checkbox {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          font-size: 12px;
+          color: var(--muted);
+          line-height: 1.5;
+          cursor: pointer;
+        }
+        .capture-checkbox input {
+          margin-top: 2px;
+          accent-color: var(--att);
+          flex-shrink: 0;
+        }
+        .capture-submit {
+          padding: 14px 20px;
+          background: linear-gradient(135deg, var(--att), #0077b6);
+          border: none;
+          border-radius: 10px;
+          color: white;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform .1s, box-shadow .15s;
+        }
+        .capture-submit:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(0,168,224,.3);
+        }
+        .capture-submit:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+        .capture-status {
+          padding: 12px 14px;
+          border-radius: 10px;
+          font-size: 14px;
+          line-height: 1.5;
+        }
+        .capture-status.success {
+          background: rgba(52,211,153,.15);
+          color: #34d399;
+          border: 1px solid rgba(52,211,153,.3);
+        }
+        .capture-status.error {
+          background: rgba(244,63,94,.15);
+          color: #f43f5e;
+          border: 1px solid rgba(244,63,94,.3);
+        }
+        .capture-status.loading {
+          background: rgba(0,168,224,.15);
+          color: #7dd3fc;
+          border: 1px solid rgba(0,168,224,.3);
+        }
         .discount-group { margin-bottom: 20px; }
         .discount-hint {
           margin: -4px 0 10px;
@@ -2672,6 +2862,137 @@ export default function Home() {
                         ? "*This is a real-time quote based on current AT&T pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
                         : "*This is an estimate based on current AT&T Unlimited 2.0 plan pricing, autopay discounts, and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions."
                       }
+                    </div>
+
+                    {/* Contact capture */}
+                    <div className="contact-capture">
+                      <h4>Lock in your quote</h4>
+                      <p className="capture-subtitle">Send this estimate to Sofia and a local rep. We’ll follow up via your preferred method.</p>
+
+                      {submissionStatus?.kind === "success" ? (
+                        <div className={`capture-status ${submissionStatus.kind}`}>
+                          {submissionStatus.message}
+                        </div>
+                      ) : (
+                        <form onSubmit={submitLandingQuote} className="capture-form">
+                          {submissionStatus?.kind === "error" && (
+                            <div className="capture-status error">{submissionStatus.message}</div>
+                          )}
+                          {submissionStatus?.kind === "loading" && (
+                            <div className="capture-status loading">{submissionStatus.message}</div>
+                          )}
+
+                          <div className="capture-row">
+                            <label className="capture-radio">
+                              <input
+                                type="radio"
+                                name="lead_type"
+                                value="consumer"
+                                checked={contactForm.lead_type === "consumer"}
+                                onChange={(e) => setContactForm(prev => ({ ...prev, lead_type: e.target.value }))}
+                              />
+                              <span>Personal / family</span>
+                            </label>
+                            <label className="capture-radio">
+                              <input
+                                type="radio"
+                                name="lead_type"
+                                value="business"
+                                checked={contactForm.lead_type === "business"}
+                                onChange={(e) => setContactForm(prev => ({ ...prev, lead_type: e.target.value }))}
+                              />
+                              <span>Business</span>
+                            </label>
+                          </div>
+
+                          {contactForm.lead_type === "business" && (
+                            <input
+                              type="text"
+                              placeholder="Business name *"
+                              value={contactForm.business_name}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, business_name: e.target.value }))}
+                              required
+                              className="capture-input"
+                            />
+                          )}
+
+                          <div className="capture-row">
+                            <input
+                              type="text"
+                              placeholder="First name *"
+                              value={contactForm.first_name}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, first_name: e.target.value }))}
+                              required
+                              className="capture-input"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Last name"
+                              value={contactForm.last_name}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, last_name: e.target.value }))}
+                              className="capture-input"
+                            />
+                          </div>
+
+                          <input
+                            type="tel"
+                            placeholder="Phone number *"
+                            value={contactForm.phone}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                            required
+                            className="capture-input"
+                          />
+
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={contactForm.email}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                            className="capture-input"
+                          />
+
+                          <div className="capture-row">
+                            <input
+                              type="text"
+                              placeholder="ZIP code"
+                              value={contactForm.zip_code}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, zip_code: e.target.value }))}
+                              className="capture-input"
+                            />
+                            <select
+                              value={contactForm.preferred_contact_method}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, preferred_contact_method: e.target.value }))}
+                              className="capture-input"
+                            >
+                              <option value="text">Text me</option>
+                              <option value="call">Call me</option>
+                              <option value="email">Email me</option>
+                            </select>
+                          </div>
+
+                          <input
+                            type="text"
+                            placeholder="Best time to reach you (e.g., weekday evenings)"
+                            value={contactForm.best_time_to_contact}
+                            onChange={(e) => setContactForm(prev => ({ ...prev, best_time_to_contact: e.target.value }))}
+                            className="capture-input"
+                          />
+
+                          <label className="capture-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={contactForm.permission_to_contact}
+                              onChange={(e) => setContactForm(prev => ({ ...prev, permission_to_contact: e.target.checked }))}
+                              required
+                            />
+                            <span>I agree to be contacted by White Glove Wireless about this quote. Message and data rates may apply.</span>
+                          </label>
+
+                          <button type="submit" className="capture-submit" disabled={submissionStatus?.kind === "loading"}>
+                            {submissionStatus?.kind === "loading" ? "Sending..." : "Send me my quote"}
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </>
                 ) : (
