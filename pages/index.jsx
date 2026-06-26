@@ -191,72 +191,6 @@ function findPromoForDevice(deviceName, promos) {
   return promos.find(p => p.tier === "Trade-in value only") || promos[promos.length - 1] || null;
 }
 
-const PRODUCTS = [
-  {
-    id: "wgw",
-    name: "White Glove Wireless",
-    label: "Sales OS",
-    description: "AI sales, bill review, field reps, outreach, appointments, and owner controls for wireless teams.",
-    logo: "/logos/white-glove-wireless-app-icon-selected.png",
-    href: "/wireless",
-    accent: "#00A8E0",
-  },
-  {
-    id: "spendsense",
-    name: "SpendSense",
-    label: "Finance OS",
-    description: "Connected spending intelligence, financial guidance, and owner-level money visibility.",
-    logo: "/logos/spendsense-brand-lockup-selected.png",
-    href: "/spendsense",
-    accent: "#2dd4bf",
-  },
-  {
-    id: "sales-platform",
-    name: "Sales Platform",
-    label: "Configurable CRM",
-    description: "A white-label SaaS foundation for industry-specific pipelines, roles, and workflows.",
-    logo: "/logos/sales-platform-app-icon-selected.png",
-    href: "/sales-platform",
-    accent: "#a78bfa",
-  },
-  {
-    id: "repairscout",
-    name: "RepairScout",
-    label: "Repair intelligence",
-    description: "AI diagnostics and quote context for drivers who need a clearer repair path.",
-    logo: "/logos/repairscout-brand-lockup-selected.png",
-    href: "/repairscout",
-    accent: "#c8ff18",
-  },
-  {
-    id: "trucktracker",
-    name: "TruckTracker",
-    label: "Local discovery",
-    description: "Live food truck maps, follow signals, and local commerce discovery tools.",
-    logo: "/logos/trucktracker-app-icon-selected.png",
-    href: "/trucktracker",
-    accent: "#ffb21c",
-  },
-  {
-    id: "poopsense",
-    name: "PoopSense",
-    label: "Pet health AI",
-    description: "Browser-based clinical image analysis for pet stool health and urgency reports.",
-    logo: "/logos/poopsense-app-icon.svg",
-    href: "https://web-production-fb2d1.up.railway.app/",
-    accent: "#fb7185",
-  },
-  {
-    id: "the-pass",
-    name: "The Pass",
-    label: "AI kitchen",
-    description: "A multi-model chef brigade that turns ingredients into usable recipes.",
-    logo: "/logos/the-pass-app-icon.svg",
-    href: "/the-pass",
-    accent: "#e8541e",
-  },
-];
-
 const SYSTEM_STEPS = [
   ["01", "Upload the bill", "Send us a photo, PDF, or text of your current wireless or fiber bill."],
   ["02", "Compare your savings", "We analyze your plan, usage, and current provider to find what you could save."],
@@ -361,22 +295,6 @@ const TRADE_IN_SHOWCASE = [
   "Samsung Galaxy S25", "Samsung Galaxy S24", "Samsung Galaxy S23", "Samsung Galaxy S22", "Samsung Galaxy S21",
   "Galaxy Z Fold6", "Galaxy Z Flip6", "Pixel 9", "Pixel 8", "Pixel 7", "Motorola Razr (2024)",
 ];
-
-function ProductLink({ product }) {
-  const external = product.href.startsWith("http");
-  const content = (
-    <article className="product" style={{ "--accent": product.accent }}>
-      <Image src={product.logo} alt={`${product.name} logo`} width={56} height={56} className="product-logo" />
-      <div>
-        <span>{product.label}</span>
-        <h3>{product.name}</h3>
-        <p>{product.description}</p>
-      </div>
-    </article>
-  );
-  if (external) return <a href={product.href} target="_blank" rel="noreferrer">{content}</a>;
-  return <Link href={product.href}>{content}</Link>;
-}
 
 export default function Home() {
   const [tradeInPromos, setTradeInPromos] = useState(DEFAULT_TRADE_IN_TIERS);
@@ -1072,43 +990,6 @@ export default function Home() {
         .bill-compare-card h3 { margin: 0; font-size: 18px; }
         .bill-compare-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
         .bill-compare-card .primary-link { margin-top: auto; }
-        .products {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-        .product {
-          min-height: 180px;
-          display: flex;
-          gap: 14px;
-          align-items: flex-start;
-          border: 1px solid var(--line);
-          border-radius: 8px;
-          padding: 16px;
-          background: rgba(255,255,255,.035);
-          transition: border-color .2s ease, transform .2s ease, background .2s ease;
-        }
-        a:hover .product, a:focus-visible .product {
-          border-color: var(--accent);
-          transform: translateY(-2px);
-          background: rgba(255,255,255,.06);
-        }
-        .product-logo {
-          width: 56px;
-          height: 56px;
-          object-fit: contain;
-          border-radius: 8px;
-          flex: 0 0 auto;
-        }
-        .product span {
-          color: var(--accent);
-          font-family: "DM Mono", monospace;
-          font-size: 9px;
-          letter-spacing: .08em;
-          text-transform: uppercase;
-        }
-        .product h3 { margin: 8px 0 8px; font-size: 22px; line-height: 1.05; }
-        .product p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.58; }
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
@@ -2192,7 +2073,7 @@ export default function Home() {
           }
           .quote-step-options { grid-template-columns: 1fr; }
           .hero { grid-template-columns: 1fr; min-height: auto; }
-          .proof, .system-grid, .products, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .proof, .system-grid, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .att-features, .phone-categories, .trade-in-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .legend-items { grid-template-columns: 1fr; }
         }
@@ -2205,7 +2086,7 @@ export default function Home() {
           .hero { padding-top: 28px; }
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
           .hero-copy p { font-size: 14px; }
-          .proof, .form-grid, .system-grid, .products, .bill-compare-cta { grid-template-columns: 1fr; }
+          .proof, .form-grid, .system-grid, .bill-compare-cta { grid-template-columns: 1fr; }
           .att-features, .phone-categories, .trade-in-grid { grid-template-columns: 1fr; }
           .legend-items { grid-template-columns: 1fr; }
           .section-head { display: block; }
@@ -2231,7 +2112,7 @@ export default function Home() {
             <Link href="#phones">New Phones</Link>
             <Link href="#trade-in">Trade-In Deals</Link>
             <Link href="#calculator">Calculator</Link>
-            <Link href="#products">Products</Link>
+            <Link href="/products">Products</Link>
             <Link href="/wireless">WGW platform</Link>
             <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
@@ -3052,22 +2933,6 @@ export default function Home() {
                 <p>{copy}</p>
               </div>
             ))}
-          </div>
-        </section>
-
-        <section className="section" id="products" aria-label="Solution products">
-          <div className="section-head">
-            <div>
-              <div className="mono">Built by White Glove</div>
-              <h2>Solution-based SaaS products, led by WGW.</h2>
-            </div>
-            <p>
-              The other apps stay available from the main page, but the front door now points at
-              the company, the operating system, and the practical workflow behind the products.
-            </p>
-          </div>
-          <div className="products">
-            {PRODUCTS.map(product => <ProductLink product={product} key={product.id} />)}
           </div>
         </section>
 
