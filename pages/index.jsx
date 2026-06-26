@@ -160,6 +160,23 @@ const DEVICE_VALUES = {
   "Budget Device": 25,
 };
 
+const TRADE_IN_TIERS = [
+  { minValue: 800, promoCredit: 800, label: "Premium", description: "$800+ trade-in value", color: "#34d399" },
+  { minValue: 400, promoCredit: 400, label: "Mid-tier", description: "$400–$799 trade-in value", color: "#fbbf24" },
+  { minValue: 200, promoCredit: 200, label: "Standard", description: "$200–$399 trade-in value", color: "#60a5fa" },
+  { minValue: 0, promoCredit: 0, label: "Base", description: "Under $200 trade-in value", color: "#94a3b8" },
+];
+
+const TRADE_IN_SHOWCASE = [
+  "iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17", "iPhone 16", "iPhone 15",
+  "Samsung Galaxy S26 Ultra", "Samsung Galaxy S26+", "Samsung Galaxy S26", "Samsung Galaxy S25", "Samsung Galaxy S24",
+  "Galaxy Z Fold7", "Galaxy Z Flip7", "Pixel 10 Pro", "Pixel 10", "Motorola Razr",
+];
+
+function getTradeInTier(value) {
+  return TRADE_IN_TIERS.find(t => value >= t.minValue) || TRADE_IN_TIERS[TRADE_IN_TIERS.length - 1];
+}
+
 function ProductLink({ product }) {
   const external = product.href.startsWith("http");
   const content = (
@@ -809,6 +826,110 @@ export default function Home() {
           background: rgba(245,158,11,.1);
           color: #fde68a;
         }
+        .trade-in-legend {
+          margin: 0 auto 32px;
+          max-width: 780px;
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          background: rgba(255,255,255,.04);
+          padding: 20px 24px;
+        }
+        .legend-title {
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .12em;
+          text-transform: uppercase;
+          color: var(--soft);
+          margin-bottom: 14px;
+          text-align: center;
+        }
+        .legend-items {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+        }
+        .legend-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 6px;
+          text-align: center;
+          padding: 14px;
+          border-radius: 8px;
+          background: rgba(255,255,255,.03);
+        }
+        .legend-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+        .legend-label {
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--ink);
+        }
+        .legend-range {
+          font-size: 11px;
+          color: var(--muted);
+        }
+        .legend-credit {
+          font-size: 12px;
+          font-weight: 700;
+          color: #34d399;
+        }
+        .trade-in-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 14px;
+          margin-bottom: 32px;
+        }
+        .trade-in-card {
+          border: 1px solid var(--line);
+          border-left: 3px solid var(--tier-color);
+          border-radius: 10px;
+          background: rgba(255,255,255,.04);
+          padding: 18px;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          transition: transform .2s ease, border-color .2s ease, background .2s ease;
+        }
+        .trade-in-card:hover {
+          transform: translateY(-2px);
+          border-color: var(--tier-color);
+          background: rgba(255,255,255,.07);
+        }
+        .trade-in-device {
+          font-size: 15px;
+          font-weight: 700;
+          color: var(--ink);
+        }
+        .trade-in-value {
+          font-size: 18px;
+          font-weight: 800;
+          color: #fbbf24;
+        }
+        .trade-in-tier {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: .06em;
+          color: var(--soft);
+        }
+        .tier-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        .trade-in-qualifies {
+          font-size: 12px;
+          color: var(--muted);
+          margin-top: 4px;
+        }
+        .trade-in-qualifies b { color: var(--ink); }
         .trade-in-cta {
           margin-top: 40px;
           text-align: center;
@@ -1214,7 +1335,8 @@ export default function Home() {
           }
           .hero { grid-template-columns: 1fr; min-height: auto; }
           .proof, .system-grid, .products, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .att-features, .phone-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .att-features, .phone-categories, .trade-in-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .legend-items { grid-template-columns: 1fr; }
         }
         @media (max-width: 640px) {
           .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
@@ -1226,7 +1348,8 @@ export default function Home() {
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
           .hero-copy p { font-size: 14px; }
           .proof, .form-grid, .system-grid, .products, .bill-compare-cta { grid-template-columns: 1fr; }
-          .att-features, .phone-categories { grid-template-columns: 1fr; }
+          .att-features, .phone-categories, .trade-in-grid { grid-template-columns: 1fr; }
+          .legend-items { grid-template-columns: 1fr; }
           .section-head { display: block; }
           .section-head p { margin-top: 14px; }
           .footer { flex-direction: column; line-height: 1.6; }
@@ -1420,9 +1543,44 @@ export default function Home() {
                 <h2>Get Credit for Your Old Device</h2>
               </div>
               <p>
-                Trade in your current phone and get instant credit toward a new device. We accept phones from any carrier, regardless of condition.
+                Trade in your current phone and get instant credit toward a new device. The table below shows estimated trade-in values and the AT&T promotional credit tier each device qualifies for.
               </p>
             </div>
+
+            <div className="trade-in-legend">
+              <div className="legend-title">Promotional credit tiers</div>
+              <div className="legend-items">
+                {TRADE_IN_TIERS.filter(t => t.promoCredit > 0).map((tier, index) => (
+                  <div className="legend-item" key={index}>
+                    <span className="legend-dot" style={{ background: tier.color }} />
+                    <span className="legend-label">{tier.label}</span>
+                    <span className="legend-range">{tier.description}</span>
+                    <span className="legend-credit">Up to ${tier.promoCredit} credit</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="trade-in-grid">
+              {TRADE_IN_SHOWCASE.map((device, index) => {
+                const value = DEVICE_VALUES[device] || 0;
+                const tier = getTradeInTier(value);
+                return (
+                  <div className="trade-in-card" key={index} style={{ "--tier-color": tier.color }}>
+                    <div className="trade-in-device">{device}</div>
+                    <div className="trade-in-value">${value} est. value</div>
+                    <div className="trade-in-tier">
+                      <span className="tier-dot" style={{ background: tier.color }} />
+                      {tier.label} tier
+                    </div>
+                    <div className="trade-in-qualifies">
+                      Qualifies for up to <b>${tier.promoCredit}</b> in credits
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
             <div className="trade-in-brands">
               {TRADE_IN_BRANDS.map((brand, index) => (
                 <span className="trade-in-brand" key={index}>{brand}</span>
