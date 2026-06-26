@@ -73,10 +73,10 @@ const PRODUCTS = [
 ];
 
 const SYSTEM_STEPS = [
-  ["01", "Upload the bill", "A customer sends a bill photo, PDF, or text file from the homepage."],
-  ["02", "Route the record", "WGW separates household reviews from business telecom opportunities."],
-  ["03", "Assign the work", "The right AI teammates receive follow-up, research, readiness, and risk tasks."],
-  ["04", "Prepare the quote", "The rep sees a bill-review record with context instead of a loose website form."],
+  ["01", "Upload the bill", "Send us a photo, PDF, or text of your current wireless or fiber bill."],
+  ["02", "Compare your savings", "We analyze your plan, usage, and current provider to find what AT&T can save you."],
+  ["03", "Order from home", "Pick your devices or fiber plan and check out online — no store visit required."],
+  ["04", "Get it set up", "Next-day delivery plus personalized setup so everything works before we leave."],
 ];
 
 const ATT_FEATURES = [
@@ -383,10 +383,10 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>White Glove Wireless - Solution-Based SaaS Products</title>
+        <title>White Glove Wireless - Wireless & Fiber Without the Store</title>
         <meta
           name="description"
-          content="White Glove Wireless builds solution-based SaaS products led by an AI sales operating system for wireless teams, bill review, pipelines, and owner workflows."
+          content="Switch to AT&T wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -602,6 +602,25 @@ export default function Home() {
         .system-step span { color: var(--amber); font-family: "DM Mono", monospace; font-size: 10px; }
         .system-step h3 { margin: 34px 0 9px; font-size: 20px; }
         .system-step p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
+        .bill-compare-cta {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 16px;
+        }
+        .bill-compare-card {
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          padding: 24px;
+          background: rgba(255,255,255,.04);
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .bill-compare-card:hover { border-color: var(--amber); background: rgba(255,255,255,.06); }
+        .bill-compare-icon { font-size: 28px; line-height: 1; }
+        .bill-compare-card h3 { margin: 0; font-size: 18px; }
+        .bill-compare-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+        .bill-compare-card .primary-link { margin-top: auto; }
         .products {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1140,7 +1159,7 @@ export default function Home() {
             grid-template-columns: 1fr;
           }
           .hero { grid-template-columns: 1fr; min-height: auto; }
-          .proof, .system-grid, .products { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+          .proof, .system-grid, .products, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
           .att-features, .phone-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 640px) {
@@ -1151,7 +1170,7 @@ export default function Home() {
           .hero { padding-top: 28px; }
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
           .hero-copy p { font-size: 14px; }
-          .proof, .form-grid, .system-grid, .products { grid-template-columns: 1fr; }
+          .proof, .form-grid, .system-grid, .products, .bill-compare-cta { grid-template-columns: 1fr; }
           .att-features, .phone-categories { grid-template-columns: 1fr; }
           .section-head { display: block; }
           .section-head p { margin-top: 14px; }
@@ -1165,7 +1184,7 @@ export default function Home() {
             <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless logo" width={42} height={42} priority />
             <span>
               <strong>White Glove Wireless</strong>
-              <span>Solution-based SaaS products</span>
+              <span>Wireless & fiber without the store</span>
             </span>
           </Link>
           <div className="nav-actions">
@@ -1181,19 +1200,19 @@ export default function Home() {
 
         <section className="hero">
           <div className="hero-copy">
-            <div className="mono">AI software company for real business workflows</div>
+            <div className="mono">Wireless & fiber, delivered to your door</div>
             <h1>
-              We build SaaS products around the problem, <span>not the template.</span>
+              Switch to AT&T without stepping into a store. <span>We come to you.</span>
             </h1>
             <p>
-              White Glove Wireless is the flagship operating system: AI sales agents, bill review,
-              field execution, owner controls, and follow-up that turns customer interest into
-              worked opportunities.
+              White Glove Wireless makes switching to AT&T wireless and fiber simple. Skip the line,
+              skip the upsell, skip the setup headache. Compare your current bill, order online, get
+              next-day delivery, and get a personalized setup that fits how you actually use your service.
             </p>
-            <div className="proof" aria-label="White Glove Wireless platform proof points">
-              <div><b>2</b><span>Bill paths: consumer savings reviews and business telecom opportunities.</span></div>
-              <div><b>5</b><span>AI teammates for outreach, market research, operations, metrics, and direction.</span></div>
-              <div><b>7</b><span>Products in the portfolio, all shaped around practical workflows.</span></div>
+            <div className="proof" aria-label="White Glove Wireless convenience proof points">
+              <div><b>No store</b><span>Compare, order, and switch entirely online or by text.</span></div>
+              <div><b>Next-day</b><span>Devices and equipment delivered as fast as tomorrow.</span></div>
+              <div><b>No upsell</b><span>Personalized setup based on your bill, not a sales quota.</span></div>
             </div>
           </div>
 
@@ -1201,8 +1220,8 @@ export default function Home() {
             <div className="panel-head">
               <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="" width={52} height={52} />
               <div>
-                <h2>Upload a wireless bill</h2>
-                <p>Send the review to WGW and let the system organize the next step.</p>
+                <h2>Upload your bill. See your savings.</h2>
+                <p>We'll compare your current wireless or fiber plan and show what AT&T can save you.</p>
               </div>
             </div>
             <form className="bill-form" onSubmit={submitBill}>
@@ -1243,6 +1262,41 @@ export default function Home() {
               </div>
             </form>
           </aside>
+        </section>
+
+        <section className="section" aria-label="Why White Glove Wireless">
+          <div className="section-head">
+            <div>
+              <div className="mono">Why White Glove</div>
+              <h2>The easier way to switch to AT&T.</h2>
+            </div>
+            <p>
+              Most people dread switching carriers because it means a store visit, a pushy pitch, and a
+              half-day of setup. We built White Glove Wireless to remove all of that.
+            </p>
+          </div>
+          <div className="system-grid">
+            <div className="system-step">
+              <span>🏠</span>
+              <h3>Skip the store entirely</h3>
+              <p>Compare plans, pick your devices, and place your order from your couch. No lines, no parking, no waiting.</p>
+            </div>
+            <div className="system-step">
+              <span>🚚</span>
+              <h3>Next-day delivery</h3>
+              <p>Your new phones, tablets, or fiber equipment arrive as fast as tomorrow — ready to activate.</p>
+            </div>
+            <div className="system-step">
+              <span>🛡️</span>
+              <h3>No upsell, no pressure</h3>
+              <p>We review your actual bill and usage, then recommend only what you need. No hidden extras, no quotas.</p>
+            </div>
+            <div className="system-step">
+              <span>🔧</span>
+              <h3>Personalized setup</h3>
+              <p>We configure your service, transfer your data, and walk you through everything so it works the way you want.</p>
+            </div>
+          </div>
         </section>
 
         <section className="att-section" id="att-features" aria-label="Switch to AT&T features">
@@ -1460,18 +1514,39 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section" aria-label="Bill upload workflow">
+        <section className="section" aria-label="Compare your bill">
           <div className="section-head">
             <div>
-              <div className="mono">Pipeline automation</div>
-              <h2>Front-page intake that becomes rep-ready work.</h2>
+              <div className="mono">Compare your bill</div>
+              <h2>Upload your bill to see your savings.</h2>
             </div>
             <p>
-              The upload is only the beginning. The platform turns the submission into a record and
-              keeps the next step visible for the team.
+              The fastest way to find out what AT&T wireless and fiber can save you is to let us
+              review your current bill. No store visit, no pressure — just a clear side-by-side
+              comparison and a recommendation that fits your actual usage.
             </p>
           </div>
-          <div className="system-grid">
+          <div className="bill-compare-cta">
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">📄</div>
+              <h3>See what you could save</h3>
+              <p>Upload a photo or PDF of your current wireless or fiber bill. Our team compares your plan, lines, and usage against current AT&T pricing.</p>
+              <a className="primary-link" href="#bill-review" onClick={e => { e.preventDefault(); document.getElementById('bill-review').scrollIntoView({ behavior: 'smooth' }); }}>
+                Upload your bill →
+              </a>
+            </div>
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">📊</div>
+              <h3>Get a clear recommendation</h3>
+              <p>We show you the difference line by line — monthly cost, features, and any trade-in or switching bonuses you qualify for.</p>
+            </div>
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">🚚</div>
+              <h3>Switch without the store</h3>
+              <p>Approve your new plan and devices online, schedule next-day delivery, and get personalized setup — all from home.</p>
+            </div>
+          </div>
+          <div className="system-grid" style={{ marginTop: 48 }}>
             {SYSTEM_STEPS.map(([number, title, copy]) => (
               <div className="system-step" key={number}>
                 <span>{number}</span>
