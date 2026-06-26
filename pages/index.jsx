@@ -27,6 +27,39 @@ const DEFAULT_TRADE_IN_TIERS = [
   { tier: "Trade-in value only", promo_credit: 0, eligible_devices: ["Older or damaged devices not listed above"], example_models: ["Older iPhone, Android, or feature phones"], color: "#64748b" },
 ];
 
+const ATT_PLANS = [
+  {
+    id: "unlimited_starter",
+    name: "AT&T Unlimited Starter SL",
+    shortName: "Starter SL",
+    pricePerLine: [65, 60, 50, 45, 35],
+    features: "Unlimited talk, text & data · SD streaming · 3 GB hotspot",
+    recommendedFor: "Light streamers and budget-conscious households",
+  },
+  {
+    id: "unlimited_extra",
+    name: "AT&T Unlimited Extra EL",
+    shortName: "Extra EL",
+    pricePerLine: [75, 65, 55, 50, 40],
+    features: "Unlimited talk, text & data · 50 GB premium data · 15 GB hotspot",
+    recommendedFor: "Most families and remote workers",
+  },
+  {
+    id: "unlimited_premium",
+    name: "AT&T Unlimited Premium PL",
+    shortName: "Premium PL",
+    pricePerLine: [85, 75, 65, 60, 50],
+    features: "Unlimited talk, text & data · Unlimited premium data · 50 GB hotspot · 4K UHD streaming",
+    recommendedFor: "Power users and heavy streamers",
+  },
+];
+
+function getAttPlanPrice(planId, lines) {
+  const plan = ATT_PLANS.find(p => p.id === planId) || ATT_PLANS[1];
+  const idx = Math.max(0, Math.min(lines - 1, plan.pricePerLine.length - 1));
+  return plan.pricePerLine[idx];
+}
+
 function normalizeDeviceName(name) {
   // Keep letters, numbers, spaces, and '+' (e.g. Razr+ vs Razr). Replace everything else with space.
   return String(name || "").toLowerCase().replace(/[^a-z0-9\s+]/g, " ").replace(/\s+/g, " ").trim();
@@ -308,11 +341,14 @@ export default function Home() {
     currentBill: "",
     lines: "",
     currentProvider: "",
-    tradeInDevice: "",
-    tradeInCondition: "good",
+    attPlan: "unlimited_extra",
     wantsNewPhone: false,
     dataUsage: "medium",
+    tradeIns: [], // { id, device, condition, value, promoCredit, promoTier, color }
+    tradeInSearch: "",
   });
+  const [tradeInSuggestions, setTradeInSuggestions] = useState([]);
+  const [showTradeInSuggestions, setShowTradeInSuggestions] = useState(false);
   const [quoteResult, setQuoteResult] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
 
@@ -360,67 +396,113 @@ export default function Home() {
     setCalculator(prev => ({ ...prev, [field]: value }));
   };
 
+  function getConditionMultiplier(condition) {
+    if (condition === "excellent") return 1.2;
+    if (condition === "good") return 1;
+    if (condition === "fair") return 0.7;
+    if (condition === "poor") return 0.4;
+    return 1;
+  }
+
+  function adjustTradeInValue(value, condition) {
+    return (value || 0) * getConditionMultiplier(condition);
+  }
+
+  function getTradeInSuggestions(query) {
+    if (!query || query.length < 2) return [];
+    const q = query.toLowerCase();
+    return Object.keys(DEVICE_VALUES)
+      .filter(d => d.toLowerCase().includes(q))
+      .slice(0, 8);
+  }
+
+  function addTradeIn(device) {
+    const value = DEVICE_VALUES[device] || 0;
+    const promo = findPromoForDevice(device, tradeInPromos) || {};
+    const tradeIn = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
+      device,
+      condition: "good",
+      value,
+      promoCredit: promo.promo_credit || 0,
+      promoTier: promo.tier || "Trade-in value only",
+      color: promo.color || "#94a3b8",
+    };
+    setCalculator(prev => ({
+      ...prev,
+      tradeIns: [...prev.tradeIns, tradeIn],
+      tradeInSearch: "",
+    }));
+    setShowTradeInSuggestions(false);
+    setTradeInSuggestions([]);
+  }
+
+  function updateTradeIn(id, updates) {
+    setCalculator(prev => ({
+      ...prev,
+      tradeIns: prev.tradeIns.map(t => {
+        if (t.id !== id) return t;
+        const next = { ...t, ...updates };
+        if (updates.condition) {
+          next.value = adjustTradeInValue(DEVICE_VALUES[t.device] || 0, next.condition);
+        }
+        return next;
+      }),
+    }));
+  }
+
+  function removeTradeIn(id) {
+    setCalculator(prev => ({ ...prev, tradeIns: prev.tradeIns.filter(t => t.id !== id) }));
+  }
+
   const calculateQuote = async () => {
     setIsCalculating(true);
-    
+
     const currentBill = parseFloat(calculator.currentBill) || 0;
-    const lines = parseInt(calculator.lines) || 1;
-    const tradeInValue = DEVICE_VALUES[calculator.tradeInDevice] || 0;
-    const promo = calculator.tradeInDevice ? findPromoForDevice(calculator.tradeInDevice, tradeInPromos) : null;
-    const promoCredit = promo ? promo.promo_credit : 0;
+    const lines = Math.max(1, parseInt(calculator.lines) || 1);
+    const planPricePerLine = getAttPlanPrice(calculator.attPlan, lines);
+    const newMonthlyBill = planPricePerLine * lines;
 
-    // Apply condition multiplier to trade-in value only (not promo credit)
-    let conditionMultiplier = 1;
-    if (calculator.tradeInCondition === "excellent") conditionMultiplier = 1.2;
-    else if (calculator.tradeInCondition === "good") conditionMultiplier = 1;
-    else if (calculator.tradeInCondition === "fair") conditionMultiplier = 0.7;
-    else if (calculator.tradeInCondition === "poor") conditionMultiplier = 0.4;
+    // Trade-in totals
+    const tradeInDetails = calculator.tradeIns.map(t => ({
+      ...t,
+      adjustedValue: adjustTradeInValue(t.value, t.condition),
+    }));
+    const totalTradeInValue = tradeInDetails.reduce((sum, t) => sum + t.adjustedValue, 0);
+    const totalPromoCredit = tradeInDetails.reduce((sum, t) => sum + (t.promoCredit || 0), 0);
 
-    const adjustedTradeIn = tradeInValue * conditionMultiplier;
-
-    // Estimate AT&T savings (typically 15-25% savings for switching)
-    const estimatedSavings = currentBill * 0.20;
-    const newMonthlyBill = currentBill - estimatedSavings;
-
-    // First bill with trade-in credit applied
-    const firstBillWithCredit = Math.max(0, newMonthlyBill - adjustedTradeIn);
-
-    // Annual savings
-    const annualSavings = estimatedSavings * 12;
-
-    // Data usage impact on plan pricing
-    let dataAdjustment = 0;
-    if (calculator.dataUsage === "low") dataAdjustment = -10;
-    else if (calculator.dataUsage === "high") dataAdjustment = 15;
-    else if (calculator.dataUsage === "unlimited") dataAdjustment = 25;
-
-    const adjustedMonthlyBill = newMonthlyBill + (dataAdjustment * lines);
+    const monthlySavings = Math.max(0, currentBill - newMonthlyBill);
+    const annualSavings = monthlySavings * 12;
+    const firstBillWithCredit = Math.max(0, newMonthlyBill - totalTradeInValue);
+    const firstYearTotalValue = annualSavings + totalTradeInValue + totalPromoCredit;
 
     const quoteData = {
       currentBill,
-      newMonthlyBill: adjustedMonthlyBill,
-      monthlySavings: currentBill - adjustedMonthlyBill,
-      tradeInValue: adjustedTradeIn,
-      promoCredit,
-      firstBillWithCredit,
-      annualSavings: (currentBill - adjustedMonthlyBill) * 12,
       lines,
-      perLineSavings: (currentBill - adjustedMonthlyBill) / lines,
+      attPlan: ATT_PLANS.find(p => p.id === calculator.attPlan) || ATT_PLANS[1],
+      newMonthlyBill,
+      monthlySavings,
+      annualSavings,
+      totalTradeInValue,
+      totalPromoCredit,
+      tradeInDetails,
+      firstBillWithCredit,
+      firstYearTotalValue,
+      perLineSavings: monthlySavings / lines,
+      perLineNewBill: newMonthlyBill / lines,
     };
 
     // Try to get real-time quote from API
     try {
       const response = await fetch(`${API}/api/quote-generation`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           current_provider: calculator.currentProvider,
           monthly_bill: calculator.currentBill,
           lines: calculator.lines,
-          trade_in_device: calculator.tradeInDevice,
-          trade_in_condition: calculator.tradeInCondition,
+          att_plan: calculator.attPlan,
+          trade_ins: calculator.tradeIns.map(t => ({ device: t.device, condition: t.condition })),
           data_usage: calculator.dataUsage,
           customer_type: 'consumer',
         }),
@@ -428,26 +510,13 @@ export default function Home() {
 
       if (response.ok) {
         const apiQuote = await response.json();
-        // Use API data if available, otherwise fall back to calculated estimate
-        setQuoteResult({
-          ...quoteData,
-          ...apiQuote,
-          isRealQuote: true,
-        });
+        setQuoteResult({ ...quoteData, ...apiQuote, isRealQuote: true });
       } else {
-        // Fall back to calculated estimate if API fails
-        setQuoteResult({
-          ...quoteData,
-          isRealQuote: false,
-        });
+        setQuoteResult({ ...quoteData, isRealQuote: false });
       }
     } catch (error) {
-      // Fall back to calculated estimate if API call fails
       console.log('API quote generation failed, using estimate:', error);
-      setQuoteResult({
-        ...quoteData,
-        isRealQuote: false,
-      });
+      setQuoteResult({ ...quoteData, isRealQuote: false });
     } finally {
       setIsCalculating(false);
     }
@@ -1433,6 +1502,151 @@ export default function Home() {
         .placeholder-row.highlight .placeholder-value {
           color: rgba(52,211,153,.55);
         }
+        .trade-in-selector { position: relative; }
+        .trade-in-selector input {
+          width: 100%;
+          padding: 12px 16px;
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          background: rgba(255,255,255,.05);
+          color: var(--soft);
+          font-size: 14px;
+          outline: none;
+        }
+        .trade-in-selector input:focus {
+          border-color: var(--att-glow);
+          background: rgba(255,255,255,.08);
+        }
+        .trade-in-suggestions {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          right: 0;
+          max-height: 220px;
+          overflow-y: auto;
+          background: rgba(9,12,18,.98);
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          z-index: 10;
+          display: flex;
+          flex-direction: column;
+        }
+        .trade-in-suggestion {
+          padding: 12px 16px;
+          text-align: left;
+          background: none;
+          border: none;
+          border-bottom: 1px solid var(--line);
+          color: var(--soft);
+          font-size: 14px;
+          cursor: pointer;
+          transition: background .15s ease;
+        }
+        .trade-in-suggestion:last-child { border-bottom: none; }
+        .trade-in-suggestion:hover {
+          background: rgba(0,168,224,.1);
+          color: #7dd3fc;
+        }
+        .trade-in-list {
+          margin-top: 14px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        .trade-in-row {
+          display: grid;
+          grid-template-columns: 1fr auto auto;
+          gap: 10px;
+          align-items: center;
+          padding: 12px;
+          border: 1px solid var(--line);
+          border-left: 3px solid var(--row-color, var(--att));
+          border-radius: 8px;
+          background: rgba(255,255,255,.04);
+        }
+        .trade-in-row-info {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          min-width: 0;
+        }
+        .trade-in-row-device {
+          font-weight: 700;
+          color: var(--ink);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .trade-in-row-credit {
+          font-size: 11px;
+          color: var(--muted);
+        }
+        .trade-in-row-condition {
+          padding: 8px 10px;
+          border: 1px solid var(--line);
+          border-radius: 6px;
+          background: rgba(255,255,255,.05);
+          color: var(--soft);
+          font-size: 12px;
+          cursor: pointer;
+        }
+        .trade-in-row-remove {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          border: 1px solid var(--line);
+          background: rgba(255,255,255,.05);
+          color: var(--muted);
+          font-size: 18px;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .trade-in-row-remove:hover {
+          background: rgba(239,68,68,.15);
+          color: #fca5a5;
+          border-color: rgba(239,68,68,.4);
+        }
+        .result-trade-in-block {
+          margin: 10px 0 16px;
+          padding: 14px;
+          background: rgba(0,0,0,.15);
+          border: 1px solid var(--line);
+          border-radius: 10px;
+        }
+        .result-trade-in-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          color: var(--soft);
+        }
+        .result-trade-in-total {
+          font-weight: 700;
+          color: var(--att);
+        }
+        .result-trade-in-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 8px 0;
+          border-bottom: 1px solid rgba(255,255,255,.06);
+          font-size: 13px;
+          color: var(--soft);
+        }
+        .result-trade-in-item:last-child { border-bottom: none; }
+        .result-trade-in-item small { color: var(--muted); }
+        .result-total {
+          background: rgba(0,168,224,.08);
+          border-radius: 8px;
+          padding: 16px;
+          margin: 8px 0;
+        }
+        .result-total .result-value {
+          font-size: 28px;
+          color: var(--att);
+        }
         .placeholder-hint {
           margin: 18px 0 0;
           padding: 14px;
@@ -1768,31 +1982,16 @@ export default function Home() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Trade-In Device (Optional)</label>
+                  <label>Choose Your AT&T Plan</label>
                   <select
-                    value={calculator.tradeInDevice}
-                    onChange={(e) => updateCalculator('tradeInDevice', e.target.value)}
+                    value={calculator.attPlan}
+                    onChange={(e) => updateCalculator('attPlan', e.target.value)}
                   >
-                    <option value="">No trade-in</option>
-                    {Object.keys(DEVICE_VALUES).map(device => (
-                      <option key={device} value={device}>{device}</option>
+                    {ATT_PLANS.map(plan => (
+                      <option key={plan.id} value={plan.id}>{plan.shortName} — {plan.features}</option>
                     ))}
                   </select>
                 </div>
-                {calculator.tradeInDevice && (
-                  <div className="form-group">
-                    <label>Device Condition</label>
-                    <select
-                      value={calculator.tradeInCondition}
-                      onChange={(e) => updateCalculator('tradeInCondition', e.target.value)}
-                    >
-                      <option value="excellent">Excellent (like new)</option>
-                      <option value="good">Good (normal wear)</option>
-                      <option value="fair">Fair (scratches, minor damage)</option>
-                      <option value="poor">Poor (cracked screen, functional)</option>
-                    </select>
-                  </div>
-                )}
                 <div className="form-group">
                   <label>Data Usage per Line</label>
                   <select
@@ -1805,6 +2004,72 @@ export default function Home() {
                     <option value="unlimited">Unlimited</option>
                   </select>
                 </div>
+
+                <div className="form-group trade-in-group">
+                  <label>Trade-In Devices (Optional)</label>
+                  <div className="trade-in-selector">
+                    <input
+                      type="text"
+                      placeholder="Start typing a device (e.g. iPhone 16)"
+                      value={calculator.tradeInSearch}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        updateCalculator('tradeInSearch', val);
+                        setTradeInSuggestions(getTradeInSuggestions(val));
+                        setShowTradeInSuggestions(val.length >= 2);
+                      }}
+                      onFocus={() => setShowTradeInSuggestions(calculator.tradeInSearch.length >= 2)}
+                      onBlur={() => setTimeout(() => setShowTradeInSuggestions(false), 150)}
+                    />
+                    {showTradeInSuggestions && tradeInSuggestions.length > 0 && (
+                      <div className="trade-in-suggestions">
+                        {tradeInSuggestions.map(device => (
+                          <button
+                            type="button"
+                            key={device}
+                            className="trade-in-suggestion"
+                            onMouseDown={(e) => { e.preventDefault(); addTradeIn(device); }}
+                          >
+                            {device}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {calculator.tradeIns.length > 0 && (
+                    <div className="trade-in-list">
+                      {calculator.tradeIns.map(t => (
+                        <div className="trade-in-row" key={t.id} style={{ "--row-color": t.color }}>
+                          <div className="trade-in-row-info">
+                            <span className="trade-in-row-device">{t.device}</span>
+                            <span className="trade-in-row-credit">
+                              ${t.value} value · {t.promoTier} · up to ${t.promoCredit} promo credit
+                            </span>
+                          </div>
+                          <select
+                            value={t.condition}
+                            onChange={(e) => updateTradeIn(t.id, { condition: e.target.value })}
+                            className="trade-in-row-condition"
+                          >
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                            <option value="poor">Poor</option>
+                          </select>
+                          <button
+                            type="button"
+                            className="trade-in-row-remove"
+                            onClick={() => removeTradeIn(t.id)}
+                            aria-label={`Remove ${t.device}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button 
                   className="calculator-calculate-btn" 
                   onClick={calculateQuote}
@@ -1815,7 +2080,7 @@ export default function Home() {
               </div>
               
               <div className="calculator-results">
-                <h3>Your Estimated Savings</h3>
+                <h3>Your AT&T Quote</h3>
                 {quoteResult ? (
                   <>
                     <div className={`quote-badge ${quoteResult.isRealQuote ? 'real' : 'estimate'}`}>
@@ -1826,8 +2091,12 @@ export default function Home() {
                       <span className="result-value">${quoteResult.currentBill.toFixed(2)}</span>
                     </div>
                     <div className="result-item">
-                      <span className="result-label">New AT&T Monthly Bill</span>
-                      <span className="result-value">${quoteResult.newMonthlyBill.toFixed(2)}</span>
+                      <span className="result-label">New AT&T Plan</span>
+                      <span className="result-value">{quoteResult.attPlan?.shortName || "Extra EL"}</span>
+                    </div>
+                    <div className="result-item">
+                      <span className="result-label">New Monthly Bill</span>
+                      <span className="result-value">${quoteResult.newMonthlyBill.toFixed(2)} <small>(${quoteResult.perLineNewBill?.toFixed(2)}/line)</small></span>
                     </div>
                     <div className="result-item">
                       <span className="result-label">Monthly Savings</span>
@@ -1837,24 +2106,36 @@ export default function Home() {
                       <span className="result-label">Annual Savings</span>
                       <span className="result-value savings highlight">${quoteResult.annualSavings.toFixed(2)}</span>
                     </div>
-                    {quoteResult.tradeInValue > 0 && (
-                      <>
-                        <div className="result-item">
-                          <span className="result-label">Trade-In Value</span>
-                          <span className="result-value savings">${quoteResult.tradeInValue.toFixed(2)}</span>
+
+                    {quoteResult.tradeInDetails?.length > 0 && (
+                      <div className="result-trade-in-block">
+                        <div className="result-trade-in-header">
+                          <span>Trade-Ins ({quoteResult.tradeInDetails.length})</span>
+                          <span className="result-trade-in-total">
+                            ${quoteResult.totalTradeInValue.toFixed(2)} value · ${quoteResult.totalPromoCredit.toFixed(2)} promo credit
+                          </span>
                         </div>
-                        {quoteResult.promoCredit > 0 && (
-                          <div className="result-item">
-                            <span className="result-label">AT&T Promo Credit (est.)</span>
-                            <span className="result-value savings highlight">Up to ${quoteResult.promoCredit.toFixed(2)}</span>
+                        {quoteResult.tradeInDetails.map((t, i) => (
+                          <div className="result-trade-in-item" key={t.id || i} style={{ "--row-color": t.color }}>
+                            <span>{t.device} <small>({t.condition})</small></span>
+                            <span>${t.adjustedValue.toFixed(2)} value · up to ${t.promoCredit.toFixed(2)} credit</span>
                           </div>
-                        )}
-                        <div className="result-item">
-                          <span className="result-label">First Bill with Trade-In Value</span>
-                          <span className="result-value">${quoteResult.firstBillWithCredit.toFixed(2)}</span>
-                        </div>
-                      </>
+                        ))}
+                      </div>
                     )}
+
+                    {quoteResult.totalPromoCredit > 0 && (
+                      <div className="result-item">
+                        <span className="result-label">Total AT&T Promo Credit</span>
+                        <span className="result-value savings highlight">Up to ${quoteResult.totalPromoCredit.toFixed(2)}</span>
+                      </div>
+                    )}
+
+                    <div className="result-item result-total">
+                      <span className="result-label">First Year Total Value</span>
+                      <span className="result-value savings highlight">${quoteResult.firstYearTotalValue.toFixed(2)}</span>
+                    </div>
+
                     <div className="result-item">
                       <span className="result-label">Savings per Line</span>
                       <span className="result-value">${quoteResult.perLineSavings.toFixed(2)}/line</span>
@@ -1862,7 +2143,7 @@ export default function Home() {
                     <div className="calculator-disclaimer">
                       {quoteResult.isRealQuote
                         ? "*This is a real-time quote based on current AT&T pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
-                        : "*This is an estimate based on typical AT&T switching savings. Actual savings may vary based on your specific plan, location, and current promotions. For an accurate quote, please upload your bill using the form above or contact our team."
+                        : "*This is an estimate based on current AT&T plan pricing and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions. For an accurate quote, please upload your bill using the form above or contact our team."
                       }
                     </div>
                   </>
@@ -1873,7 +2154,7 @@ export default function Home() {
                       <span className="placeholder-value">--</span>
                     </div>
                     <div className="placeholder-row">
-                      <span className="placeholder-label">New AT&T bill</span>
+                      <span className="placeholder-label">New AT&T plan</span>
                       <span className="placeholder-value">--</span>
                     </div>
                     <div className="placeholder-row highlight">
