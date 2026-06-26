@@ -139,22 +139,33 @@ const DEVICE_VALUES = {
   "iPhone 17 Pro": 800,
   "iPhone 17": 650,
   "iPhone 17e": 500,
-  "iPhone 16": 400,
-  "iPhone 15": 300,
-  "iPhone 14": 200,
-  "iPhone SE": 75,
+  "iPhone 16": 430,
+  "iPhone 15": 320,
+  "iPhone 14": 220,
+  "iPhone 13": 160,
+  "iPhone 12": 120,
+  "iPhone 11": 90,
+  "iPhone SE": 60,
   "Samsung Galaxy S26 Ultra": 850,
   "Samsung Galaxy S26+": 700,
   "Samsung Galaxy S26": 550,
-  "Samsung Galaxy S25": 400,
-  "Samsung Galaxy S24": 250,
+  "Samsung Galaxy S25": 380,
+  "Samsung Galaxy S24": 260,
+  "Samsung Galaxy S23": 180,
+  "Samsung Galaxy S22": 140,
+  "Samsung Galaxy S21": 100,
   "Galaxy Z Fold7": 600,
   "Galaxy Z Flip7": 450,
+  "Galaxy Z Fold6": 480,
+  "Galaxy Z Flip6": 360,
   "Pixel 10 Pro": 600,
   "Pixel 10": 450,
   "Pixel 10a": 300,
-  "Pixel 9": 200,
+  "Pixel 9": 210,
+  "Pixel 8": 150,
+  "Pixel 7": 110,
   "Motorola Razr": 350,
+  "Motorola Razr (2024)": 280,
   "Other Premium": 100,
   "Mid-range Device": 50,
   "Budget Device": 25,
@@ -168,9 +179,9 @@ const TRADE_IN_TIERS = [
 ];
 
 const TRADE_IN_SHOWCASE = [
-  "iPhone 17 Pro Max", "iPhone 17 Pro", "iPhone 17", "iPhone 16", "iPhone 15",
-  "Samsung Galaxy S26 Ultra", "Samsung Galaxy S26+", "Samsung Galaxy S26", "Samsung Galaxy S25", "Samsung Galaxy S24",
-  "Galaxy Z Fold7", "Galaxy Z Flip7", "Pixel 10 Pro", "Pixel 10", "Motorola Razr",
+  "iPhone 16", "iPhone 15", "iPhone 14", "iPhone 13", "iPhone 12", "iPhone 11", "iPhone SE",
+  "Samsung Galaxy S25", "Samsung Galaxy S24", "Samsung Galaxy S23", "Samsung Galaxy S22", "Samsung Galaxy S21",
+  "Galaxy Z Fold6", "Galaxy Z Flip6", "Pixel 9", "Pixel 8", "Pixel 7", "Motorola Razr (2024)",
 ];
 
 function getTradeInTier(value) {
@@ -930,6 +941,27 @@ export default function Home() {
           margin-top: 4px;
         }
         .trade-in-qualifies b { color: var(--ink); }
+        .trade-in-disclaimer {
+          margin: 0 auto 32px;
+          max-width: 780px;
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          background: rgba(255,255,255,.04);
+          padding: 20px 24px;
+          color: var(--muted);
+          font-size: 12px;
+          line-height: 1.7;
+        }
+        .trade-in-disclaimer p { margin: 0 0 10px; }
+        .trade-in-disclaimer p:last-child { margin-bottom: 0; }
+        .trade-in-disclaimer a { color: #7dd3fc; text-decoration: underline; }
+        .trade-in-source {
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--line);
+          color: var(--soft);
+          font-size: 11px;
+        }
         .trade-in-cta {
           margin-top: 40px;
           text-align: center;
@@ -1543,7 +1575,7 @@ export default function Home() {
                 <h2>Get Credit for Your Old Device</h2>
               </div>
               <p>
-                Trade in your current phone and get instant credit toward a new device. The table below shows estimated trade-in values and the AT&T promotional credit tier each device qualifies for.
+                Trade in your current phone and get instant credit toward a new device. The grid below shows example devices you can trade in — not the new phones you are buying — along with estimated trade-in values and the AT&T promotional credit tier each may qualify for.
               </p>
             </div>
 
@@ -1579,6 +1611,18 @@ export default function Home() {
                   </div>
                 );
               })}
+            </div>
+
+            <div className="trade-in-disclaimer">
+              <p>
+                <b>Estimates only.</b> Values shown are representative examples based on AT&T’s promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current AT&T promotions.
+              </p>
+              <p>
+                Always confirm your actual trade-in value and eligible credits directly with <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">AT&T</a> before making a purchase decision.
+              </p>
+              <p className="trade-in-source">
+                Source: AT&T Trade-In program (<a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">att.com/trade-in</a>) · Values estimated as of June 26, 2026
+              </p>
             </div>
 
             <div className="trade-in-brands">
