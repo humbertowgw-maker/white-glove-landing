@@ -18,6 +18,20 @@ async function fetchTradeInPromos() {
   }
 }
 
+async function fetchDevices(search = "") {
+  try {
+    const url = new URL(`${API}/api/devices`);
+    if (search) url.searchParams.set("search", search);
+    const res = await fetch(url.toString());
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data.devices) ? data.devices : [];
+  } catch (err) {
+    console.warn("[landing] could not load devices:", err.message);
+    return [];
+  }
+}
+
 const DEFAULT_TRADE_IN_TIERS = [
   { tier: "Premium", promo_credit: 1000, eligible_devices: ["iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 16 Pro Max", "iPhone 16 Pro", "Galaxy S24 Ultra", "Galaxy Z Fold6", "Galaxy Z Fold7", "Pixel 9 Pro XL", "Pixel 9 Pro", "Motorola Razr+ (2024)"], example_models: ["iPhone 15 Pro Max", "iPhone 16 Pro Max", "Galaxy S24 Ultra", "Galaxy Z Fold7", "Pixel 9 Pro XL"], color: "#34d399" },
   { tier: "High", promo_credit: 800, eligible_devices: ["iPhone 15 Plus", "iPhone 15", "iPhone 16 Plus", "iPhone 16", "Galaxy S24+", "Galaxy S24", "Galaxy S25+", "Galaxy S25", "Galaxy Z Flip6", "Galaxy Z Flip7", "Pixel 9", "Pixel 9 Pro Fold"], example_models: ["iPhone 15", "iPhone 16", "Galaxy S24", "Galaxy Z Flip7", "Pixel 9 Pro Fold"], color: "#2dd4bf" },
@@ -93,32 +107,33 @@ function applyPlanDiscounts(basePricePerLine, lines, discounts) {
   };
 }
 
-// New phone catalog for financing estimates (36-month device payments).
-const NEW_PHONES = [
-  { id: "iphone_17_pro_max", name: "iPhone 17 Pro Max", fullPrice: 1199, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "iphone_17_pro", name: "iPhone 17 Pro", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "iphone_17", name: "iPhone 17", fullPrice: 799, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "iphone_17e", name: "iPhone 17e", fullPrice: 599, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
-  { id: "iphone_16", name: "iPhone 16", fullPrice: 699, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
-  { id: "galaxy_s26_ultra", name: "Samsung Galaxy S26 Ultra", fullPrice: 1299, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "galaxy_s26_plus", name: "Samsung Galaxy S26+", fullPrice: 1099, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "galaxy_s26", name: "Samsung Galaxy S26", fullPrice: 899, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "galaxy_z_fold7", name: "Galaxy Z Fold7", fullPrice: 1899, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "galaxy_z_flip7", name: "Galaxy Z Flip7", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "pixel_10_pro", name: "Pixel 10 Pro", fullPrice: 999, qualifiesForPromo: ["unlimited_extra", "unlimited_premium"] },
-  { id: "pixel_10", name: "Pixel 10", fullPrice: 799, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
-  { id: "motorola_razr", name: "Motorola Razr", fullPrice: 699, qualifiesForPromo: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+// Default device catalog for financing estimates (36-month device payments).
+// The landing page will fetch the live catalog from /api/devices when available.
+const DEFAULT_DEVICES = [
+  { id: "iphone-17-pro-max", slug: "iphone-17-pro-max", name: "iPhone 17 Pro Max", brand: "Apple", full_price: 1199, monthly_payment: 33.31, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone-17-pro", slug: "iphone-17-pro", name: "iPhone 17 Pro", brand: "Apple", full_price: 999, monthly_payment: 27.75, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone-17", slug: "iphone-17", name: "iPhone 17", brand: "Apple", full_price: 799, monthly_payment: 22.19, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "iphone-17e", slug: "iphone-17e", name: "iPhone 17e", brand: "Apple", full_price: 599, monthly_payment: 16.64, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "iphone-16", slug: "iphone-16", name: "iPhone 16", brand: "Apple", full_price: 699, monthly_payment: 19.42, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy-s26-ultra", slug: "galaxy-s26-ultra", name: "Samsung Galaxy S26 Ultra", brand: "Samsung", full_price: 1299, monthly_payment: 36.08, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy-s26-plus", slug: "galaxy-s26-plus", name: "Samsung Galaxy S26+", brand: "Samsung", full_price: 1099, monthly_payment: 30.53, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy-s26", slug: "galaxy-s26", name: "Samsung Galaxy S26", brand: "Samsung", full_price: 899, monthly_payment: 24.97, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy-z-fold7", slug: "galaxy-z-fold7", name: "Galaxy Z Fold7", brand: "Samsung", full_price: 1899, monthly_payment: 52.75, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "galaxy-z-flip7", slug: "galaxy-z-flip7", name: "Galaxy Z Flip7", brand: "Samsung", full_price: 999, monthly_payment: 27.75, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "pixel-10-pro", slug: "pixel-10-pro", name: "Pixel 10 Pro", brand: "Google", full_price: 999, monthly_payment: 27.75, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_extra", "unlimited_premium"] },
+  { id: "pixel-10", slug: "pixel-10", name: "Pixel 10", brand: "Google", full_price: 799, monthly_payment: 22.19, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
+  { id: "motorola-razr", slug: "motorola-razr", name: "Motorola Razr", brand: "Motorola", full_price: 699, monthly_payment: 19.42, financing_months: 36, qualifies_for_trade_in_promo: true, requires_plan: ["unlimited_starter", "unlimited_extra", "unlimited_premium"] },
 ];
 
 const FINANCING_MONTHS = 36;
 const AUTOPAY_DISCOUNT_PER_LINE = 10;
 
-function getPhone(nameOrId) {
-  return NEW_PHONES.find(p => p.id === nameOrId || p.name === nameOrId) || null;
+function getPhone(deviceCatalog, nameOrId) {
+  return deviceCatalog.find(p => p.id === nameOrId || p.slug === nameOrId || p.name === nameOrId) || null;
 }
 
-function monthlyDevicePayment(fullPrice, downPayment = 0) {
-  return Math.max(0, (fullPrice - downPayment) / FINANCING_MONTHS);
+function monthlyDevicePayment(fullPrice, downPayment = 0, months = FINANCING_MONTHS) {
+  return Math.max(0, (fullPrice - downPayment) / months);
 }
 
 function promoQualifiesForPlan(planId) {
@@ -366,6 +381,8 @@ function ProductLink({ product }) {
 export default function Home() {
   const [tradeInPromos, setTradeInPromos] = useState(DEFAULT_TRADE_IN_TIERS);
   const [promosLoaded, setPromosLoaded] = useState(false);
+  const [deviceCatalog, setDeviceCatalog] = useState(DEFAULT_DEVICES);
+  const [devicesLoaded, setDevicesLoaded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -380,6 +397,13 @@ export default function Home() {
         setTradeInPromos(colored);
       }
       setPromosLoaded(true);
+    });
+    fetchDevices().then(devices => {
+      if (!mounted) return;
+      if (devices.length > 0) {
+        setDeviceCatalog(devices.map(d => ({ ...d, id: d.slug || d.id })));
+      }
+      setDevicesLoaded(true);
     });
     return () => { mounted = false; };
   }, []);
@@ -544,7 +568,7 @@ export default function Home() {
   function getNewPhoneSuggestions(query) {
     if (!query || query.length < 2) return [];
     const q = query.toLowerCase();
-    return NEW_PHONES.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
+    return deviceCatalog.filter(p => p.name.toLowerCase().includes(q)).slice(0, 8);
   }
 
   function addNewPhone(phone) {
@@ -552,9 +576,10 @@ export default function Home() {
       ...prev,
       newPhones: [...prev.newPhones, {
         id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2),
-        phoneId: phone.id,
+        phoneId: phone.id || phone.slug,
         name: phone.name,
-        fullPrice: phone.fullPrice,
+        fullPrice: phone.full_price,
+        monthlyPayment: phone.monthly_payment,
       }],
       newPhoneSearch: "",
     }));
@@ -600,14 +625,16 @@ export default function Home() {
     const totalMonthlyPromoCredit = totalPromoCredit / FINANCING_MONTHS;
     const promoRequiresQualifyingPlan = calculator.tradeIns.length > 0 && !promoQualifiesForPlan(calculator.attPlan);
 
-    // New phone financing (36 months). Trade-in value is treated as a down payment,
-    // and promo credits reduce the financed amount evenly over 36 months.
+    // New phone financing (36 months). Trade-in value is kept separate as bill credits;
+    // promo credits reduce the financed amount evenly over 36 months.
     const newPhoneDetails = calculator.newPhones.map(p => {
-      const downPayment = 0; // trade-in value is kept separate as bill credits
-      const monthlyPayment = monthlyDevicePayment(p.fullPrice, downPayment);
+      const device = getPhone(deviceCatalog, p.phoneId) || p;
+      const fullPrice = device.full_price || p.fullPrice || 0;
+      const months = device.financing_months || FINANCING_MONTHS;
+      const monthlyPayment = p.monthlyPayment || monthlyDevicePayment(fullPrice, 0, months);
       const monthlyCredit = totalMonthlyPromoCredit / calculator.newPhones.length;
       const netMonthlyPayment = Math.max(0, monthlyPayment - monthlyCredit);
-      return { ...p, monthlyPayment, netMonthlyPayment };
+      return { ...p, fullPrice, monthlyPayment, netMonthlyPayment };
     });
     const totalPhoneMonthlyPayment = newPhoneDetails.reduce((sum, p) => sum + p.monthlyPayment, 0);
     const totalNetPhoneMonthlyPayment = newPhoneDetails.reduce((sum, p) => sum + p.netMonthlyPayment, 0);
