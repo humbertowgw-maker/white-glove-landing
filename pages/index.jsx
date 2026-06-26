@@ -1427,7 +1427,10 @@ export default function Home() {
               ))}
             </div>
             <div className="trade-in-cta">
-              <button onClick={() => document.getElementById('bill-review').scrollIntoView({ behavior: 'smooth' })}>
+              <button type="button" onClick={() => {
+                const el = document.getElementById('bill-review');
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}>
                 Get Your Trade-In Quote
               </button>
             </div>
@@ -1617,7 +1620,7 @@ export default function Home() {
               <div className="bill-compare-icon">📄</div>
               <h3>See what you could save</h3>
               <p>Upload a photo or PDF of your current wireless or fiber bill. Our team compares your plan, lines, and usage against current AT&T pricing.</p>
-              <a className="primary-link" href="#bill-review" onClick={e => { e.preventDefault(); document.getElementById('bill-review').scrollIntoView({ behavior: 'smooth' }); }}>
+              <a className="primary-link" href="#bill-review" onClick={e => { e.preventDefault(); const el = document.getElementById('bill-review'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                 Upload your bill →
               </a>
             </div>
