@@ -813,7 +813,8 @@ export default function Home() {
           margin-top: 40px;
           text-align: center;
         }
-        .trade-in-cta button {
+        .trade-in-cta .trade-in-link {
+          display: inline-block;
           padding: 16px 32px;
           font-size: 16px;
           background: linear-gradient(135deg, #fbbf24, #f59e0b);
@@ -822,9 +823,10 @@ export default function Home() {
           color: #111827;
           font-weight: 800;
           cursor: pointer;
+          text-decoration: none;
           transition: transform .2s ease, box-shadow .2s ease;
         }
-        .trade-in-cta button:hover {
+        .trade-in-cta .trade-in-link:hover {
           transform: translateY(-2px);
           box-shadow: 0 8px 24px rgba(245,158,11,.3);
         }
@@ -1427,12 +1429,9 @@ export default function Home() {
               ))}
             </div>
             <div className="trade-in-cta">
-              <button type="button" onClick={() => {
-                const el = document.getElementById('bill-review');
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}>
+              <a className="trade-in-link" href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">
                 Get Your Trade-In Quote
-              </button>
+              </a>
             </div>
           </div>
         </section>
