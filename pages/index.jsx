@@ -41,42 +41,42 @@ const DEFAULT_TRADE_IN_TIERS = [
   { tier: "Trade-in value only", promo_credit: 0, eligible_devices: ["Older or damaged devices not listed above"], example_models: ["Older iPhone, Android, or feature phones"], color: "#64748b" },
 ];
 
-// AT&T Unlimited 2.0 consumer plans — per-line pricing for 1, 2, 3, 4, 5+ lines.
-const ATT_PLANS = [
+// Unlimited consumer plans — per-line pricing for 1, 2, 3, 4, 5+ lines.
+const UNLIMITED_PLANS = [
   {
     id: "unlimited_starter",
-    name: "AT&T Unlimited 2.0 Starter SL",
-    shortName: "Starter SL",
+    name: "Unlimited Starter",
+    shortName: "Starter",
     pricePerLine: [65.99, 60.99, 50.99, 45.99, 35.99],
     features: "Unlimited talk, text & data · SD streaming · 3 GB hotspot",
     recommendedFor: "Light streamers and budget-conscious households",
   },
   {
     id: "unlimited_extra",
-    name: "AT&T Unlimited 2.0 Extra EL",
-    shortName: "Extra EL",
+    name: "Unlimited Extra",
+    shortName: "Extra",
     pricePerLine: [75.99, 65.99, 55.99, 50.99, 40.99],
     features: "Unlimited talk, text & data · 50 GB premium data · 15 GB hotspot",
     recommendedFor: "Most families and remote workers",
   },
   {
     id: "unlimited_premium",
-    name: "AT&T Unlimited 2.0 Premium PL",
-    shortName: "Premium PL",
+    name: "Unlimited Premium",
+    shortName: "Premium",
     pricePerLine: [85.99, 75.99, 65.99, 60.99, 50.99],
     features: "Unlimited talk, text & data · Unlimited premium data · 50 GB hotspot · 4K UHD streaming",
     recommendedFor: "Power users and heavy streamers",
   },
 ];
 
-function getAttPlanPrice(planId, lines) {
-  const plan = ATT_PLANS.find(p => p.id === planId) || ATT_PLANS[1];
+function getPlanPrice(planId, lines) {
+  const plan = UNLIMITED_PLANS.find(p => p.id === planId) || UNLIMITED_PLANS[1];
   const idx = Math.max(0, Math.min(lines - 1, plan.pricePerLine.length - 1));
   return plan.pricePerLine[idx];
 }
 
 function applyPlanDiscounts(basePricePerLine, lines, discounts) {
-  // AT&T does not stack most discounts — apply the single best eligible discount.
+  // Most carrier discounts do not stack — apply the single best eligible discount.
   const { is55Plus, isMilitary, isTeacher, hasEmployerDiscount } = discounts || {};
 
   const candidates = [];
@@ -137,7 +137,7 @@ function monthlyDevicePayment(fullPrice, downPayment = 0, months = FINANCING_MON
 }
 
 function promoQualifiesForPlan(planId) {
-  // Max trade-in promo credits require a qualifying AT&T Unlimited 2.0 plan.
+  // Max trade-in promo credits require a qualifying unlimited plan.
   // Starter SL typically does not qualify for the full promotional credits.
   return planId === "unlimited_premium" || planId === "unlimited_extra";
 }
@@ -259,12 +259,12 @@ const PRODUCTS = [
 
 const SYSTEM_STEPS = [
   ["01", "Upload the bill", "Send us a photo, PDF, or text of your current wireless or fiber bill."],
-  ["02", "Compare your savings", "We analyze your plan, usage, and current provider to find what AT&T can save you."],
+  ["02", "Compare your savings", "We analyze your plan, usage, and current provider to find what you could save."],
   ["03", "Order from home", "Pick your devices or fiber plan and check out online — no store visit required."],
   ["04", "Get it set up", "Next-day delivery plus personalized setup so everything works before we leave."],
 ];
 
-const ATT_FEATURES = [
+const WGW_FEATURES = [
   {
     icon: "📱",
     title: "Latest iPhone & Android Devices",
@@ -283,7 +283,7 @@ const ATT_FEATURES = [
   {
     icon: "📡",
     title: "5G Coverage",
-    description: "Access America's most reliable 5G network with coverage in 99% of the U.S. population.",
+    description: "Access a reliable 5G network with coverage across the U.S. population.",
   },
   {
     icon: "🎁",
@@ -427,7 +427,7 @@ export default function Home() {
   // Sophia AI Chat State
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessages, setChatMessages] = useState([
-    { role: "assistant", content: "Hi! I'm Sophia, your White Glove Wireless assistant. I can help you with AT&T switching, phone upgrades, trade-in quotes, or any questions about our services. How can I help you today?" }
+    { role: "assistant", content: "Hi! I'm Sophia, your White Glove Wireless assistant. I can help you with switching carriers, phone upgrades, trade-in quotes, or any questions about our services. How can I help you today?" }
   ]);
   const [chatInput, setChatInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -492,9 +492,9 @@ export default function Home() {
     setTimeout(() => {
       let aiResponse = "";
       const lowerInput = userMessage.content.toLowerCase();
-      
-      if (lowerInput.includes("switch") || lowerInput.includes("at&t")) {
-        aiResponse = "Great question! Switching to AT&T with White Glove Wireless is seamless. We handle the entire porting process, you keep your number, and you'll get access to America's most reliable 5G network. Plus, we have exclusive switching bonuses including bill credits and device deals. Would you like me to help you start the switching process?";
+
+      if (lowerInput.includes("switch") || lowerInput.includes("carrier")) {
+        aiResponse = "Great question! Switching with White Glove Wireless is seamless. We handle the entire porting process, you keep your number, and you'll get access to a reliable 5G network. Plus, we have exclusive switching bonuses including bill credits and device deals. Would you like me to help you start the switching process?";
       } else if (lowerInput.includes("phone") || lowerInput.includes("iphone") || lowerInput.includes("samsung")) {
         aiResponse = "We have the latest devices available! Including iPhone 17 series, Samsung Galaxy S26 series, Google Pixel 10 series, Motorola Razr, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
       } else if (lowerInput.includes("trade") || lowerInput.includes("credit")) {
@@ -502,9 +502,9 @@ export default function Home() {
       } else if (lowerInput.includes("quote") || lowerInput.includes("price") || lowerInput.includes("cost")) {
         aiResponse = "I'd be happy to help you get a quote! The fastest way is to upload your current wireless bill using the form on this page. Our AI team will analyze it and provide personalized savings recommendations. You can also use our interactive calculator coming soon. What's your current monthly bill roughly?";
       } else if (lowerInput.includes("help") || lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        aiResponse = "Hello! I'm here to help you with anything related to White Glove Wireless services. I can assist with AT&T switching information, phone upgrades, trade-in quotes, bill reviews, or answer any questions you might have. What would you like to know more about?";
+        aiResponse = "Hello! I'm here to help you with anything related to White Glove Wireless services. I can assist with switching information, phone upgrades, trade-in quotes, bill reviews, or answer any questions you might have. What would you like to know more about?";
       } else {
-        aiResponse = "Thanks for your question! I can help you with AT&T switching, new phones, trade-in deals, and bill reviews. For specific quotes, I recommend uploading your bill using the form on this page so our team can give you personalized recommendations. Is there anything specific about our services you'd like to know more about?";
+        aiResponse = "Thanks for your question! I can help you with switching carriers, new phones, trade-in deals, and bill reviews. For specific quotes, I recommend uploading your bill using the form on this page so our team can give you personalized recommendations. Is there anything specific about our services you'd like to know more about?";
       }
 
       setChatMessages(prev => [...prev, { role: "assistant", content: aiResponse }]);
@@ -611,7 +611,7 @@ export default function Home() {
 
     const currentBill = parseFloat(calculator.currentBill) || 0;
     const lines = Math.max(1, parseInt(calculator.lines) || 1);
-    const basePlanPricePerLine = getAttPlanPrice(calculator.attPlan, lines);
+    const basePlanPricePerLine = getPlanPrice(calculator.attPlan, lines);
     const discounted = applyPlanDiscounts(basePlanPricePerLine, lines, {
       is55Plus: calculator.is55Plus,
       isMilitary: calculator.isMilitary,
@@ -663,7 +663,7 @@ export default function Home() {
     const quoteData = {
       currentBill,
       lines,
-      attPlan: ATT_PLANS.find(p => p.id === calculator.attPlan) || ATT_PLANS[1],
+      attPlan: UNLIMITED_PLANS.find(p => p.id === calculator.attPlan) || UNLIMITED_PLANS[1],
       basePlanPricePerLine,
       planTotalBeforeAutopay: discounted.pricePerLine * lines,
       newMonthlyBill,
@@ -816,7 +816,7 @@ export default function Home() {
         <title>White Glove Wireless - Wireless & Fiber Without the Store</title>
         <meta
           name="description"
-          content="Switch to AT&T wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
+          content="Switch wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -2226,19 +2226,8 @@ export default function Home() {
               <span>Wireless & fiber without the store</span>
             </span>
           </Link>
-          <div className="att-badge">
-            <svg className="att-globe" viewBox="0 0 48 48" aria-hidden="true">
-              <circle cx="24" cy="24" r="22" fill="#00A8E0"/>
-              <path d="M24 2a22 22 0 0 1 0 44 22 22 0 0 1 0-44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
-              <path d="M24 2c-6 8-6 36 0 44M24 2c6 8 6 36 0 44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
-              <ellipse cx="24" cy="24" rx="10" ry="22" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
-              <path d="M2 24h44" fill="none" stroke="rgba(255,255,255,.35)" strokeWidth="1.5"/>
-            </svg>
-            <span>AT&T Authorized Dealer</span>
-          </div>
-
           <div className="nav-actions">
-            <Link href="#att-features">Switch to AT&T</Link>
+            <Link href="#features">Switch & Save</Link>
             <Link href="#phones">New Phones</Link>
             <Link href="#trade-in">Trade-In Deals</Link>
             <Link href="#calculator">Calculator</Link>
@@ -2252,10 +2241,10 @@ export default function Home() {
           <div className="hero-copy">
             <div className="mono">Wireless & fiber, delivered to your door</div>
             <h1>
-              Switch to AT&T without stepping into a store. <span>We come to you.</span>
+              Switch wireless and fiber without stepping into a store. <span>We come to you.</span>
             </h1>
             <p>
-              White Glove Wireless makes switching to AT&T wireless and fiber simple. Skip the line,
+              White Glove Wireless makes switching wireless and fiber simple. Skip the line,
               skip the upsell, skip the setup headache. Compare your current bill, order online, get
               next-day delivery, and get a personalized setup that fits how you actually use your service.
             </p>
@@ -2271,7 +2260,7 @@ export default function Home() {
               <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="" width={52} height={52} />
               <div>
                 <h2>Upload your bill. See your savings.</h2>
-                <p>We'll compare your current wireless or fiber plan and show what AT&T can save you.</p>
+                <p>We'll compare your current wireless or fiber plan and show what you could save.</p>
               </div>
             </div>
             <form className="bill-form" onSubmit={submitBill}>
@@ -2318,7 +2307,7 @@ export default function Home() {
           <div className="section-head">
             <div>
               <div className="mono">Why White Glove</div>
-              <h2>The easier way to switch to AT&T.</h2>
+              <h2>The easier way to switch.</h2>
             </div>
             <p>
               Most people dread switching carriers because it means a store visit, a pushy pitch, and a
@@ -2349,19 +2338,19 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="att-section" id="att-features" aria-label="Switch to AT&T features">
+        <section className="att-section" id="features" aria-label="Switch and save features">
           <div className="section">
             <div className="section-head">
               <div>
-                <div className="mono">Why Switch to AT&T</div>
-                <h2>America's Most Reliable 5G Network</h2>
+                <div className="mono">Why Switch</div>
+                <h2>A Better Wireless & Fiber Experience</h2>
               </div>
               <p>
-                Experience the benefits of switching to AT&T with White Glove Wireless. We make the transition seamless while you get better coverage, faster speeds, and exclusive deals.
+                Experience the benefits of switching with White Glove Wireless. We make the transition seamless while you get better coverage, faster speeds, and exclusive deals.
               </p>
             </div>
             <div className="att-features">
-              {ATT_FEATURES.map((feature, index) => (
+              {WGW_FEATURES.map((feature, index) => (
                 <div className="att-feature" key={index}>
                   <div className="att-feature-icon">{feature.icon}</div>
                   <h3>{feature.title}</h3>
@@ -2404,7 +2393,7 @@ export default function Home() {
                 <h2>Get Credit for Your Old Device</h2>
               </div>
               <p>
-                Trade in your current phone and get instant credit toward a new device. The grid below shows example devices you can trade in — not the new phones you are buying — along with estimated trade-in values and the AT&T promotional credit tier each may qualify for.
+                Trade in your current phone and get instant credit toward a new device. The grid below shows example devices you can trade in — not the new phones you are buying — along with estimated trade-in values and the promotional credit tier each may qualify for.
               </p>
             </div>
 
@@ -2446,13 +2435,13 @@ export default function Home() {
 
             <div className="trade-in-disclaimer">
               <p>
-                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current AT&T offers. Values shown are representative examples based on AT&T’s promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current AT&T promotions.
+                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current carrier offers. Values shown are representative examples based on promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current promotions.
               </p>
               <p>
-                Always confirm your actual trade-in value and eligible credits directly with <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">AT&T</a> before making a purchase decision.
+                Always confirm your actual trade-in value and eligible credits directly with your carrier before making a purchase decision.
               </p>
               <p className="trade-in-source">
-                Source: AT&T Trade-In program (<a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">att.com/trade-in</a>) · Refreshed daily by WGW Director AI
+                Refreshed daily by WGW Director AI
               </p>
             </div>
 
@@ -2462,9 +2451,9 @@ export default function Home() {
               ))}
             </div>
             <div className="trade-in-cta">
-              <a className="trade-in-link" href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer">
+              <button className="trade-in-link" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
                 Get Your Trade-In Quote
-              </a>
+              </button>
             </div>
           </div>
         </section>
@@ -2474,10 +2463,10 @@ export default function Home() {
             <div className="section-head">
               <div>
                 <div className="mono">Savings Calculator</div>
-                <h2>Build Your Personalized AT&T Quote</h2>
+                <h2>Build Your Personalized Quote</h2>
               </div>
               <p>
-                Answer a few quick questions and we’ll show you exactly what you could save by switching to AT&T with White Glove Wireless — including your eligible trade-in credits and any discounts you qualify for.
+                Answer a few quick questions and we’ll show you exactly what you could save by switching with White Glove Wireless — including your eligible trade-in credits and any discounts you qualify for.
               </p>
             </div>
             <div className="calculator-container">
@@ -2486,7 +2475,7 @@ export default function Home() {
                   <div className="quote-wizard-avatar">🤖</div>
                   <div>
                     <h3>Sophia, your WGW quote assistant</h3>
-                    <p>I’ll research current AT&T Unlimited 2.0 plans, trade-in promos, and discounts to build your personalized quote.</p>
+                    <p>I’ll research current unlimited plans, trade-in promos, and discounts to build your personalized quote.</p>
                   </div>
                 </div>
 
@@ -2565,14 +2554,14 @@ export default function Home() {
                   {quoteStep >= 4 && (
                     <div className={`quote-step ${quoteStep === 4 ? 'active' : ''}`}>
                       <div className="quote-step-question">
-                        Based on your answers, I recommend the <b>{ATT_PLANS.find(p => p.id === calculator.attPlan)?.name}</b>. Want to change it?
+                        Based on your answers, I recommend the <b>{UNLIMITED_PLANS.find(p => p.id === calculator.attPlan)?.name}</b>. Want to change it?
                       </div>
                       <div className="quote-step-input">
                         <select
                           value={calculator.attPlan}
                           onChange={(e) => updateCalculator('attPlan', e.target.value)}
                         >
-                          {ATT_PLANS.map(plan => (
+                          {UNLIMITED_PLANS.map(plan => (
                             <option key={plan.id} value={plan.id}>{plan.name} — {plan.features}</option>
                           ))}
                         </select>
@@ -2583,7 +2572,7 @@ export default function Home() {
                   {quoteStep >= 5 && (
                     <div className={`quote-step ${quoteStep === 5 ? 'active' : ''}`}>
                       <div className="quote-step-question">Do any of these discounts apply?</div>
-                      <p className="quote-step-hint">I’ll automatically apply the best eligible AT&T discount and the autopay/paperless savings.</p>
+                      <p className="quote-step-hint">I’ll automatically apply the best eligible discount and the autopay/paperless savings.</p>
                       <div className="discount-options">
                         <label className="discount-option">
                           <input type="checkbox" checked={calculator.autopay} onChange={() => toggleDiscount('autopay')} />
@@ -2603,7 +2592,7 @@ export default function Home() {
                         </label>
                         <label className="discount-option">
                           <input type="checkbox" checked={calculator.hasEmployerDiscount} onChange={() => toggleDiscount('hasEmployerDiscount')} />
-                          <span>My employer may offer an AT&T discount</span>
+                          <span>My employer may offer a carrier discount</span>
                         </label>
                       </div>
                     </div>
@@ -2612,7 +2601,7 @@ export default function Home() {
                   {quoteStep >= 6 && (
                     <div className={`quote-step ${quoteStep === 6 ? 'active' : ''}`}>
                       <div className="quote-step-question">Any devices to trade in?</div>
-                      <p className="quote-step-hint">I’ll look up the current AT&T trade-in promo credit for each device.</p>
+                      <p className="quote-step-hint">I’ll look up the current trade-in promo credit for each device.</p>
                       <div className="trade-in-selector">
                         <input
                           type="text"
@@ -2679,7 +2668,7 @@ export default function Home() {
                       {calculator.tradeIns.length > 0 && !promoQualifiesForPlan(calculator.attPlan) && (
                         <div className="quote-step-warning">
                           Your selected plan does not qualify for the maximum trade-in promo credits. Choose Extra EL or Premium PL to unlock the full promo amount.
-                          <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer"> See AT&T trade-in terms</a>.
+                          See trade-in terms for details.
                         </div>
                       )}
                     </div>
@@ -2758,7 +2747,7 @@ export default function Home() {
               </div>
 
               <div className="calculator-results">
-                <h3>Your AT&T Quote</h3>
+                <h3>Your Quote</h3>
                 {quoteResult ? (
                   <>
                     <div className={`quote-badge ${quoteResult.isRealQuote ? 'real' : 'estimate'}`}>
@@ -2771,8 +2760,8 @@ export default function Home() {
                     </div>
 
                     <div className="result-item">
-                      <span className="result-label">New AT&T Plan</span>
-                      <span className="result-value">{quoteResult.attPlan?.name || "AT&T Unlimited 2.0 Extra EL"}</span>
+                      <span className="result-label">New Plan</span>
+                      <span className="result-value">{quoteResult.attPlan?.name || "Unlimited Extra"}</span>
                     </div>
 
                     <div className="result-item">
@@ -2835,7 +2824,7 @@ export default function Home() {
 
                     {quoteResult.totalPromoCredit > 0 && (
                       <div className="result-item">
-                        <span className="result-label">Total AT&T Promo Credit</span>
+                        <span className="result-label">Total Promo Credit</span>
                         <span className="result-value savings highlight">Up to ${quoteResult.totalPromoCredit.toFixed(2)}</span>
                       </div>
                     )}
@@ -2852,15 +2841,14 @@ export default function Home() {
 
                     {(quoteResult.totalPromoCredit > 0 || quoteResult.totalNetPhoneMonthlyPayment > 0) && (
                       <div className="calculator-disclaimer">
-                        <b>Trade-in & financing details:</b> Trade-in promo credits are typically split over {quoteResult.financingMonths} months as bill credits and require an eligible AT&T Unlimited 2.0 plan with autopay/paperless billing. If you cancel service early, remaining credits may be forfeited. Device financing is separate and may require credit approval.
-                        <a href="https://www.att.com/trade-in/" target="_blank" rel="noreferrer"> See AT&T trade-in terms</a> and <a href="https://www.att.com/support/article/wireless/KM1218200/" target="_blank" rel="noreferrer">installment details</a>.
+                        <b>Trade-in & financing details:</b> Trade-in promo credits are typically split over {quoteResult.financingMonths} months as bill credits and require an eligible unlimited plan with autopay/paperless billing. If you cancel service early, remaining credits may be forfeited. Device financing is separate and may require credit approval.
                       </div>
                     )}
 
                     <div className="calculator-disclaimer">
                       {quoteResult.isRealQuote
-                        ? "*This is a real-time quote based on current AT&T pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
-                        : "*This is an estimate based on current AT&T Unlimited 2.0 plan pricing, autopay discounts, and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions."
+                        ? "*This is a real-time quote based on current carrier pricing and promotions. Final pricing may vary based on credit approval and location. For complete details, please contact our team."
+                        : "*This is an estimate based on current unlimited plan pricing, autopay discounts, and promotional trade-in tiers. Actual savings may vary based on your specific plan, location, device condition, and current promotions."
                       }
                     </div>
 
@@ -2999,14 +2987,14 @@ export default function Home() {
                   <div className="calculator-placeholder">
                     <div className="quote-wizard-preview">
                       <div className="quote-preview-avatar">🤖</div>
-                      <p>Answer the questions on the left and I’ll build your personalized AT&T quote here — with plan pricing, autopay savings, trade-in credits, and 36-month financing.</p>
+                      <p>Answer the questions on the left and I’ll build your personalized quote here — with plan pricing, autopay savings, trade-in credits, and 36-month financing.</p>
                     </div>
                     <div className="placeholder-row">
                       <span className="placeholder-label">Current monthly bill</span>
                       <span className="placeholder-value">--</span>
                     </div>
                     <div className="placeholder-row">
-                      <span className="placeholder-label">New AT&T plan</span>
+                      <span className="placeholder-label">New plan</span>
                       <span className="placeholder-value">--</span>
                     </div>
                     <div className="placeholder-row highlight">
@@ -3031,7 +3019,7 @@ export default function Home() {
               <h2>Upload your bill to see your savings.</h2>
             </div>
             <p>
-              The fastest way to find out what AT&T wireless and fiber can save you is to let us
+              The fastest way to find out what wireless and fiber can save you is to let us
               review your current bill. No store visit, no pressure — just a clear side-by-side
               comparison and a recommendation that fits your actual usage.
             </p>
@@ -3040,7 +3028,7 @@ export default function Home() {
             <div className="bill-compare-card">
               <div className="bill-compare-icon">📄</div>
               <h3>See what you could save</h3>
-              <p>Upload a photo or PDF of your current wireless or fiber bill. Our team compares your plan, lines, and usage against current AT&T pricing.</p>
+              <p>Upload a photo or PDF of your current wireless or fiber bill. Our team compares your plan, lines, and usage against current carrier pricing.</p>
               <a className="primary-link" href="#bill-review" onClick={e => { e.preventDefault(); const el = document.getElementById('bill-review'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
                 Upload your bill →
               </a>
