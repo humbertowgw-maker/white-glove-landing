@@ -2184,10 +2184,9 @@ export default function Home() {
             </span>
           </Link>
           <div className="nav-actions">
-            <Link href="#features">Switch & Save</Link>
-            <Link href="#phones">New Phones</Link>
-            <Link href="#trade-in">Trade-In Deals</Link>
+            <Link href="#services">Services</Link>
             <Link href="#calculator">Calculator</Link>
+            <Link href="#why-us">Why us</Link>
             <Link href="/products">Products</Link>
             <Link href="/wireless">WGW platform</Link>
             <a className="primary-link" href="#bill-review">Upload bill</a>
@@ -2196,19 +2195,20 @@ export default function Home() {
 
         <section className="hero">
           <div className="hero-copy">
-            <div className="mono">Wireless & fiber, delivered to your door</div>
+            <div className="mono">Wireless & fiber, simplified</div>
             <h1>
-              Switch wireless and fiber without stepping into a store. <span>We come to you.</span>
+              Switch carriers the easy way — <span>with a real person in your corner.</span>
             </h1>
             <p>
-              White Glove Wireless makes switching wireless and fiber simple. Skip the line,
-              skip the upsell, skip the setup headache. Compare your current bill, order online, get
-              next-day delivery, and get a personalized setup that fits how you actually use your service.
+              White Glove Wireless helps individuals and businesses cut through confusing phone plans,
+              compare real options, and switch without stepping into a store. Upload your bill for a free
+              personal review, or use our calculator to explore savings. A local expert explains everything
+              in plain language and handles the details, so you get the right plan at the right price.
             </p>
             <div className="proof" aria-label="White Glove Wireless convenience proof points">
+              <div><b>Personal review</b><span>A real person analyzes your bill and recommends the best fit.</span></div>
               <div><b>No store</b><span>Compare, order, and switch entirely online or by text.</span></div>
               <div><b>Next-day</b><span>Devices and equipment delivered as fast as tomorrow.</span></div>
-              <div><b>No upsell</b><span>Personalized setup based on your bill, not a sales quota.</span></div>
             </div>
           </div>
 
@@ -2216,8 +2216,8 @@ export default function Home() {
             <div className="panel-head">
               <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="" width={52} height={52} />
               <div>
-                <h2>Upload your bill. See your savings.</h2>
-                <p>We'll compare your current wireless or fiber plan and show what you could save.</p>
+                <h2>Get your free bill review</h2>
+                <p>Send us your current wireless or fiber bill and a local expert will compare your options, estimate your savings, and recommend the right plan — no obligation.</p>
               </div>
             </div>
             <form className="bill-form" onSubmit={submitBill}>
@@ -2251,7 +2251,7 @@ export default function Home() {
                 I agree White Glove Wireless may contact me about this bill review. Consent is not a condition of purchase.
               </label>
               <button className="submit" disabled={status.kind === "loading"}>
-                {status.kind === "loading" ? "Sending..." : "Send to AI team"}
+                {status.kind === "loading" ? "Sending..." : "Request my personal review"}
               </button>
               <div className={`status-line ${status.kind === "success" ? "success" : status.kind === "error" ? "error" : ""}`}>
                 {status.message || "Choose consumer or business so WGW starts the right workflow."}
@@ -2260,157 +2260,72 @@ export default function Home() {
           </aside>
         </section>
 
-        <section className="section" aria-label="Why White Glove Wireless">
+        <section className="section" aria-label="Common wireless problems">
           <div className="section-head">
             <div>
-              <div className="mono">Why White Glove</div>
-              <h2>The easier way to switch.</h2>
+              <div className="mono">The Problem</div>
+              <h2>Wireless doesn't have to be this hard.</h2>
             </div>
             <p>
-              Most people dread switching carriers because it means a store visit, a pushy pitch, and a
-              half-day of setup. We built White Glove Wireless to remove all of that.
+              Most people and small businesses overpay simply because phone plans are confusing and
+              constantly changing. We make it simple to see what you're actually paying for — and what you could save.
+            </p>
+          </div>
+          <div className="bill-compare-cta">
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">🗺️</div>
+              <h3>Confusing phone plans</h3>
+              <p>Unlimited tiers, promotional credits, and fine print make it hard to know what you actually need.</p>
+            </div>
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">💸</div>
+              <h3>Overpaying for service</h3>
+              <p>Many customers pay for data they don't use, lines they don't need, or outdated plans they never updated.</p>
+            </div>
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">⚖️</div>
+              <h3>No way to compare the best deal</h3>
+              <p>With so many carriers and bundles, comparing apples-to-apples feels almost impossible.</p>
+            </div>
+            <div className="bill-compare-card">
+              <div className="bill-compare-icon">⏳</div>
+              <h3>Businesses wasting time</h3>
+              <p>Small business owners spend hours on hold and in stores instead of running their business.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="section" aria-label="Personal guidance">
+          <div className="section-head">
+            <div>
+              <div className="mono">Personal Touch</div>
+              <h2>Real people. Real help. Zero robots.</h2>
+            </div>
+            <p>
+              Technology can estimate, but it can't listen. A local White Glove expert reviews your bill,
+              answers your questions, and guides you to a wireless setup that fits your life or your business.
             </p>
           </div>
           <div className="system-grid">
             <div className="system-step">
-              <span>🏠</span>
-              <h3>Skip the store entirely</h3>
-              <p>Compare plans, pick your devices, and place your order from your couch. No lines, no parking, no waiting.</p>
+              <span>🎧</span>
+              <h3>We listen first</h3>
+              <p>Tell us how you use your service. We'll ask the right questions and listen before recommending anything.</p>
             </div>
             <div className="system-step">
-              <span>🚚</span>
-              <h3>Next-day delivery</h3>
-              <p>Your new phones, tablets, or fiber equipment arrive as fast as tomorrow — ready to activate.</p>
-            </div>
-            <div className="system-step">
-              <span>🛡️</span>
-              <h3>No upsell, no pressure</h3>
-              <p>We review your actual bill and usage, then recommend only what you need. No hidden extras, no quotas.</p>
+              <span>💬</span>
+              <h3>We explain every option</h3>
+              <p>Plans, devices, trade-ins, and promotions — explained in plain language, not carrier jargon.</p>
             </div>
             <div className="system-step">
               <span>🔧</span>
-              <h3>Personalized setup</h3>
-              <p>We configure your service, transfer your data, and walk you through everything so it works the way you want.</p>
+              <h3>We handle the details</h3>
+              <p>From porting your number to next-day delivery and personalized setup, we manage the switch for you.</p>
             </div>
-          </div>
-        </section>
-
-        <section className="att-section" id="features" aria-label="Switch and save features">
-          <div className="section">
-            <div className="section-head">
-              <div>
-                <div className="mono">Why Switch</div>
-                <h2>A Better Wireless & Fiber Experience</h2>
-              </div>
-              <p>
-                Experience the benefits of switching with White Glove Wireless. We make the transition seamless while you get better coverage, faster speeds, and exclusive deals.
-              </p>
-            </div>
-            <div className="att-features">
-              {WGW_FEATURES.map((feature, index) => (
-                <div className="att-feature" key={index}>
-                  <div className="att-feature-icon">{feature.icon}</div>
-                  <h3>{feature.title}</h3>
-                  <p>{feature.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="phones-section section" id="phones" aria-label="New phones available">
-          <div className="section-head">
-            <div>
-              <div className="mono">Latest Devices</div>
-              <h2>New Phones Available</h2>
-            </div>
-            <p>
-              Get the latest smartphones with flexible payment options. Choose from iPhone, Samsung Galaxy, Google Pixel, and other premium devices.
-            </p>
-          </div>
-          <div className="phone-categories">
-            {PHONE_CATEGORIES.map((category, index) => (
-              <div className="phone-category" key={index} style={{ "--accent": category.accent }}>
-                <div className="phone-category-header">{category.category}</div>
-                <ul className="phone-list">
-                  {category.phones.map((phone, phoneIndex) => (
-                    <li key={phoneIndex}>{phone}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="trade-in-section" id="trade-in" aria-label="Trade-in deals">
-          <div className="section">
-            <div className="section-head">
-              <div>
-                <div className="mono">Device Trade-In</div>
-                <h2>Get Credit for Your Old Device</h2>
-              </div>
-              <p>
-                Trade in your current phone and get instant credit toward a new device. The grid below shows example devices you can trade in — not the new phones you are buying — along with estimated trade-in values and the promotional credit tier each may qualify for.
-              </p>
-            </div>
-
-            <div className="trade-in-legend">
-              <div className="legend-title">Promotional credit tiers</div>
-              <div className="legend-items">
-                {tradeInPromos.filter(t => t.promo_credit > 0).map((tier, index) => (
-                  <div className="legend-item" key={index}>
-                    <span className="legend-dot" style={{ background: tier.color }} />
-                    <span className="legend-label">{tier.tier}</span>
-                    <span className="legend-range">{tier.notes || `Eligible: ${(tier.example_models || tier.eligible_devices || []).slice(0, 3).join(", ")}`}</span>
-                    <span className="legend-credit">Up to ${tier.promo_credit} credit</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="trade-in-grid">
-              {TRADE_IN_SHOWCASE.map((device, index) => {
-                const value = DEVICE_VALUES[device] || 0;
-                const tier = findPromoForDevice(device, tradeInPromos) || tradeInPromos[tradeInPromos.length - 1];
-                return (
-                  <div className="trade-in-card" key={index} style={{ "--tier-color": tier.color }}>
-                    <div className="trade-in-device">{device}</div>
-                    <div className="trade-in-value">${value} est. value</div>
-                    <div className="trade-in-tier">
-                      <span className="tier-dot" style={{ background: tier.color }} />
-                      {tier.tier} tier
-                    </div>
-                    <div className="trade-in-qualifies">
-                      {tier.promo_credit > 0
-                        ? <>Qualifies for up to <b>${tier.promo_credit}</b> in promo credits</>
-                        : <>Trade-in value only — no current promo credit</>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="trade-in-disclaimer">
-              <p>
-                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current carrier offers. Values shown are representative examples based on promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current promotions.
-              </p>
-              <p>
-                Always confirm your actual trade-in value and eligible credits directly with your carrier before making a purchase decision.
-              </p>
-              <p className="trade-in-source">
-                Refreshed daily by WGW Director AI
-              </p>
-            </div>
-
-            <div className="trade-in-brands">
-              {TRADE_IN_BRANDS.map((brand, index) => (
-                <span className="trade-in-brand" key={index}>{brand}</span>
-              ))}
-            </div>
-            <div className="trade-in-cta">
-              <button className="trade-in-link" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
-                Get Your Trade-In Quote
-              </button>
+            <div className="system-step">
+              <span>🤝</span>
+              <h3>We are not just a website</h3>
+              <p>A local White Glove expert reviews every bill and follows up personally. You're not talking to a chatbot.</p>
             </div>
           </div>
         </section>
@@ -2420,10 +2335,12 @@ export default function Home() {
             <div className="section-head">
               <div>
                 <div className="mono">Savings Calculator</div>
-                <h2>Build Your Personalized Quote</h2>
+                <h2>Explore your savings</h2>
               </div>
               <p>
-                Answer a few quick questions and we’ll show you exactly what you could save by switching with White Glove Wireless — including your eligible trade-in credits and any discounts you qualify for.
+                This calculator is a helpful starting point based on current unlimited plan pricing, autopay
+                discounts, and promotional trade-in tiers. For the most accurate recommendation — especially
+                for business accounts or complex bills — request a free personal review.
               </p>
             </div>
             <div className="calculator-container">
@@ -3048,16 +2965,177 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="att-section" id="services" aria-label="Services and solutions">
+          <div className="section">
+            <div className="section-head">
+              <div>
+                <div className="mono">Solutions</div>
+                <h2>What we help with</h2>
+              </div>
+              <p>
+                From personal phone plans to business wireless accounts, we help you find the right devices,
+                the right coverage, and real cost savings — without the store visit.
+              </p>
+            </div>
+            <div className="att-features">
+              {WGW_FEATURES.map((feature, index) => (
+                <div className="att-feature" key={index}>
+                  <div className="att-feature-icon">{feature.icon}</div>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.description}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="section-head" style={{ marginTop: 64 }}>
+              <div>
+                <div className="mono">Latest Devices</div>
+                <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)' }}>New phones, same expert guidance</h2>
+              </div>
+              <p>
+                Choose from the latest iPhone, Samsung Galaxy, Google Pixel, and more. We help you compare
+                financing, trade-in value, and plan requirements so you pick the device that makes sense.
+              </p>
+            </div>
+            <div className="phone-categories">
+            {PHONE_CATEGORIES.map((category, index) => (
+              <div className="phone-category" key={index} style={{ "--accent": category.accent }}>
+                <div className="phone-category-header">{category.category}</div>
+                <ul className="phone-list">
+                  {category.phones.map((phone, phoneIndex) => (
+                    <li key={phoneIndex}>{phone}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+            <div className="section-head" style={{ marginTop: 64 }}>
+              <div>
+                <div className="mono">Device Trade-In</div>
+                <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)' }}>Get credit for your old device</h2>
+              </div>
+              <p>
+                Trade in your current phone and get instant credit toward a new device. The grid below shows
+                example trade-in devices and the promotional credit tier each may qualify for.
+              </p>
+            </div>
+
+            <div className="trade-in-legend">
+              <div className="legend-title">Promotional credit tiers</div>
+              <div className="legend-items">
+                {tradeInPromos.filter(t => t.promo_credit > 0).map((tier, index) => (
+                  <div className="legend-item" key={index}>
+                    <span className="legend-dot" style={{ background: tier.color }} />
+                    <span className="legend-label">{tier.tier}</span>
+                    <span className="legend-range">{tier.notes || `Eligible: ${(tier.example_models || tier.eligible_devices || []).slice(0, 3).join(", ")}`}</span>
+                    <span className="legend-credit">Up to ${tier.promo_credit} credit</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="trade-in-grid">
+              {TRADE_IN_SHOWCASE.map((device, index) => {
+                const value = DEVICE_VALUES[device] || 0;
+                const tier = findPromoForDevice(device, tradeInPromos) || tradeInPromos[tradeInPromos.length - 1];
+                return (
+                  <div className="trade-in-card" key={index} style={{ "--tier-color": tier.color }}>
+                    <div className="trade-in-device">{device}</div>
+                    <div className="trade-in-value">${value} est. value</div>
+                    <div className="trade-in-tier">
+                      <span className="tier-dot" style={{ background: tier.color }} />
+                      {tier.tier} tier
+                    </div>
+                    <div className="trade-in-qualifies">
+                      {tier.promo_credit > 0
+                        ? <>Qualifies for up to <b>${tier.promo_credit}</b> in promo credits</>
+                        : <>Trade-in value only — no current promo credit</>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="trade-in-disclaimer">
+              <p>
+                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current carrier offers. Values shown are representative examples based on promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current promotions.
+              </p>
+              <p>
+                Always confirm your actual trade-in value and eligible credits directly with your carrier before making a purchase decision.
+              </p>
+              <p className="trade-in-source">
+                Refreshed daily by WGW Director AI
+              </p>
+            </div>
+
+            <div className="trade-in-brands">
+              {TRADE_IN_BRANDS.map((brand, index) => (
+                <span className="trade-in-brand" key={index}>{brand}</span>
+              ))}
+            </div>
+            <div className="trade-in-cta">
+              <button className="trade-in-link" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
+                Get Your Trade-In Quote
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="section" id="why-us" aria-label="Why choose White Glove Wireless">
+          <div className="section-head">
+            <div>
+              <div className="mono">Why Choose Us</div>
+              <h2>Guidance you can trust.</h2>
+            </div>
+            <p>
+              We combine carrier expertise with old-fashioned customer service. You get clear answers,
+              honest recommendations, and support that doesn't disappear after you sign up.
+            </p>
+          </div>
+          <div className="att-features">
+            <div className="att-feature">
+              <div className="att-feature-icon">👤</div>
+              <h3>Personalized support</h3>
+              <p>One point of contact who knows your account and checks in until everything works.</p>
+            </div>
+            <div className="att-feature">
+              <div className="att-feature-icon">📡</div>
+              <h3>Wireless experience</h3>
+              <p>We know carrier plans, business accounts, devices, and promotions inside and out.</p>
+            </div>
+            <div className="att-feature">
+              <div className="att-feature-icon">💬</div>
+              <h3>Simple explanations</h3>
+              <p>No acronyms or pressure. Just clear answers so you can decide confidently.</p>
+            </div>
+            <div className="att-feature">
+              <div className="att-feature-icon">💰</div>
+              <h3>Savings-focused</h3>
+              <p>Our goal is to lower your bill or get you more value — not sell you extras.</p>
+            </div>
+            <div className="att-feature">
+              <div className="att-feature-icon">🏢</div>
+              <h3>Business-friendly</h3>
+              <p>From multi-line accounts to mobile internet, we handle the complexity for your team.</p>
+            </div>
+            <div className="att-feature">
+              <div className="att-feature-icon">🛡️</div>
+              <h3>No confusing sales pressure</h3>
+              <p>No quotas, no hidden fees, no rush. Advice that puts you first.</p>
+            </div>
+          </div>
+        </section>
+
         <section className="section" aria-label="Compare your bill">
           <div className="section-head">
             <div>
-              <div className="mono">Compare your bill</div>
-              <h2>Upload your bill to see your savings.</h2>
+              <div className="mono">Get Started</div>
+              <h2>Ready to find your savings?</h2>
             </div>
             <p>
-              The fastest way to find out what wireless and fiber can save you is to let us
-              review your current bill. No store visit, no pressure — just a clear side-by-side
-              comparison and a recommendation that fits your actual usage.
+              Start with the calculator for a quick estimate, or upload your bill for a personal review.
+              Either way, a local White Glove expert will help you understand your options and next steps.
             </p>
           </div>
           <div className="bill-compare-cta">
