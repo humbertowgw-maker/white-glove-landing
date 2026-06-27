@@ -18,6 +18,18 @@ async function fetchTradeInPromos() {
   }
 }
 
+async function fetchCarrierPlans() {
+  try {
+    const res = await fetch(`${API}/api/carrier-plans`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data.plans) ? data.plans : [];
+  } catch (err) {
+    console.warn("[landing] could not load carrier plans:", err.message);
+    return [];
+  }
+}
+
 async function fetchDevices(search = "") {
   try {
     const url = new URL(`${API}/api/devices`);
@@ -69,21 +81,46 @@ const UNLIMITED_PLANS = [
   },
 ];
 
-function getPlanPrice(planId, lines) {
+function getPlanRow(plans, tier, lines) {
+  const tierPlans = plans.filter(p => p.tier === tier);
+  if (!tierPlans.length) return null;
+  return (
+    tierPlans.find(p => (p.lines_min || 1) <= lines && (p.lines_max == null || p.lines_max >= lines)) ||
+    tierPlans[tierPlans.length - 1]
+  );
+}
+
+function getPlanPrice(plans, planId, lines) {
+  if (plans?.length) {
+    const row = getPlanRow(plans, planId, lines);
+    if (row) return Number(row.per_line_price);
+  }
   const plan = UNLIMITED_PLANS.find(p => p.id === planId) || UNLIMITED_PLANS[1];
   const idx = Math.max(0, Math.min(lines - 1, plan.pricePerLine.length - 1));
   return plan.pricePerLine[idx];
 }
 
-function applyPlanDiscounts(basePricePerLine, lines, discounts) {
+function applyPlanDiscounts(basePricePerLine, lines, discounts, planRow) {
   // Most carrier discounts do not stack — apply the single best eligible discount.
   const { is55Plus, isMilitary, isTeacher, hasEmployerDiscount } = discounts || {};
 
   const candidates = [];
-  if (is55Plus) candidates.push({ type: "55+", amount: 10 * lines, label: "55+ discount" }); // $10 off per line
-  if (isMilitary) candidates.push({ type: "military", factor: 0.25, label: "Military / veteran discount" });
-  if (isTeacher) candidates.push({ type: "teacher", factor: 0.25, label: "Teacher discount" });
-  if (hasEmployerDiscount) candidates.push({ type: "employer", factor: 0.15, label: "Employer discount" });
+  if (is55Plus) {
+    const amount = planRow?.senior_discount ? Number(planRow.senior_discount) * lines : 10 * lines;
+    candidates.push({ type: "55+", amount, label: "55+ discount" });
+  }
+  if (isMilitary) {
+    const factor = planRow?.military_discount ? Number(planRow.military_discount) / 100 : 0.25;
+    candidates.push({ type: "military", factor, label: "Military / veteran discount" });
+  }
+  if (isTeacher) {
+    const factor = planRow?.teacher_discount ? Number(planRow.teacher_discount) / 100 : 0.25;
+    candidates.push({ type: "teacher", factor, label: "Teacher discount" });
+  }
+  if (hasEmployerDiscount) {
+    const factor = planRow?.employer_discount ? Number(planRow.employer_discount) / 100 : 0.15;
+    candidates.push({ type: "employer", factor, label: "Employer discount" });
+  }
 
   if (!candidates.length) return { pricePerLine: basePricePerLine, totalDiscount: 0, discountLabel: null };
 
@@ -301,6 +338,7 @@ export default function Home() {
   const [promosLoaded, setPromosLoaded] = useState(false);
   const [deviceCatalog, setDeviceCatalog] = useState(DEFAULT_DEVICES);
   const [devicesLoaded, setDevicesLoaded] = useState(false);
+  const [carrierPlans, setCarrierPlans] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -322,6 +360,10 @@ export default function Home() {
         setDeviceCatalog(devices.map(d => ({ ...d, id: d.slug || d.id })));
       }
       setDevicesLoaded(true);
+    });
+    fetchCarrierPlans().then(plans => {
+      if (!mounted) return;
+      if (plans.length > 0) setCarrierPlans(plans);
     });
     return () => { mounted = false; };
   }, []);
@@ -533,16 +575,18 @@ export default function Home() {
 
     const currentBill = parseFloat(calculator.currentBill) || 0;
     const lines = Math.max(1, parseInt(calculator.lines) || 1);
-    const basePlanPricePerLine = getPlanPrice(calculator.attPlan, lines);
+    const planRow = getPlanRow(carrierPlans, calculator.attPlan, lines);
+    const basePlanPricePerLine = getPlanPrice(carrierPlans, calculator.attPlan, lines);
     const discounted = applyPlanDiscounts(basePlanPricePerLine, lines, {
       is55Plus: calculator.is55Plus,
       isMilitary: calculator.isMilitary,
       isTeacher: calculator.isTeacher,
       hasEmployerDiscount: calculator.hasEmployerDiscount,
-    });
+    }, planRow);
 
-    // Autopay/paperless discount ($10/line on Unlimited 2.0 plans).
-    const autopayDiscount = calculator.autopay ? AUTOPAY_DISCOUNT_PER_LINE * lines : 0;
+    // Autopay/paperless discount.
+    const autopayPerLine = planRow?.autopay_discount ? Number(planRow.autopay_discount) : AUTOPAY_DISCOUNT_PER_LINE;
+    const autopayDiscount = calculator.autopay ? autopayPerLine * lines : 0;
     const planTotalAfterAutopay = Math.max(0, discounted.pricePerLine * lines - autopayDiscount);
     const planPricePerLineAfterAutopay = planTotalAfterAutopay / lines;
 
@@ -585,7 +629,7 @@ export default function Home() {
     const quoteData = {
       currentBill,
       lines,
-      attPlan: UNLIMITED_PLANS.find(p => p.id === calculator.attPlan) || UNLIMITED_PLANS[1],
+      attPlan: planRow || UNLIMITED_PLANS.find(p => p.id === calculator.attPlan) || UNLIMITED_PLANS[1],
       basePlanPricePerLine,
       planTotalBeforeAutopay: discounted.pricePerLine * lines,
       newMonthlyBill,
@@ -2467,16 +2511,24 @@ export default function Home() {
                   {quoteStep >= 4 && (
                     <div className={`quote-step ${quoteStep === 4 ? 'active' : ''}`}>
                       <div className="quote-step-question">
-                        Based on your answers, I recommend the <b>{UNLIMITED_PLANS.find(p => p.id === calculator.attPlan)?.name}</b>. Want to change it?
+                        Based on your answers, I recommend the <b>{(getPlanRow(carrierPlans, calculator.attPlan, calculator.lines) || UNLIMITED_PLANS.find(p => p.id === calculator.attPlan))?.plan_name || UNLIMITED_PLANS.find(p => p.id === calculator.attPlan)?.name}</b>. Want to change it?
                       </div>
                       <div className="quote-step-input">
                         <select
                           value={calculator.attPlan}
                           onChange={(e) => updateCalculator('attPlan', e.target.value)}
                         >
-                          {UNLIMITED_PLANS.map(plan => (
-                            <option key={plan.id} value={plan.id}>{plan.name} — {plan.features}</option>
-                          ))}
+                          {(carrierPlans.length ? [...new Set(carrierPlans.map(p => p.tier))] : UNLIMITED_PLANS.map(p => p.id)).map(tier => {
+                            const plan = carrierPlans.length
+                              ? carrierPlans.find(p => p.tier === tier)
+                              : UNLIMITED_PLANS.find(p => p.id === tier);
+                            const fallback = UNLIMITED_PLANS.find(p => p.id === tier);
+                            return (
+                              <option key={tier} value={tier}>
+                                {(plan?.plan_name || fallback?.name || tier)} — {(plan?.features?.join?.(", ") || fallback?.features || "")}
+                              </option>
+                            );
+                          })}
                         </select>
                       </div>
                     </div>
@@ -2674,7 +2726,7 @@ export default function Home() {
 
                     <div className="result-item">
                       <span className="result-label">New Plan</span>
-                      <span className="result-value">{quoteResult.attPlan?.name || "Unlimited Extra"}</span>
+                      <span className="result-value">{quoteResult.attPlan?.plan_name || quoteResult.attPlan?.name || "Unlimited Extra"}</span>
                     </div>
 
                     <div className="result-item">
