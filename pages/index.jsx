@@ -390,6 +390,10 @@ export default function Home() {
     permission_to_contact: false,
   });
   const [submissionStatus, setSubmissionStatus] = useState(null);
+  const [submittedId, setSubmittedId] = useState(null);
+  const [bookCallStatus, setBookCallStatus] = useState(null);
+  const [bookCallDate, setBookCallDate] = useState("");
+  const [bookCallTime, setBookCallTime] = useState("");
 
   const update = event => {
     const { name, value, type, checked } = event.target;
@@ -688,6 +692,7 @@ export default function Home() {
         kind: "success",
         message: data.message || "Your quote is submitted. A rep will reach out soon.",
       });
+      if (data.submission?.id) setSubmittedId(data.submission.id);
     } catch (error) {
       console.error("[landing/submit]", error);
       setSubmissionStatus({ kind: "error", message: error.message });
@@ -1869,6 +1874,33 @@ export default function Home() {
           color: #7dd3fc;
           border: 1px solid rgba(0,168,224,.3);
         }
+        .capture-success { display: flex; flex-direction: column; gap: 16px; }
+        .book-call-box {
+          padding: 18px;
+          background: rgba(255,255,255,.04);
+          border: 1px solid rgba(255,255,255,.1);
+          border-radius: 12px;
+        }
+        .book-call-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--ink);
+          margin-bottom: 4px;
+        }
+        .book-call-subtitle {
+          margin: 0 0 14px;
+          color: var(--muted);
+          font-size: 13px;
+        }
+        .book-call-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 14px;
+        }
+        @media (max-width: 480px) {
+          .book-call-row { grid-template-columns: 1fr; }
+        }
         .discount-group { margin-bottom: 20px; }
         .discount-hint {
           margin: -4px 0 10px;
@@ -2739,8 +2771,79 @@ export default function Home() {
                       <p className="capture-subtitle">Send this estimate to Sofia and a local rep. We’ll follow up via your preferred method.</p>
 
                       {submissionStatus?.kind === "success" ? (
-                        <div className={`capture-status ${submissionStatus.kind}`}>
-                          {submissionStatus.message}
+                        <div className="capture-success">
+                          <div className={`capture-status ${submissionStatus.kind}`}>
+                            {submissionStatus.message}
+                            {bookCallStatus?.kind === "success" && (
+                              <span style={{ display: "block", marginTop: 8, fontWeight: 500 }}>
+                                Your call is booked for {bookCallDate} at {bookCallTime}.
+                              </span>
+                            )}
+                          </div>
+                          {bookCallStatus?.kind !== "success" && (
+                            <div className="book-call-box">
+                              <div className="book-call-title">Want to lock in your savings faster?</div>
+                              <p className="book-call-subtitle">Book a free 15-minute call with a local rep.</p>
+                              {bookCallStatus?.kind === "error" && (
+                                <div className="capture-status error">{bookCallStatus.message}</div>
+                              )}
+                              {bookCallStatus?.kind === "loading" && (
+                                <div className="capture-status loading">{bookCallStatus.message}</div>
+                              )}
+                              <div className="book-call-row">
+                                <input
+                                  type="date"
+                                  value={bookCallDate}
+                                  min={new Date().toISOString().slice(0, 10)}
+                                  onChange={(e) => setBookCallDate(e.target.value)}
+                                  className="capture-input"
+                                />
+                                <select
+                                  value={bookCallTime}
+                                  onChange={(e) => setBookCallTime(e.target.value)}
+                                  className="capture-input"
+                                >
+                                  <option value="">Pick a time</option>
+                                  <option value="9:00 AM">9:00 AM</option>
+                                  <option value="10:00 AM">10:00 AM</option>
+                                  <option value="11:00 AM">11:00 AM</option>
+                                  <option value="12:00 PM">12:00 PM</option>
+                                  <option value="1:00 PM">1:00 PM</option>
+                                  <option value="2:00 PM">2:00 PM</option>
+                                  <option value="3:00 PM">3:00 PM</option>
+                                  <option value="4:00 PM">4:00 PM</option>
+                                  <option value="5:00 PM">5:00 PM</option>
+                                </select>
+                              </div>
+                              <button
+                                type="button"
+                                className="capture-submit"
+                                disabled={!bookCallDate || !bookCallTime || bookCallStatus?.kind === "loading"}
+                                onClick={async () => {
+                                  setBookCallStatus({ kind: "loading", message: "Booking your call..." });
+                                  try {
+                                    const res = await fetch(`${API}/api/landing/book-call`, {
+                                      method: "POST",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        landing_submission_id: submittedId,
+                                        scheduled_date: bookCallDate,
+                                        scheduled_time: bookCallTime,
+                                      }),
+                                    });
+                                    const data = await res.json().catch(() => ({}));
+                                    if (!res.ok) throw new Error(data.error || "Could not book call.");
+                                    setBookCallStatus({ kind: "success", message: "Call booked!" });
+                                  } catch (err) {
+                                    console.error("[landing/book-call]", err);
+                                    setBookCallStatus({ kind: "error", message: err.message });
+                                  }
+                                }}
+                              >
+                                Book my call
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <form onSubmit={submitLandingQuote} className="capture-form">
