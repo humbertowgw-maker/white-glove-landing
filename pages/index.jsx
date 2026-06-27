@@ -394,6 +394,11 @@ export default function Home() {
 
   // Quote Calculator State
   const [calculator, setCalculator] = useState({
+    // Intake fields
+    customerType: "consumer",
+    customerStatus: "new",
+    serviceInterest: "wireless_only",
+    // Wireless quote fields
     currentBill: "",
     lines: "",
     currentProvider: "",
@@ -414,9 +419,23 @@ export default function Home() {
   const [showTradeInSuggestions, setShowTradeInSuggestions] = useState(false);
   const [newPhoneSuggestions, setNewPhoneSuggestions] = useState([]);
   const [showNewPhoneSuggestions, setShowNewPhoneSuggestions] = useState(false);
+  const [intakeStep, setIntakeStep] = useState(0);
   const [quoteStep, setQuoteStep] = useState(0);
   const [quoteResult, setQuoteResult] = useState(null);
+  const [fourLineEstimate, setFourLineEstimate] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [availabilityResult, setAvailabilityResult] = useState({
+    address: "",
+    customerType: "consumer",
+    customerStatus: "new",
+    fiberAvailable: "unknown",
+    fiberProviderType: "unknown",
+    internetAirAvailable: "unknown",
+    wirelessAvailable: "unknown",
+    recommendedInternetType: "unknown",
+    convergedEligible: "unknown",
+    notes: [],
+  });
 
   // Contact capture after quote
   const [contactForm, setContactForm] = useState({
@@ -436,6 +455,23 @@ export default function Home() {
   const [bookCallStatus, setBookCallStatus] = useState(null);
   const [bookCallDate, setBookCallDate] = useState("");
   const [bookCallTime, setBookCallTime] = useState("");
+
+  // Sync contact form lead type with quote intake customer type.
+  useEffect(() => {
+    setContactForm(current => ({
+      ...current,
+      lead_type: calculator.customerType,
+    }));
+  }, [calculator.customerType]);
+
+  // Keep availability result in sync with intake selections.
+  useEffect(() => {
+    setAvailabilityResult(current => ({
+      ...current,
+      customerType: calculator.customerType,
+      customerStatus: calculator.customerStatus,
+    }));
+  }, [calculator.customerType, calculator.customerStatus]);
 
   const update = event => {
     const { name, value, type, checked } = event.target;
@@ -570,27 +606,115 @@ export default function Home() {
     setCalculator(prev => ({ ...prev, newPhones: prev.newPhones.filter(p => p.id !== id) }));
   }
 
-  const calculateQuote = async () => {
-    setIsCalculating(true);
+  // Internet recommendation helper for internet/bundle paths.
+  // Does not call the real address API yet.
+  function getInternetRecommendation(result, interest) {
+    const showFiber = result.fiberAvailable === true;
+    const showInternetAir = !showFiber && result.internetAirAvailable === true;
+    const showNone = result.fiberAvailable === false && result.internetAirAvailable === false;
 
+    if (showFiber) {
+      return {
+        title: "Fiber may be available",
+        message: "Fiber may be available at this address, so we can build the quote around fiber internet.",
+        recommendedInternetType: "fiber",
+        showHumanReview: false,
+      };
+    }
+    if (showInternetAir) {
+      return {
+        title: "Internet Air may be an option",
+        message: "Fiber may not be available at this address, but Internet Air may be an option.",
+        recommendedInternetType: "internet_air",
+        showHumanReview: false,
+      };
+    }
+    if (showNone) {
+      return {
+        title: "Internet option not confirmed",
+        message: "We could not confirm an internet option for this address yet. White Glove can manually review your options.",
+        recommendedInternetType: "none",
+        showHumanReview: true,
+      };
+    }
+    return {
+      title: "White Glove review recommended",
+      message: "White Glove can personally review this address and confirm whether Fiber or Internet Air may be available.",
+      recommendedInternetType: "unknown",
+      showHumanReview: true,
+    };
+  }
+
+  // Determine whether to show the optional Internet Air backup recommendation.
+  function shouldShowInternetAirBackupOption(calc, avail) {
+    if (calc.customerStatus === "existing") return true;
+    if (calc.customerType === "business") return true;
+    if (calc.serviceInterest === "internet_wireless") return true;
+    return false;
+  }
+
+  // Determine whether to show the Converged Offer opportunity card.
+  function shouldShowConvergedOffer(calc, avail) {
+    if (calc.serviceInterest === "internet_wireless") return true;
+    if (calc.serviceInterest === "not_sure") return true;
+    return false;
+  }
+
+  // Build a customer/rep-friendly summary of the quote advisor state.
+  function buildAdvisorSummaryText(calc) {
+    let text = "";
+    if (calc.serviceInterest === "internet_only") {
+      text = "Customer is requesting internet only. Address needs White Glove review for Fiber or Internet Air availability.";
+    } else if (calc.serviceInterest === "internet_wireless") {
+      text = "Customer is requesting internet and wireless. Converged Offer should be reviewed. Address needs Fiber or Internet Air confirmation.";
+    } else if (calc.serviceInterest === "not_sure") {
+      text = "Customer is not sure which option is best. White Glove should review internet availability, wireless needs, and possible bundle value.";
+    } else if (calc.serviceInterest === "wireless_only") {
+      text = "Customer is requesting wireless only. Review requested line count, device needs, and optional better-value recommendations.";
+    }
+    if (calc.customerType === "business") {
+      text += " Business customer: review business line, dual SIM, and backup internet needs where applicable.";
+    }
+    if (calc.customerStatus === "existing") {
+      text += " Existing customer: review current services, bill, upgrade options, and backup needs.";
+    }
+    return text.trim();
+  }
+
+  // Customer-facing labels for intake values.
+  function getServiceInterestLabel(interest) {
+    return {
+      internet_only: 'Internet only',
+      internet_wireless: 'Internet + Wireless',
+      not_sure: 'Not sure, help me choose',
+      wireless_only: 'Wireless only',
+    }[interest] || interest;
+  }
+  function getCustomerTypeLabel(type) {
+    return type === 'business' ? 'Business' : 'Home / Residential';
+  }
+  function getCustomerStatusLabel(status) {
+    return status === 'existing' ? 'Existing Customer' : 'New Customer';
+  }
+
+  // Synchronous wireless estimate builder. Does not call the API.
+  function buildWirelessEstimate(lines) {
     const currentBill = parseFloat(calculator.currentBill) || 0;
-    const lines = Math.max(1, parseInt(calculator.lines) || 1);
-    const planRow = getPlanRow(carrierPlans, calculator.attPlan, lines);
-    const basePlanPricePerLine = getPlanPrice(carrierPlans, calculator.attPlan, lines);
-    const discounted = applyPlanDiscounts(basePlanPricePerLine, lines, {
+    const safeLines = Math.max(1, parseInt(lines) || 1);
+    const planRow = getPlanRow(carrierPlans, calculator.attPlan, safeLines);
+    const basePlanPricePerLine = getPlanPrice(carrierPlans, calculator.attPlan, safeLines);
+    const discounted = applyPlanDiscounts(basePlanPricePerLine, safeLines, {
       is55Plus: calculator.is55Plus,
       isMilitary: calculator.isMilitary,
       isTeacher: calculator.isTeacher,
       hasEmployerDiscount: calculator.hasEmployerDiscount,
     }, planRow);
 
-    // Autopay/paperless discount.
     const autopayPerLine = planRow?.autopay_discount ? Number(planRow.autopay_discount) : AUTOPAY_DISCOUNT_PER_LINE;
-    const autopayDiscount = calculator.autopay ? autopayPerLine * lines : 0;
-    const planTotalAfterAutopay = Math.max(0, discounted.pricePerLine * lines - autopayDiscount);
-    const planPricePerLineAfterAutopay = planTotalAfterAutopay / lines;
+    const autopayDiscount = calculator.autopay ? autopayPerLine * safeLines : 0;
+    const planTotalAfterAutopay = Math.max(0, discounted.pricePerLine * safeLines - autopayDiscount);
+    const planPricePerLineAfterAutopay = planTotalAfterAutopay / safeLines;
 
-    // Trade-in totals — promo credits require a qualifying plan.
     const tradeInDetails = calculator.tradeIns.map(t => {
       const adjustedValue = adjustTradeInValue(t.value, t.condition);
       const promoCredit = effectivePromoCredit(t.promoCredit, calculator.attPlan);
@@ -606,8 +730,6 @@ export default function Home() {
     const totalMonthlyPromoCredit = totalPromoCredit / FINANCING_MONTHS;
     const promoRequiresQualifyingPlan = calculator.tradeIns.length > 0 && !promoQualifiesForPlan(calculator.attPlan);
 
-    // New phone financing (36 months). Trade-in value is kept separate as bill credits;
-    // promo credits reduce the financed amount evenly over 36 months.
     const newPhoneDetails = calculator.newPhones.map(p => {
       const device = getPhone(deviceCatalog, p.phoneId) || p;
       const fullPrice = device.full_price || p.fullPrice || 0;
@@ -626,12 +748,12 @@ export default function Home() {
     const firstBillWithCredit = Math.max(0, planTotalAfterAutopay - totalTradeInValue) + totalNetPhoneMonthlyPayment;
     const firstYearTotalValue = annualSavings + totalTradeInValue + totalPromoCredit;
 
-    const quoteData = {
+    return {
       currentBill,
-      lines,
+      lines: safeLines,
       attPlan: planRow || UNLIMITED_PLANS.find(p => p.id === calculator.attPlan) || UNLIMITED_PLANS[1],
       basePlanPricePerLine,
-      planTotalBeforeAutopay: discounted.pricePerLine * lines,
+      planTotalBeforeAutopay: discounted.pricePerLine * safeLines,
       newMonthlyBill,
       monthlySavings,
       annualSavings,
@@ -644,7 +766,7 @@ export default function Home() {
       totalNetPhoneMonthlyPayment,
       firstBillWithCredit,
       firstYearTotalValue,
-      perLineSavings: monthlySavings / lines,
+      perLineSavings: monthlySavings / safeLines,
       perLineNewBill: planPricePerLineAfterAutopay,
       discountLabel: discounted.discountLabel,
       totalDiscount: discounted.totalDiscount,
@@ -652,7 +774,22 @@ export default function Home() {
       autopay: calculator.autopay,
       promoRequiresQualifyingPlan,
       financingMonths: FINANCING_MONTHS,
+      isRealQuote: false,
     };
+  }
+
+  const calculateQuote = async () => {
+    setIsCalculating(true);
+
+    const lines = Math.max(1, parseInt(calculator.lines) || 1);
+    const quoteData = buildWirelessEstimate(lines);
+
+    // Optional 4th-line estimate for wireless-only paths with 1-3 lines.
+    if (calculator.serviceInterest === 'wireless_only' && lines >= 1 && lines <= 3) {
+      setFourLineEstimate(buildWirelessEstimate(4));
+    } else {
+      setFourLineEstimate(null);
+    }
 
     // Try to get real-time quote from API
     try {
@@ -688,35 +825,62 @@ export default function Home() {
     event.preventDefault();
     setSubmissionStatus({ kind: "loading", message: "Locking in your quote..." });
     try {
-      const quote_summary = quoteResult ? {
-        currentProvider: calculator.currentProvider,
-        currentBill: quoteResult.currentBill,
-        lines: quoteResult.lines,
-        attPlan: quoteResult.attPlan,
-        basePlanPricePerLine: quoteResult.basePlanPricePerLine,
-        planTotalBeforeAutopay: quoteResult.planTotalBeforeAutopay,
-        newMonthlyBill: quoteResult.newMonthlyBill,
-        monthlySavings: quoteResult.monthlySavings,
-        annualSavings: quoteResult.annualSavings,
-        totalTradeInValue: quoteResult.totalTradeInValue,
-        totalPromoCredit: quoteResult.totalPromoCredit,
-        totalMonthlyPromoCredit: quoteResult.totalMonthlyPromoCredit,
-        tradeInDetails: quoteResult.tradeInDetails,
-        newPhoneDetails: quoteResult.newPhoneDetails,
-        totalPhoneMonthlyPayment: quoteResult.totalPhoneMonthlyPayment,
-        totalNetPhoneMonthlyPayment: quoteResult.totalNetPhoneMonthlyPayment,
-        firstBillWithCredit: quoteResult.firstBillWithCredit,
-        firstYearTotalValue: quoteResult.firstYearTotalValue,
-        perLineSavings: quoteResult.perLineSavings,
-        perLineNewBill: quoteResult.perLineNewBill,
-        discountLabel: quoteResult.discountLabel,
-        totalDiscount: quoteResult.totalDiscount,
-        autopayDiscount: quoteResult.autopayDiscount,
-        autopay: quoteResult.autopay,
-        promoRequiresQualifyingPlan: quoteResult.promoRequiresQualifyingPlan,
-        financingMonths: quoteResult.financingMonths,
-        isRealQuote: quoteResult.isRealQuote,
-      } : null;
+      const isWirelessPath = calculator.serviceInterest === 'wireless_only';
+      const requestedWirelessLines = isWirelessPath ? Math.max(1, parseInt(calculator.lines) || 1) : null;
+      const showFourthLineOption = isWirelessPath && requestedWirelessLines >= 1 && requestedWirelessLines <= 3;
+      const showBusinessDualSimOption = isWirelessPath && calculator.customerType === 'business';
+
+      const showInternetAirBackupOption = shouldShowInternetAirBackupOption(calculator, availabilityResult);
+      const existingCustomerReviewNeeded = calculator.customerStatus === 'existing';
+      const showConvergedOfferOption = shouldShowConvergedOffer(calculator, availabilityResult);
+      const convergedOfferStatus = 'needs_review';
+
+      const advisorSummaryText = buildAdvisorSummaryText(calculator);
+
+      const quote_summary = {
+        customerType: calculator.customerType,
+        customerStatus: calculator.customerStatus,
+        serviceInterest: calculator.serviceInterest,
+        availabilityAddress: availabilityResult.address,
+        availabilityRecommendedInternetType: availabilityResult.recommendedInternetType,
+        requestedWirelessLines,
+        showFourthLineOption,
+        showBusinessDualSimOption,
+        showInternetAirBackupOption,
+        existingCustomerReviewNeeded,
+        showConvergedOfferOption,
+        convergedOfferStatus,
+        advisorSummaryText,
+        ...(quoteResult ? {
+          currentProvider: calculator.currentProvider,
+          currentBill: quoteResult.currentBill,
+          lines: quoteResult.lines,
+          attPlan: quoteResult.attPlan,
+          basePlanPricePerLine: quoteResult.basePlanPricePerLine,
+          planTotalBeforeAutopay: quoteResult.planTotalBeforeAutopay,
+          newMonthlyBill: quoteResult.newMonthlyBill,
+          monthlySavings: quoteResult.monthlySavings,
+          annualSavings: quoteResult.annualSavings,
+          totalTradeInValue: quoteResult.totalTradeInValue,
+          totalPromoCredit: quoteResult.totalPromoCredit,
+          totalMonthlyPromoCredit: quoteResult.totalMonthlyPromoCredit,
+          tradeInDetails: quoteResult.tradeInDetails,
+          newPhoneDetails: quoteResult.newPhoneDetails,
+          totalPhoneMonthlyPayment: quoteResult.totalPhoneMonthlyPayment,
+          totalNetPhoneMonthlyPayment: quoteResult.totalNetPhoneMonthlyPayment,
+          firstBillWithCredit: quoteResult.firstBillWithCredit,
+          firstYearTotalValue: quoteResult.firstYearTotalValue,
+          perLineSavings: quoteResult.perLineSavings,
+          perLineNewBill: quoteResult.perLineNewBill,
+          discountLabel: quoteResult.discountLabel,
+          totalDiscount: quoteResult.totalDiscount,
+          autopayDiscount: quoteResult.autopayDiscount,
+          autopay: quoteResult.autopay,
+          promoRequiresQualifyingPlan: quoteResult.promoRequiresQualifyingPlan,
+          financingMonths: quoteResult.financingMonths,
+          isRealQuote: quoteResult.isRealQuote,
+        } : { isRealQuote: false, note: 'Intake captured; estimate only.' }),
+      };
 
       const payload = {
         ...contactForm,
@@ -734,7 +898,7 @@ export default function Home() {
 
       setSubmissionStatus({
         kind: "success",
-        message: data.message || "Your quote is submitted. A rep will reach out soon.",
+        message: "Thanks — White Glove received your request. A team member will personally review your quote details and follow up.",
       });
       if (data.submission?.id) setSubmittedId(data.submission.id);
     } catch (error) {
@@ -1649,6 +1813,216 @@ export default function Home() {
           font-size: 12px;
           line-height: 1.5;
         }
+        .quote-placeholder-note {
+          margin-top: 16px;
+          padding: 16px;
+          border: 1px dashed var(--line);
+          border-radius: 10px;
+          background: rgba(255,255,255,.04);
+        }
+        .quote-placeholder-note span {
+          display: inline-block;
+          padding: 4px 10px;
+          border-radius: 999px;
+          background: rgba(245,158,11,.15);
+          color: #fde68a;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .05em;
+          text-transform: uppercase;
+        }
+        .quote-placeholder-note p {
+          margin: 10px 0 0;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-recommendation-preview {
+          margin-top: 16px;
+          padding: 16px;
+          border: 1px solid rgba(0,168,224,.3);
+          border-radius: 10px;
+          background: rgba(0,168,224,.08);
+        }
+        .quote-recommendation-preview strong {
+          display: block;
+          margin-bottom: 8px;
+          color: var(--ink);
+          font-size: 14px;
+        }
+        .quote-recommendation-preview p {
+          margin: 0;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-input-label {
+          display: block;
+          margin-bottom: 6px;
+          color: var(--soft);
+          font-size: 12px;
+          font-weight: 600;
+        }
+        .quote-guide-panel {
+          margin-top: 20px;
+          display: grid;
+          gap: 14px;
+        }
+        .quote-guide-section {
+          padding: 16px;
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          background: rgba(255,255,255,.03);
+        }
+        .quote-guide-section-title {
+          margin-bottom: 10px;
+          color: var(--ink);
+          font-size: 13px;
+          font-weight: 800;
+          letter-spacing: .04em;
+          text-transform: uppercase;
+        }
+        .quote-guide-text {
+          margin: 0 0 10px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-guide-text:last-child {
+          margin-bottom: 0;
+        }
+        .quote-guide-list {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+          display: grid;
+          gap: 8px;
+        }
+        .quote-guide-list li {
+          position: relative;
+          padding-left: 18px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.5;
+        }
+        .quote-guide-list li::before {
+          content: '✓';
+          position: absolute;
+          left: 0;
+          color: var(--att);
+          font-size: 12px;
+        }
+        .quote-guide-list li b {
+          color: var(--soft);
+          font-weight: 600;
+        }
+        .quote-guide-note {
+          padding: 14px;
+          border-left: 3px solid var(--att);
+          border-radius: 0 8px 8px 0;
+          background: rgba(0,168,224,.08);
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-guide-review p {
+          margin: 0 0 14px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-option-card {
+          margin-top: 18px;
+          padding: 18px;
+          border: 1px solid var(--line);
+          border-radius: 12px;
+          background: rgba(255,255,255,.04);
+        }
+        .quote-option-card-title {
+          margin-bottom: 10px;
+          color: var(--ink);
+          font-size: 15px;
+          font-weight: 800;
+        }
+        .quote-option-card-text {
+          margin: 0 0 12px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-option-card-estimate {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 12px;
+          border-radius: 8px;
+          background: rgba(0,168,224,.08);
+          margin-bottom: 10px;
+        }
+        .quote-option-card-label {
+          color: var(--muted);
+          font-size: 12px;
+        }
+        .quote-option-card-value {
+          color: var(--ink);
+          font-size: 16px;
+          font-weight: 800;
+        }
+        .quote-option-card-value small {
+          color: var(--muted);
+          font-size: 12px;
+          font-weight: 500;
+        }
+        .quote-option-card-note {
+          margin: 0;
+          color: var(--muted);
+          font-size: 11px;
+          font-style: italic;
+          line-height: 1.5;
+        }
+        .quote-option-card-list {
+          margin: 0;
+          padding-left: 18px;
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .quote-option-card-list li {
+          margin-bottom: 4px;
+        }
+        .quote-wg-review-note {
+          margin-top: 18px;
+          padding: 16px;
+          border-left: 3px solid var(--att);
+          border-radius: 0 10px 10px 0;
+          background: rgba(0,168,224,.08);
+          color: var(--soft);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .advisor-summary {
+          display: grid;
+          gap: 12px;
+        }
+        .advisor-summary .quote-badge {
+          justify-self: flex-start;
+        }
+        .advisor-summary-note {
+          padding: 14px;
+          border-radius: 10px;
+          background: rgba(255,255,255,.05);
+          color: var(--muted);
+          font-size: 13px;
+          line-height: 1.6;
+        }
+        .advisor-summary-flag {
+          padding: 8px 12px;
+          border-radius: 8px;
+          background: rgba(245,158,11,.1);
+          color: #fde68a;
+          font-size: 12px;
+          font-weight: 600;
+        }
         .quote-step-warning a { color: #7dd3fc; text-decoration: underline; }
         .quote-wizard-nav {
           display: flex;
@@ -2353,21 +2727,91 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="quote-step-list">
-                  {quoteStep >= 0 && (
-                    <div className={`quote-step ${quoteStep === 0 ? 'active' : ''}`}>
-                      <div className="quote-step-question">How many lines do you need?</div>
-                      <div className="quote-step-input">
-                        <input
-                          type="number"
-                          min="1"
-                          placeholder="e.g., 4"
-                          value={calculator.lines}
-                          onChange={(e) => updateCalculator('lines', e.target.value)}
-                        />
+                {intakeStep < 3 && (
+                  <div className="quote-step-list">
+                    {intakeStep === 0 && (
+                      <div className="quote-step active">
+                        <div className="quote-step-question">Is this for your home or business?</div>
+                        <div className="quote-step-options">
+                          {[
+                            { value: 'consumer', label: 'Home / Residential' },
+                            { value: 'business', label: 'Business' },
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`quote-step-option ${calculator.customerType === opt.value ? 'selected' : ''}`}
+                              onClick={() => updateCalculator('customerType', opt.value)}
+                            >
+                              <b>{opt.label}</b>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {intakeStep === 1 && (
+                      <div className="quote-step active">
+                        <div className="quote-step-question">Are you a new or existing customer?</div>
+                        <div className="quote-step-options">
+                          {[
+                            { value: 'new', label: 'New Customer' },
+                            { value: 'existing', label: 'Existing Customer' },
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`quote-step-option ${calculator.customerStatus === opt.value ? 'selected' : ''}`}
+                              onClick={() => updateCalculator('customerStatus', opt.value)}
+                            >
+                              <b>{opt.label}</b>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {intakeStep === 2 && (
+                      <div className="quote-step active">
+                        <div className="quote-step-question">What are you interested in?</div>
+                        <div className="quote-step-options">
+                          {[
+                            { value: 'wireless_only', label: 'Wireless only' },
+                            { value: 'internet_only', label: 'Internet only' },
+                            { value: 'internet_wireless', label: 'Internet + Wireless' },
+                            { value: 'not_sure', label: 'Not sure, help me choose' },
+                          ].map(opt => (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              className={`quote-step-option ${calculator.serviceInterest === opt.value ? 'selected' : ''}`}
+                              onClick={() => updateCalculator('serviceInterest', opt.value)}
+                            >
+                              <b>{opt.label}</b>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {intakeStep >= 3 && calculator.serviceInterest === 'wireless_only' && (
+                  <div className="quote-step-list">
+                    {quoteStep >= 0 && (
+                      <div className={`quote-step ${quoteStep === 0 ? 'active' : ''}`}>
+                        <div className="quote-step-question">How many lines do you need?</div>
+                        <div className="quote-step-input">
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="e.g., 4"
+                            value={calculator.lines}
+                            onChange={(e) => updateCalculator('lines', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    )}
 
                   {quoteStep >= 1 && (
                     <div className={`quote-step ${quoteStep === 1 ? 'active' : ''}`}>
@@ -2613,23 +3057,195 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+                )}
+
+                {intakeStep >= 3 && calculator.serviceInterest !== 'wireless_only' && (
+                  <div className="quote-step-list">
+                    {(() => {
+                      const rec = getInternetRecommendation(availabilityResult, calculator.serviceInterest);
+                      const pathLabel = getServiceInterestLabel(calculator.serviceInterest);
+                      const pathMessage = calculator.serviceInterest === 'internet_only'
+                        ? 'We’ll check whether Fiber or Internet Air is the best fit for this address.'
+                        : calculator.serviceInterest === 'internet_wireless'
+                          ? 'We’ll look at internet and wireless together so we can find the best overall value.'
+                          : 'We’ll use your address and needs to recommend the best path: Fiber, Internet Air, Wireless, or a Converged Offer.';
+                      return (
+                        <div className="quote-step active">
+                          <div className="quote-step-question">{pathMessage}</div>
+
+                          <div className="quote-step-input">
+                            <label className="quote-input-label">Service address</label>
+                            <input
+                              type="text"
+                              placeholder="Street address, city, state, ZIP"
+                              value={availabilityResult.address}
+                              onChange={(e) => setAvailabilityResult(current => ({ ...current, address: e.target.value }))}
+                            />
+                            <p className="quote-step-hint">
+                              We’ll use this to check which internet options may be available. For now, White Glove will personally confirm availability.
+                            </p>
+                          </div>
+
+                          <div className="quote-guide-panel">
+                            <div className="quote-guide-section">
+                              <div className="quote-guide-section-title">Your Requested Quote</div>
+                              <ul className="quote-guide-list">
+                                <li><b>Service path:</b> {pathLabel}</li>
+                                <li><b>Customer type:</b> {getCustomerTypeLabel(calculator.customerType)}</li>
+                                <li><b>Customer status:</b> {getCustomerStatusLabel(calculator.customerStatus)}</li>
+                                {availabilityResult.address && (
+                                  <li><b>Address:</b> {availabilityResult.address}</li>
+                                )}
+                              </ul>
+                            </div>
+
+                            <div className="quote-guide-section">
+                              <div className="quote-guide-section-title">Current Recommendation</div>
+                              <div className="quote-recommendation-preview">
+                                <strong>{rec.title}</strong>
+                                <p>{rec.message}</p>
+                              </div>
+                            </div>
+
+                            <div className="quote-guide-section">
+                              <div className="quote-guide-section-title">What We’ll Check</div>
+                              <ul className="quote-guide-list">
+                                <li>Fiber availability</li>
+                                <li>Internet Air availability</li>
+                                {(calculator.serviceInterest === 'internet_wireless' || calculator.serviceInterest === 'not_sure') && (
+                                  <li>Wireless options</li>
+                                )}
+                                {calculator.serviceInterest === 'internet_wireless' && (
+                                  <li>Bundle / Converged Offer value</li>
+                                )}
+                                {(calculator.customerStatus === 'existing' || calculator.customerType === 'business') && (
+                                  <li>Backup internet options</li>
+                                )}
+                              </ul>
+                            </div>
+
+                            {calculator.serviceInterest === 'internet_wireless' && (
+                              <div className="quote-guide-note">
+                                A Converged Offer combines internet and wireless so we can look at the best overall value instead of quoting each service separately.
+                              </div>
+                            )}
+
+                            {calculator.customerStatus === 'existing' && (
+                              <div className="quote-guide-note">
+                                Since you’re an existing customer, White Glove can also review your current services, bill, upgrade options, and possible backup internet needs.
+                              </div>
+                            )}
+
+                            {calculator.customerType === 'business' && (
+                              <div className="quote-guide-note">
+                                For businesses, we can also review internet for payments, phones, cameras, online orders, daily operations, and backup connection needs.
+                              </div>
+                            )}
+
+                            {shouldShowConvergedOffer(calculator, availabilityResult) && (
+                              <div className="quote-guide-section">
+                                <div className="quote-guide-section-title">Converged Offer Opportunity</div>
+                                <p className="quote-guide-text">
+                                  A Converged Offer combines internet and wireless so we can look at the best overall value instead of quoting each service separately.
+                                </p>
+                                <p className="quote-guide-text">
+                                  White Glove can review Fiber, Internet Air, and wireless options together to help find the best fit for this address.
+                                </p>
+                                <ul className="quote-guide-list">
+                                  <li>Fiber + Wireless, if Fiber is available</li>
+                                  <li>Internet Air + Wireless, if Fiber is unavailable but Internet Air may be available</li>
+                                  <li>Wireless standalone, if internet availability is unclear</li>
+                                  <li>White Glove manual review, if more confirmation is needed</li>
+                                </ul>
+                                <p className="quote-guide-text" style={{ marginTop: 10, fontStyle: 'italic' }}>
+                                  Availability still needs to be confirmed before a final recommendation.
+                                </p>
+                              </div>
+                            )}
+
+                            {shouldShowInternetAirBackupOption(calculator, availabilityResult) && (
+                              <div className="quote-guide-section">
+                                <div className="quote-guide-section-title">Optional Backup Internet Recommendation</div>
+                                <p className="quote-guide-text">
+                                  Internet Air may also be useful as a backup connection, especially if your business depends on internet for payments, phones, cameras, online orders, remote work, or daily operations.
+                                </p>
+                                <p className="quote-guide-text">
+                                  White Glove can help review whether Internet Air makes sense as a primary connection, backup connection, or not needed for this location.
+                                  {availabilityResult.internetAirAvailable === 'unknown' && ' White Glove can confirm availability.'}
+                                </p>
+                              </div>
+                            )}
+
+                            {calculator.customerStatus === 'existing' && (
+                              <div className="quote-guide-section">
+                                <div className="quote-guide-section-title">Existing Customer Review</div>
+                                <p className="quote-guide-text">
+                                  Since you’re an existing customer, White Glove can review your current services, bill, upgrade options, and backup internet needs before recommending changes.
+                                </p>
+                                <ul className="quote-guide-list">
+                                  <li>Current services</li>
+                                  <li>Current monthly bill</li>
+                                  <li>Lower bill, upgrade, add lines, add internet, or bundle services</li>
+                                  <li>Service issues</li>
+                                  <li>Backup internet needs</li>
+                                </ul>
+                              </div>
+                            )}
+
+                            <div className="quote-guide-section quote-guide-review">
+                              <div className="quote-guide-section-title">White Glove Review</div>
+                              <p>
+                                Our smart quote tool helps estimate your best options, but our White Glove team personally reviews your situation so you are not left guessing.
+                              </p>
+                              <button
+                                type="button"
+                                className="quote-wizard-next"
+                                onClick={() => {
+                                  const el = document.getElementById('contact-capture');
+                                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }}
+                              >
+                                Have White Glove Review My Options
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
 
                 <div className="quote-wizard-nav">
-                  {quoteStep > 0 && (
-                    <button type="button" className="quote-wizard-back" onClick={() => setQuoteStep(s => s - 1)}>Back</button>
-                  )}
-                  {quoteStep < 7 ? (
-                    <button type="button" className="quote-wizard-next" onClick={() => setQuoteStep(s => s + 1)}>Next</button>
+                  {intakeStep < 3 ? (
+                    <>
+                      {intakeStep > 0 && (
+                        <button type="button" className="quote-wizard-back" onClick={() => setIntakeStep(s => s - 1)}>Back</button>
+                      )}
+                      <button type="button" className="quote-wizard-next" onClick={() => setIntakeStep(s => s + 1)}>
+                        {intakeStep === 2 ? 'Continue' : 'Next'}
+                      </button>
+                    </>
+                  ) : calculator.serviceInterest === 'wireless_only' ? (
+                    <>
+                      {quoteStep > 0 && (
+                        <button type="button" className="quote-wizard-back" onClick={() => setQuoteStep(s => s - 1)}>Back</button>
+                      )}
+                      {quoteStep < 7 ? (
+                        <button type="button" className="quote-wizard-next" onClick={() => setQuoteStep(s => s + 1)}>Next</button>
+                      ) : (
+                        <button type="button" className="quote-wizard-next" onClick={calculateQuote} disabled={isCalculating}>
+                          {isCalculating ? 'Building your quote...' : 'Get my quote'}
+                        </button>
+                      )}
+                    </>
                   ) : (
-                    <button type="button" className="quote-wizard-next" onClick={calculateQuote} disabled={isCalculating}>
-                      {isCalculating ? 'Building your quote...' : 'Get my quote'}
-                    </button>
+                    <button type="button" className="quote-wizard-back" onClick={() => setIntakeStep(2)}>Back</button>
                   )}
                 </div>
               </div>
 
               <div className="calculator-results">
-                <h3>Your Quote</h3>
+                <h3>{calculator.serviceInterest === 'wireless_only' ? 'Your Requested Wireless Quote' : 'Your Quote'}</h3>
                 {quoteResult ? (
                   <>
                     <div className={`quote-badge ${quoteResult.isRealQuote ? 'real' : 'estimate'}`}>
@@ -2734,8 +3350,44 @@ export default function Home() {
                       }
                     </div>
 
+                    {calculator.serviceInterest === 'wireless_only' && fourLineEstimate && (
+                      <div className="quote-option-card">
+                        <div className="quote-option-card-title">Optional Better Value: Add a 4th Line</div>
+                        <p className="quote-option-card-text">
+                          Here is the quote based on the lines you requested. There may also be a better-value option if you add a 4th line, because some wireless offers improve at higher line counts.
+                        </p>
+                        <div className="quote-option-card-estimate">
+                          <span className="quote-option-card-label">Estimated 4-line monthly bill</span>
+                          <span className="quote-option-card-value">${fourLineEstimate.newMonthlyBill.toFixed(2)} <small>(${fourLineEstimate.perLineNewBill.toFixed(2)}/line)</small></span>
+                        </div>
+                        <p className="quote-option-card-note">This is an optional estimate. Final pricing depends on your plan, devices, and current promotions.</p>
+                      </div>
+                    )}
+
+                    {calculator.serviceInterest === 'wireless_only' && calculator.customerType === 'business' && (
+                      <div className="quote-option-card">
+                        <div className="quote-option-card-title">Business Line Option</div>
+                        <p className="quote-option-card-text">
+                          Some customers use dual SIM so they can have a personal number and a business number on the same compatible phone. This can help separate personal and business calls without carrying two phones.
+                        </p>
+                        <ul className="quote-option-card-list">
+                          <li>Compatible phone required</li>
+                          <li>Optional business line</li>
+                          <li>No contract</li>
+                          <li>No commitment</li>
+                          <li>Helpful for small business owners, contractors, salespeople, entrepreneurs, and service businesses</li>
+                        </ul>
+                      </div>
+                    )}
+
+                    {calculator.serviceInterest === 'wireless_only' && (
+                      <div className="quote-wg-review-note">
+                        Our smart quote tool helps estimate your best options, but our White Glove team personally reviews your situation so you are not left guessing.
+                      </div>
+                    )}
+
                     {/* Contact capture */}
-                    <div className="contact-capture">
+                    <div id="contact-capture" className="contact-capture">
                       <h4>Lock in your quote</h4>
                       <p className="capture-subtitle">Send this estimate to Sofia and a local rep. We’ll follow up via your preferred method.</p>
 
@@ -2936,7 +3588,7 @@ export default function Home() {
                       )}
                     </div>
                   </>
-                ) : (
+                ) : calculator.serviceInterest === 'wireless_only' ? (
                   <div className="calculator-placeholder">
                     <div className="quote-wizard-preview">
                       <div className="quote-preview-avatar">🤖</div>
@@ -2958,6 +3610,79 @@ export default function Home() {
                       <span className="placeholder-label">Annual savings</span>
                       <span className="placeholder-value">$0.00</span>
                     </div>
+                  </div>
+                ) : (
+                  <div className="advisor-summary">
+                    {(() => {
+                      const rec = getInternetRecommendation(availabilityResult, calculator.serviceInterest);
+                      return (
+                        <>
+                          <div className="quote-badge estimate">Estimate</div>
+
+                          <div className="result-item">
+                            <span className="result-label">Customer type</span>
+                            <span className="result-value">{getCustomerTypeLabel(calculator.customerType)}</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Customer status</span>
+                            <span className="result-value">{getCustomerStatusLabel(calculator.customerStatus)}</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Interest</span>
+                            <span className="result-value">{getServiceInterestLabel(calculator.serviceInterest)}</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Address</span>
+                            <span className="result-value">{availabilityResult.address || 'Not entered yet'}</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Internet recommendation</span>
+                            <span className="result-value">{rec.title}</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Availability status</span>
+                            <span className="result-value">Needs White Glove review</span>
+                          </div>
+
+                          <div className="result-item">
+                            <span className="result-label">Estimate status</span>
+                            <span className="result-value">No exact pricing yet</span>
+                          </div>
+
+                          <div className="advisor-summary-note">
+                            White Glove will review your address, internet options, wireless needs, and any bundle opportunities before confirming a final recommendation.
+                          </div>
+
+                          {shouldShowConvergedOffer(calculator, availabilityResult) && (
+                            <div className="advisor-summary-flag">Converged Offer: Needs review</div>
+                          )}
+
+                          {shouldShowInternetAirBackupOption(calculator, availabilityResult) && (
+                            <div className="advisor-summary-flag">Backup Internet: May be useful</div>
+                          )}
+
+                          {calculator.customerStatus === 'existing' && (
+                            <div className="advisor-summary-flag">Existing Customer Review: Recommended</div>
+                          )}
+
+                          <button
+                            type="button"
+                            className="quote-wizard-next"
+                            onClick={() => {
+                              const el = document.getElementById('contact-capture');
+                              if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }}
+                          >
+                            Request White Glove Review
+                          </button>
+                        </>
+                      );
+                    })()}
                   </div>
                 )}
               </div>
