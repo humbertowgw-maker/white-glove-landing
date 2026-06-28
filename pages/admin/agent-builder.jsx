@@ -8,6 +8,7 @@ import {
   fetchOrchestratorStatus, triggerOrchestratorCycle,
   triggerTimezoneBackfill,
   fetchDialerStatus, triggerEnqueue, enableAutoDial, disableAutoDial,
+  fetchDailyReports, fetchLanguageProfiles,
 } from "../../lib/agentBuilder";
 import { SEED_AGENTS, RISK_COLORS, STATUS_COLORS } from "../../data/agentRegistry";
 
@@ -782,6 +783,341 @@ function SophiaDialerWidget({ dialer, loading, onEnqueue, onEnable, onDisable, e
   );
 }
 
+// ── EOD Reports Widget ────────────────────────────────────────────────────────
+
+const PRIORITY_COLORS = { high: "#ef4444", medium: "#f59e0b", low: "#22c55e" };
+const CATEGORY_LABELS = { dialing: "Dialing", queue: "Queue", scoring: "Scoring", language: "Language", process: "Process" };
+
+function EodReportsWidget({ reports, loading }) {
+  const [expanded, setExpanded] = useState(null);
+
+  if (loading) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        Loading EOD reports…
+      </div>
+    );
+  }
+
+  if (!reports || reports.length === 0) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        No EOD reports yet — the nightly agent runs at 11 PM UTC.
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+      borderRadius: 10, marginBottom: 20, overflow: "hidden",
+    }}>
+      <div style={{
+        padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,.06)",
+        fontSize: 11, fontWeight: 700, color: "#475569",
+        textTransform: "uppercase", letterSpacing: ".08em",
+      }}>
+        EOD Reports — last {reports.length} days
+      </div>
+
+      {reports.map(report => {
+        const isOpen = expanded === report.id;
+        const answerRate = report.total_calls > 0
+          ? Math.round(report.answered_calls / report.total_calls * 100)
+          : 0;
+        const health = report.queue_health;
+        const healthColor = HEALTH_COLORS[health] || "#475569";
+        const highSuggestions = (report.improvement_suggestions || []).filter(s => s.priority === "high");
+
+        return (
+          <div key={report.id} style={{ borderBottom: "1px solid rgba(255,255,255,.05)" }}>
+            <button
+              onClick={() => setExpanded(isOpen ? null : report.id)}
+              style={{
+                width: "100%", padding: "12px 20px", background: "transparent",
+                border: "none", cursor: "pointer", color: "#f8fafc",
+                display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+                textAlign: "left", fontFamily: "inherit",
+              }}
+            >
+              {/* Date */}
+              <div style={{ minWidth: 96, fontSize: 13, fontWeight: 700, color: "#94a3b8" }}>
+                {report.report_date}
+              </div>
+
+              {/* Call stats */}
+              <div style={{ display: "flex", gap: 16, flex: 1, flexWrap: "wrap" }}>
+                <span style={{ fontSize: 13 }}>
+                  <span style={{ color: "#f8fafc", fontWeight: 700 }}>{report.total_calls}</span>
+                  <span style={{ color: "#475569" }}> calls</span>
+                </span>
+                <span style={{ fontSize: 13 }}>
+                  <span style={{ color: "#22c55e", fontWeight: 700 }}>{answerRate}%</span>
+                  <span style={{ color: "#475569" }}> answered</span>
+                </span>
+                <span style={{ fontSize: 13 }}>
+                  <span style={{ color: "#818cf8", fontWeight: 700 }}>{report.appointments_set}</span>
+                  <span style={{ color: "#475569" }}> appts</span>
+                </span>
+                {health && (
+                  <span style={{
+                    fontSize: 11, padding: "2px 7px", borderRadius: 4,
+                    background: `${healthColor}22`, color: healthColor,
+                    border: `1px solid ${healthColor}44`, fontWeight: 700,
+                    textTransform: "uppercase",
+                  }}>
+                    {health}
+                  </span>
+                )}
+                {highSuggestions.length > 0 && (
+                  <span style={{
+                    fontSize: 11, padding: "2px 7px", borderRadius: 4,
+                    background: "#7f1d1d22", color: "#f87171",
+                    border: "1px solid #ef444433", fontWeight: 700,
+                  }}>
+                    {highSuggestions.length} HIGH
+                  </span>
+                )}
+              </div>
+
+              <span style={{ color: "#475569", fontSize: 12 }}>{isOpen ? "▲" : "▼"}</span>
+            </button>
+
+            {isOpen && (
+              <div style={{ padding: "0 20px 16px", display: "flex", flexDirection: "column", gap: 12 }}>
+                {/* Director summary */}
+                {report.director_summary && (
+                  <div style={{
+                    background: "#020617", borderRadius: 8, padding: "12px 14px",
+                    fontSize: 13, color: "#cbd5e1", lineHeight: 1.6,
+                    borderLeft: "3px solid #475569",
+                  }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>
+                      Director Summary
+                    </div>
+                    {report.director_summary}
+                  </div>
+                )}
+
+                {/* Improvement suggestions */}
+                {(report.improvement_suggestions || []).length > 0 && (
+                  <div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8 }}>
+                      Improvement Suggestions
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {report.improvement_suggestions.map(s => (
+                        <div key={s.id} style={{
+                          background: "#020617", borderRadius: 6, padding: "9px 13px",
+                          borderLeft: `3px solid ${PRIORITY_COLORS[s.priority] || "#475569"}`,
+                          display: "flex", gap: 10, alignItems: "flex-start",
+                        }}>
+                          <div style={{ display: "flex", gap: 6, flexShrink: 0, marginTop: 1 }}>
+                            <span style={{
+                              fontSize: 10, padding: "1px 6px", borderRadius: 3,
+                              background: `${PRIORITY_COLORS[s.priority] || "#475569"}22`,
+                              color: PRIORITY_COLORS[s.priority] || "#475569",
+                              border: `1px solid ${PRIORITY_COLORS[s.priority] || "#475569"}44`,
+                              fontWeight: 700, textTransform: "uppercase",
+                            }}>
+                              {s.priority}
+                            </span>
+                            <span style={{
+                              fontSize: 10, padding: "1px 6px", borderRadius: 3,
+                              background: "#1e293b", color: "#64748b",
+                              fontWeight: 700, textTransform: "uppercase",
+                            }}>
+                              {CATEGORY_LABELS[s.category] || s.category}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 13, color: "#cbd5e1", lineHeight: 1.5 }}>{s.suggestion}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stat breakdown */}
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap", fontSize: 12, color: "#64748b" }}>
+                  <span>Callbacks: <strong style={{ color: "#f59e0b" }}>{report.callbacks_scheduled}</strong></span>
+                  <span>No answer: <strong style={{ color: "#ef4444" }}>{report.no_answers}</strong></span>
+                  {report.avg_lead_score && <span>Avg score: <strong style={{ color: "#94a3b8" }}>{Number(report.avg_lead_score).toFixed(1)}</strong></span>}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Language Profiles Widget ──────────────────────────────────────────────────
+
+const CONFIDENCE_COLORS = { high: "#22c55e", medium: "#f59e0b", low: "#ef4444", unknown: "#475569" };
+const VOICE_LABELS = {
+  english_default:    "EN Default",
+  spanish_hispanic:   "ES Hispanic",
+  vietnamese_native:  "VI Native",
+  human_review:       "Human Review",
+};
+
+function LanguageProfilesWidget({ profiles, loading }) {
+  const [search, setSearch] = useState("");
+
+  if (loading) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        Loading language profiles…
+      </div>
+    );
+  }
+
+  if (!profiles || profiles.length === 0) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        No language profiles yet — profiles populate as leads are enriched by the Territory Agent.
+      </div>
+    );
+  }
+
+  const filtered = search.trim()
+    ? profiles.filter(p => {
+        const q = search.toLowerCase();
+        const lead = p.leads || {};
+        return (
+          (lead.first_name || "").toLowerCase().includes(q) ||
+          (lead.last_name  || "").toLowerCase().includes(q) ||
+          (lead.phone      || "").includes(q) ||
+          (lead.state      || "").toLowerCase().includes(q) ||
+          (p.inferred_language || "").toLowerCase().includes(q) ||
+          (p.voice_profile     || "").toLowerCase().includes(q)
+        );
+      })
+    : profiles;
+
+  return (
+    <div style={{
+      background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+      borderRadius: 10, marginBottom: 20, overflow: "hidden",
+    }}>
+      <div style={{
+        padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,.06)",
+        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em" }}>
+          Language Profiles — {profiles.length} leads
+        </div>
+        <input
+          type="text"
+          placeholder="Search by name, phone, state, language…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            ...inputStyle, width: "auto", minWidth: 240, fontSize: 12, padding: "5px 10px",
+          }}
+        />
+      </div>
+
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+          <thead>
+            <tr style={{ borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+              {["Lead", "Phone", "State", "Language", "Voice Profile", "Confidence", "Source", "Date"].map(h => (
+                <th key={h} style={{
+                  padding: "8px 14px", textAlign: "left",
+                  color: "#475569", fontWeight: 700, textTransform: "uppercase",
+                  letterSpacing: ".05em", fontSize: 10, whiteSpace: "nowrap",
+                }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.slice(0, 200).map(p => {
+              const lead = p.leads || {};
+              const conf = p.confidence || "unknown";
+              const confColor = CONFIDENCE_COLORS[conf] || "#475569";
+              return (
+                <tr key={p.id} style={{ borderBottom: "1px solid rgba(255,255,255,.04)" }}>
+                  <td style={{ padding: "8px 14px", color: "#cbd5e1" }}>
+                    {lead.first_name || "—"} {lead.last_name || ""}
+                  </td>
+                  <td style={{ padding: "8px 14px", color: "#64748b", whiteSpace: "nowrap" }}>
+                    {lead.phone || "—"}
+                  </td>
+                  <td style={{ padding: "8px 14px", color: "#64748b" }}>
+                    {lead.state || "—"}
+                  </td>
+                  <td style={{ padding: "8px 14px", color: "#f8fafc", fontWeight: 600 }}>
+                    {p.inferred_language ? p.inferred_language.toUpperCase() : "—"}
+                  </td>
+                  <td style={{ padding: "8px 14px" }}>
+                    {p.voice_profile ? (
+                      <span style={{
+                        fontSize: 10, padding: "2px 7px", borderRadius: 4,
+                        background: "#1e293b", color: "#94a3b8",
+                        fontWeight: 700, textTransform: "uppercase",
+                      }}>
+                        {VOICE_LABELS[p.voice_profile] || p.voice_profile}
+                      </span>
+                    ) : "—"}
+                  </td>
+                  <td style={{ padding: "8px 14px" }}>
+                    <span style={{
+                      fontSize: 10, padding: "2px 7px", borderRadius: 4,
+                      background: `${confColor}22`, color: confColor,
+                      border: `1px solid ${confColor}44`, fontWeight: 700, textTransform: "uppercase",
+                    }}>
+                      {conf}
+                    </span>
+                  </td>
+                  <td style={{ padding: "8px 14px", color: "#475569", textTransform: "uppercase", fontSize: 10 }}>
+                    {p.source || "—"}
+                  </td>
+                  <td style={{ padding: "8px 14px", color: "#475569", whiteSpace: "nowrap" }}>
+                    {p.created_at ? new Date(p.created_at).toLocaleDateString() : "—"}
+                  </td>
+                </tr>
+              );
+            })}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={8} style={{ padding: "20px 14px", color: "#475569", textAlign: "center" }}>
+                  No matching profiles.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {filtered.length > 200 && (
+        <div style={{ padding: "8px 20px", fontSize: 12, color: "#475569", borderTop: "1px solid rgba(255,255,255,.05)" }}>
+          Showing 200 of {filtered.length} — refine your search to narrow results.
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Login Screen ──────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }) {
@@ -861,6 +1197,10 @@ export default function AgentBuilder() {
   const [dialerLoading, setDialerLoading] = useState(false);
   const [enqueueing, setEnqueueing] = useState(false);
   const [dialerToggling, setDialerToggling] = useState(false);
+  const [dailyReports, setDailyReports] = useState([]);
+  const [reportsLoading, setReportsLoading] = useState(false);
+  const [langProfiles, setLangProfiles] = useState([]);
+  const [langLoading, setLangLoading] = useState(false);
 
   useEffect(() => {
     const stored = getStoredToken();
@@ -881,6 +1221,32 @@ export default function AgentBuilder() {
       // non-fatal — widget shows empty state
     } finally {
       setDialerLoading(false);
+    }
+  }, []);
+
+  const loadDailyReports = useCallback(async (t) => {
+    if (!t) return;
+    setReportsLoading(true);
+    try {
+      const data = await fetchDailyReports(t, 7);
+      setDailyReports(data.reports || []);
+    } catch {
+      // non-fatal
+    } finally {
+      setReportsLoading(false);
+    }
+  }, []);
+
+  const loadLangProfiles = useCallback(async (t) => {
+    if (!t) return;
+    setLangLoading(true);
+    try {
+      const data = await fetchLanguageProfiles(t, { limit: 200 });
+      setLangProfiles(data.profiles || []);
+    } catch {
+      // non-fatal
+    } finally {
+      setLangLoading(false);
     }
   }, []);
 
@@ -998,8 +1364,10 @@ export default function AgentBuilder() {
       load(token);
       loadOrchStatus(token);
       loadDialerStatus(token);
+      loadDailyReports(token);
+      loadLangProfiles(token);
     }
-  }, [token, load, loadOrchStatus, loadDialerStatus]);
+  }, [token, load, loadOrchStatus, loadDialerStatus, loadDailyReports, loadLangProfiles]);
 
   const tabCounts = {};
   for (const tab of TABS) tabCounts[tab] = agents.filter(a => a.status === tab).length;
@@ -1057,7 +1425,7 @@ export default function AgentBuilder() {
             <button onClick={() => setShowAudit(true)} style={btnStyle("#1e293b", "#94a3b8")}>
               Audit Log
             </button>
-            <button onClick={() => { load(token); loadOrchStatus(token); loadDialerStatus(token); }} disabled={loading} style={btnStyle("#1e293b", "#94a3b8")}>
+            <button onClick={() => { load(token); loadOrchStatus(token); loadDialerStatus(token); loadDailyReports(token); loadLangProfiles(token); }} disabled={loading} style={btnStyle("#1e293b", "#94a3b8")}>
               {loading ? "Loading…" : "Refresh"}
             </button>
             <button
@@ -1100,6 +1468,12 @@ export default function AgentBuilder() {
           enqueueing={enqueueing}
           toggling={dialerToggling}
         />
+
+        {/* EOD Reports Widget */}
+        <EodReportsWidget reports={dailyReports} loading={reportsLoading} />
+
+        {/* Language Profiles Widget */}
+        <LanguageProfilesWidget profiles={langProfiles} loading={langLoading} />
 
         {/* Tab Bar */}
         <div style={{
