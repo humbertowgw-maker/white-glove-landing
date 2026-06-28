@@ -2563,6 +2563,7 @@ export default function Home() {
             <Link href="#why-us">Why us</Link>
             <Link href="/products">Products</Link>
             <Link href="/wireless">WGW platform</Link>
+            <Link href="/admin/agent-builder" style={{ fontSize: 10, opacity: 0.5 }}>Agent Builder</Link>
             <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
         </nav>
