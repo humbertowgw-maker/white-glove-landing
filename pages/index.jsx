@@ -949,7 +949,6 @@ export default function Home() {
           name="description"
           content="Switch wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
         />
-        <meta name="trustpilot-one-time-domain-verification-id" content="e4d89d06-9334-4a1b-b1d7-c9c2cd959a5c"/>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
