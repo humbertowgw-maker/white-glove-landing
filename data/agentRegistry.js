@@ -1,4 +1,4 @@
-// Static seed data for the 6 existing active agents.
+// Static seed data for existing active/proposed agents.
 // Used as fallback when the API is unavailable or for initial render.
 // Keep in sync with agent_registry table in Supabase.
 
@@ -169,9 +169,125 @@ export const SEED_AGENTS = [
     ],
     notes: "ALLOWED_TOOLS: trigger_call, send_sms, send_email, update_lead, create_appointment. No other actions permitted.",
   },
+  {
+    id: "seed-territory",
+    agent_name: "territory",
+    agent_role: "Territory Manager",
+    description: "Enriches lead timezones, calculates coverage gaps, and maintains queue health metrics hourly.",
+    purpose: "Ensure every active lead has a timezone before Sophia attempts outreach. Track and surface coverage gaps across time zones so the queue never runs dry unexpectedly.",
+    status: "proposed",
+    risk_level: "medium",
+    provider: "system",
+    can_read: true,
+    can_write: true,
+    requires_approval: true,
+    human_approval_required: true,
+    inputs_json: [
+      { name: "leads", type: "array", source: "leads table (missing timezone)" },
+      { name: "call_queue", type: "array", source: "call_queue table (pending)" },
+    ],
+    outputs_json: [
+      { name: "queue_metrics", type: "object", destination: "queue_metrics table" },
+      { name: "enriched_leads", type: "number", destination: "leads.timezone (backfill)" },
+    ],
+    success_metrics_json: [
+      { metric: "Leads missing timezone", target: "0 active leads", measurement_method: "leads.timezone IS NULL count" },
+      { metric: "Queue health reported", target: "every hour", measurement_method: "queue_metrics measured_at recency" },
+    ],
+    notes: "Seeded via migration 051. Runs hourly via POST /api/cron/queue-health. Requires manual approval before activation.",
+  },
+  {
+    id: "seed-orchestrator",
+    agent_name: "orchestrator",
+    agent_role: "System Orchestrator",
+    description: "Monitors all agent registry entries, queue health, and active call count. Flags anomalies and generates recommendations without taking autonomous action.",
+    purpose: "Be the safety layer that coordinates the entire agent workforce. Surface alerts when the queue is critical, concurrency is near the ceiling, or leads are missing timezone data.",
+    status: "proposed",
+    risk_level: "low",
+    provider: "system",
+    can_read: true,
+    can_write: false,
+    requires_approval: true,
+    human_approval_required: true,
+    inputs_json: [
+      { name: "agent_registry", type: "array", source: "agent_registry table" },
+      { name: "queue_metrics", type: "object", source: "queue_metrics table (latest)" },
+      { name: "call_queue", type: "number", source: "call_queue active count" },
+      { name: "leads_missing_tz", type: "number", source: "leads table" },
+    ],
+    outputs_json: [
+      { name: "cycle_report", type: "object", destination: "agent_audit_log (system:orchestrator)" },
+      { name: "alerts", type: "array", destination: "returned to caller (not persisted)" },
+    ],
+    success_metrics_json: [
+      { metric: "Cycle completed without error", target: "100%", measurement_method: "agent_audit_log entries" },
+      { metric: "Active calls within ceiling", target: "≤5 always", measurement_method: "call_queue active count" },
+    ],
+    notes: "Seeded via migration 051. Read-only — never triggers calls, deploys code, or activates other agents. Manual approval required.",
+  },
+  {
+    id: "seed-qualification",
+    agent_name: "Qualification Agent",
+    agent_role: "qualification",
+    description: "Scores every lead 0–100 using business signals, industry fit, and lead quality indicators via Claude.",
+    purpose: "Ensure only high-quality leads (score ≥ 60) enter the Sophia calling pipeline.",
+    status: "proposed",
+    risk_level: "low",
+    provider: "claude",
+    can_read: true,
+    can_write: true,
+    requires_approval: true,
+    human_approval_required: true,
+    notes: "Logic built in services/leadScoring.js. Seeded via migration 056.",
+  },
+  {
+    id: "seed-language-matching",
+    agent_name: "Language Matching Agent",
+    agent_role: "language_matching",
+    description: "Infers preferred language and voice profile for each lead using public business signals: name, category, and description.",
+    purpose: "Route each lead to the correct Sophia voice profile before calling to improve answer rate and trust.",
+    status: "proposed",
+    risk_level: "low",
+    provider: "system",
+    can_read: true,
+    can_write: true,
+    requires_approval: true,
+    human_approval_required: true,
+    notes: "Logic built in lib/territoryAgent.js (inferLanguage). Seeded via migration 056.",
+  },
+  {
+    id: "seed-queue-health",
+    agent_name: "Queue Health Agent",
+    agent_role: "queue_health",
+    description: "Monitors Sophia's approved call queue and computes health against capacity targets. Writes hourly snapshots and alerts admin when below threshold.",
+    purpose: "Ensure Sophia always has 3+ days of approved leads (≥ 3,600). Alert admin when critical or empty.",
+    status: "proposed",
+    risk_level: "low",
+    provider: "system",
+    can_read: true,
+    can_write: true,
+    requires_approval: true,
+    human_approval_required: true,
+    notes: "Logic built in lib/territoryAgent.js (calculateQueueHealth) and wired to cron. Seeded via migration 056.",
+  },
+  {
+    id: "seed-lead-scout",
+    agent_name: "Lead Scout Agent",
+    agent_role: "lead_scout",
+    description: "Finds new business leads using Google Places API and event research. API-only, no scraping.",
+    purpose: "Maintain a 3-business-day pipeline of qualified leads ahead of Sophia's calling schedule.",
+    status: "proposed",
+    risk_level: "medium",
+    provider: "google-places",
+    can_read: true,
+    can_write: true,
+    requires_approval: true,
+    human_approval_required: true,
+    notes: "Logic built in services/scoutBusinessSearch.js. API-only — no HTML scraping until separate proposal approved. Seeded via migration 056.",
+  },
 ];
 
-export const STATUS_ORDER = ["active", "approved", "in_build", "proposed", "paused", "retired"];
+export const STATUS_ORDER = ["active", "approved", "in_build", "proposed", "paused", "retired", "rejected"];
 
 export const RISK_COLORS = {
   low:    "#22c55e",
@@ -186,4 +302,5 @@ export const STATUS_COLORS = {
   proposed:  "#f59e0b",
   paused:    "#94a3b8",
   retired:   "#475569",
+  rejected:  "#7f1d1d",
 };

@@ -3,12 +3,15 @@ import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import {
   getStoredToken, setStoredToken, clearStoredToken, validateToken,
-  fetchAgents, proposeAgent, approveAgent, activateAgent, pauseAgent,
-  retireAgent, fetchAuditLog, runDuplicateCheck,
+  fetchAgents, proposeAgent, approveAgent, rejectAgent, secondApproveAgent,
+  activateAgent, pauseAgent, retireAgent, fetchAuditLog, runDuplicateCheck,
+  fetchOrchestratorStatus, triggerOrchestratorCycle,
+  triggerTimezoneBackfill,
+  fetchDialerStatus, triggerEnqueue, enableAutoDial, disableAutoDial,
 } from "../../lib/agentBuilder";
 import { SEED_AGENTS, RISK_COLORS, STATUS_COLORS } from "../../data/agentRegistry";
 
-const TABS = ["active", "approved", "in_build", "proposed", "paused", "retired"];
+const TABS = ["active", "approved", "in_build", "proposed", "paused", "retired", "rejected"];
 const TAB_LABELS = {
   active:   "Active",
   approved: "Approved",
@@ -16,6 +19,7 @@ const TAB_LABELS = {
   proposed: "Proposed",
   paused:   "Paused",
   retired:  "Retired",
+  rejected: "Rejected",
 };
 
 const BLANK_PROPOSAL = {
@@ -151,7 +155,17 @@ function AgentCard({ agent, token, onRefresh, onShowDetail }) {
                 Approve
               </button>
             )}
-            {agent.status === "approved" && (
+            {agent.status === "proposed" && (
+              <button disabled={busy} onClick={() => act(rejectAgent, "Reject")} style={btnStyle("#3b0a0a", "#f87171")}>
+                Reject
+              </button>
+            )}
+            {agent.status === "approved" && agent.risk_level === "high" && !agent.second_approved_at && (
+              <button disabled={busy} onClick={() => act(secondApproveAgent, "2nd Approve")} style={btnStyle("#3b1f00", "#fb923c")}>
+                2nd Approve
+              </button>
+            )}
+            {agent.status === "approved" && (agent.risk_level !== "high" || agent.second_approved_at) && (
               <button disabled={busy} onClick={() => act(activateAgent, "Activate")} style={btnStyle("#14532d", "#22c55e")}>
                 Activate
               </button>
@@ -528,6 +542,246 @@ function AuditModal({ token, onClose }) {
   );
 }
 
+// ── Queue Health Widget ───────────────────────────────────────────────────────
+
+const HEALTH_COLORS = {
+  healthy:  "#22c55e",
+  low:      "#f59e0b",
+  critical: "#ef4444",
+  empty:    "#64748b",
+};
+
+function QueueHealthWidget({ metrics, agentsActive, loading }) {
+  if (loading) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        Loading queue health…
+      </div>
+    );
+  }
+
+  if (!metrics) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        No queue metrics yet — run the orchestrator cycle to generate a snapshot.
+      </div>
+    );
+  }
+
+  const health = metrics.queue_health || "empty";
+  const healthColor = HEALTH_COLORS[health] || "#94a3b8";
+  const tzGaps = metrics.tz_gaps_json || [];
+  const measuredAt = metrics.measured_at ? new Date(metrics.measured_at) : null;
+  const minsAgo = measuredAt ? Math.round((Date.now() - measuredAt.getTime()) / 60000) : null;
+
+  return (
+    <div style={{
+      background: "#0f172a", border: `1px solid ${healthColor}33`,
+      borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+      display: "flex", gap: 20, flexWrap: "wrap", alignItems: "flex-start",
+    }}>
+      {/* Health status */}
+      <div style={{ minWidth: 100 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+          Queue Health
+        </div>
+        <div style={{
+          display: "inline-block", padding: "3px 10px", borderRadius: 5,
+          background: `${healthColor}22`, color: healthColor,
+          border: `1px solid ${healthColor}44`, fontSize: 13, fontWeight: 700,
+          textTransform: "uppercase", letterSpacing: ".06em",
+        }}>
+          {health}
+        </div>
+      </div>
+
+      {/* Approved leads */}
+      <div style={{ minWidth: 100 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+          Approved Leads
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#f8fafc", lineHeight: 1 }}>
+          {(metrics.approved_leads_count || 0).toLocaleString()}
+        </div>
+        <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>
+          need {(metrics.leads_needed_today || 1200).toLocaleString()} / day
+        </div>
+      </div>
+
+      {/* Coverage hours */}
+      <div style={{ minWidth: 100 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+          Sophia Coverage
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#f8fafc", lineHeight: 1 }}>
+          {Number(metrics.sophia_coverage_hours || 0).toFixed(1)}h
+        </div>
+        <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>of calling day</div>
+      </div>
+
+      {/* TZ Gaps */}
+      <div style={{ flex: 1, minWidth: 140 }}>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+          TZ Gaps
+        </div>
+        {tzGaps.length === 0 ? (
+          <div style={{ fontSize: 13, color: "#22c55e", fontWeight: 600 }}>All 4 major zones covered</div>
+        ) : (
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+            {tzGaps.map(tz => (
+              <span key={tz} style={{
+                fontSize: 11, padding: "2px 7px", borderRadius: 4,
+                background: "#7f1d1d33", color: "#fca5a5", border: "1px solid #ef444433",
+                fontWeight: 600,
+              }}>
+                {tz.replace("America/", "")}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Active agents + timestamp */}
+      <div style={{ minWidth: 80, textAlign: "right" }}>
+        {agentsActive > 0 && (
+          <div style={{ fontSize: 11, color: "#22c55e", fontWeight: 700, marginBottom: 4 }}>
+            {agentsActive} agent{agentsActive !== 1 ? "s" : ""} active
+          </div>
+        )}
+        {minsAgo !== null && (
+          <div style={{ fontSize: 11, color: "#475569" }}>
+            {minsAgo < 2 ? "just now" : `${minsAgo}m ago`}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Sophia Dialer Widget ──────────────────────────────────────────────────────
+
+function SophiaDialerWidget({ dialer, loading, onEnqueue, onEnable, onDisable, enqueueing, toggling }) {
+  if (loading) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        Loading Sophia dialer…
+      </div>
+    );
+  }
+
+  if (!dialer) {
+    return (
+      <div style={{
+        background: "#0f172a", border: "1px solid rgba(255,255,255,.08)",
+        borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+        color: "#475569", fontSize: 13,
+      }}>
+        Sophia dialer not available — run migration 052 first.
+      </div>
+    );
+  }
+
+  const autoDial = dialer.sophia_auto_dial;
+  const borderColor = autoDial ? "#22c55e" : "#475569";
+
+  return (
+    <div style={{
+      background: "#0f172a", border: `1px solid ${borderColor}33`,
+      borderRadius: 10, padding: "14px 20px", marginBottom: 20,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 12 }}>
+        <div style={{ fontSize: 11, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em" }}>
+          Sophia Dialer — Main Queue
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={onEnqueue}
+            disabled={enqueueing}
+            style={{ ...btnStyle("#1a1e2e", "#818cf8"), opacity: enqueueing ? 0.5 : 1, fontSize: 11 }}
+          >
+            {enqueueing ? "Enqueueing…" : "Enqueue Leads"}
+          </button>
+          {autoDial ? (
+            <button
+              onClick={onDisable}
+              disabled={toggling}
+              style={{ ...btnStyle("#1c1917", "#f59e0b"), opacity: toggling ? 0.5 : 1, fontSize: 11 }}
+            >
+              {toggling ? "…" : "⏸ Pause Auto-Dial"}
+            </button>
+          ) : (
+            <button
+              onClick={onEnable}
+              disabled={toggling}
+              style={{ ...btnStyle("#14532d", "#22c55e"), opacity: toggling ? 0.5 : 1, fontSize: 11 }}
+            >
+              {toggling ? "…" : "▶ Enable Auto-Dial"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        {/* Auto-dial status */}
+        <div style={{ minWidth: 90 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+            Auto-Dial
+          </div>
+          <div style={{
+            display: "inline-block", padding: "3px 10px", borderRadius: 5,
+            background: autoDial ? "#22c55e22" : "#47556922",
+            color: autoDial ? "#22c55e" : "#475569",
+            border: `1px solid ${autoDial ? "#22c55e" : "#475569"}44`,
+            fontSize: 12, fontWeight: 700, textTransform: "uppercase",
+          }}>
+            {autoDial ? "ON" : "OFF"}
+          </div>
+        </div>
+
+        {/* Queue counts */}
+        {[
+          ["Pending",   dialer.pending,   "#818cf8"],
+          ["Active",    dialer.active,    "#22c55e"],
+          ["Callback",  dialer.callback,  "#f59e0b"],
+          ["Completed", dialer.completed, "#475569"],
+          ["No Answer", dialer.no_answer, "#ef4444"],
+        ].map(([label, count, color]) => (
+          <div key={label} style={{ minWidth: 70 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+              {label}
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: count > 0 ? color : "#334155", lineHeight: 1 }}>
+              {count}
+            </div>
+          </div>
+        ))}
+
+        {/* Max concurrent */}
+        <div style={{ minWidth: 70 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#475569", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 4 }}>
+            Max Concurrent
+          </div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: "#64748b", lineHeight: 1 }}>
+            {dialer.max_concurrent}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Login Screen ──────────────────────────────────────────────────────────────
 
 function LoginScreen({ onLogin }) {
@@ -599,6 +853,14 @@ export default function AgentBuilder() {
   const [showPropose, setShowPropose] = useState(false);
   const [showAudit, setShowAudit] = useState(false);
   const [toast, setToast] = useState(null);
+  const [orchStatus, setOrchStatus] = useState(null);
+  const [orchLoading, setOrchLoading] = useState(false);
+  const [runningCycle, setRunningCycle] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [dialerStatus, setDialerStatus] = useState(null);
+  const [dialerLoading, setDialerLoading] = useState(false);
+  const [enqueueing, setEnqueueing] = useState(false);
+  const [dialerToggling, setDialerToggling] = useState(false);
 
   useEffect(() => {
     const stored = getStoredToken();
@@ -606,6 +868,32 @@ export default function AgentBuilder() {
       validateToken(stored).then(valid => {
         if (valid) { setToken(stored); } else { clearStoredToken(); }
       });
+    }
+  }, []);
+
+  const loadDialerStatus = useCallback(async (t) => {
+    if (!t) return;
+    setDialerLoading(true);
+    try {
+      const data = await fetchDialerStatus(t);
+      setDialerStatus(data);
+    } catch {
+      // non-fatal — widget shows empty state
+    } finally {
+      setDialerLoading(false);
+    }
+  }, []);
+
+  const loadOrchStatus = useCallback(async (t) => {
+    if (!t) return;
+    setOrchLoading(true);
+    try {
+      const data = await fetchOrchestratorStatus(t);
+      setOrchStatus(data);
+    } catch {
+      // non-fatal — widget shows empty state
+    } finally {
+      setOrchLoading(false);
     }
   }, []);
 
@@ -626,7 +914,92 @@ export default function AgentBuilder() {
     }
   }, []);
 
-  useEffect(() => { if (token) load(token); }, [token, load]);
+  async function handleRunCycle() {
+    if (!token || runningCycle) return;
+    setRunningCycle(true);
+    try {
+      const { report } = await triggerOrchestratorCycle(token);
+      const alertCount = (report?.alerts || []).length;
+      setToast({
+        message: `Cycle complete — health: ${report?.queue_health || "unknown"}, ${alertCount} alert${alertCount !== 1 ? "s" : ""}`,
+        type: alertCount > 0 ? "warning" : "success",
+      });
+      await loadOrchStatus(token);
+    } catch (e) {
+      setToast({ message: `Cycle failed: ${e.message}`, type: "error" });
+    } finally {
+      setRunningCycle(false);
+    }
+  }
+
+  async function handleBackfill() {
+    if (!token || backfilling) return;
+    setBackfilling(true);
+    try {
+      const { total, updated, skipped } = await triggerTimezoneBackfill(token);
+      setToast({
+        message: `TZ backfill done — ${updated} updated, ${skipped} skipped of ${total} leads`,
+        type: updated > 0 ? "success" : "warning",
+      });
+      await loadOrchStatus(token);
+    } catch (e) {
+      setToast({ message: `Backfill failed: ${e.message}`, type: "error" });
+    } finally {
+      setBackfilling(false);
+    }
+  }
+
+  async function handleEnqueue() {
+    if (!token || enqueueing) return;
+    setEnqueueing(true);
+    try {
+      const { enqueued, skipped } = await triggerEnqueue(token);
+      setToast({ message: `Enqueued ${enqueued} leads (${skipped} already in queue)`, type: enqueued > 0 ? "success" : "warning" });
+      await loadDialerStatus(token);
+      await loadOrchStatus(token);
+    } catch (e) {
+      setToast({ message: `Enqueue failed: ${e.message}`, type: "error" });
+    } finally {
+      setEnqueueing(false);
+    }
+  }
+
+  async function handleEnableAutoDial() {
+    if (!token || dialerToggling) return;
+    if (!confirm("Enable auto-dial? Sophia will begin calling leads automatically on the next cron tick.")) return;
+    setDialerToggling(true);
+    try {
+      await enableAutoDial(token);
+      setToast({ message: "Auto-dial enabled — Sophia will start calling on next cron tick", type: "success" });
+      await loadDialerStatus(token);
+    } catch (e) {
+      setToast({ message: `Enable failed: ${e.message}`, type: "error" });
+    } finally {
+      setDialerToggling(false);
+    }
+  }
+
+  async function handleDisableAutoDial() {
+    if (!token || dialerToggling) return;
+    setDialerToggling(true);
+    try {
+      await disableAutoDial(token);
+      setToast({ message: "Auto-dial paused", type: "warning" });
+      await loadDialerStatus(token);
+    } catch (e) {
+      setToast({ message: `Disable failed: ${e.message}`, type: "error" });
+    } finally {
+      setDialerToggling(false);
+    }
+  }
+
+  useEffect(() => {
+    if (token) {
+      load(token);
+      loadOrchStatus(token);
+      loadDialerStatus(token);
+    }
+  }, [token, load, loadOrchStatus, loadDialerStatus]);
 
   const tabCounts = {};
   for (const tab of TABS) tabCounts[tab] = agents.filter(a => a.status === tab).length;
@@ -684,8 +1057,22 @@ export default function AgentBuilder() {
             <button onClick={() => setShowAudit(true)} style={btnStyle("#1e293b", "#94a3b8")}>
               Audit Log
             </button>
-            <button onClick={() => load(token)} disabled={loading} style={btnStyle("#1e293b", "#94a3b8")}>
+            <button onClick={() => { load(token); loadOrchStatus(token); loadDialerStatus(token); }} disabled={loading} style={btnStyle("#1e293b", "#94a3b8")}>
               {loading ? "Loading…" : "Refresh"}
+            </button>
+            <button
+              onClick={handleRunCycle}
+              disabled={runningCycle}
+              style={{ ...btnStyle("#1a2e1a", "#22c55e"), opacity: runningCycle ? 0.5 : 1 }}
+            >
+              {runningCycle ? "Running…" : "▶ Run Cycle"}
+            </button>
+            <button
+              onClick={handleBackfill}
+              disabled={backfilling}
+              style={{ ...btnStyle("#1a1e2e", "#818cf8"), opacity: backfilling ? 0.5 : 1 }}
+            >
+              {backfilling ? "Backfilling…" : "⏱ Backfill TZs"}
             </button>
             <button onClick={() => setShowPropose(true)} style={btnStyle("#1e3a5f", "#3b82f6")}>
               + Propose New
@@ -695,6 +1082,24 @@ export default function AgentBuilder() {
             </button>
           </div>
         </div>
+
+        {/* Queue Health Widget */}
+        <QueueHealthWidget
+          metrics={orchStatus?.latest_metrics || null}
+          agentsActive={(orchStatus?.agents || []).filter(a => a.status === "active").length}
+          loading={orchLoading}
+        />
+
+        {/* Sophia Dialer Widget */}
+        <SophiaDialerWidget
+          dialer={dialerStatus}
+          loading={dialerLoading}
+          onEnqueue={handleEnqueue}
+          onEnable={handleEnableAutoDial}
+          onDisable={handleDisableAutoDial}
+          enqueueing={enqueueing}
+          toggling={dialerToggling}
+        />
 
         {/* Tab Bar */}
         <div style={{
