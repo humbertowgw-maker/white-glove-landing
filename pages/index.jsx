@@ -1010,6 +1010,21 @@ export default function Home() {
           text-transform: uppercase;
         }
         .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .access-links {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          flex-wrap: wrap;
+          padding-left: 8px;
+          border-left: 1px solid var(--line);
+        }
+        .access-label {
+          color: #475569;
+          font-family: "DM Mono", monospace;
+          font-size: 9px;
+          letter-spacing: .14em;
+          text-transform: uppercase;
+        }
         .att-badge {
           display: inline-flex;
           align-items: center;
@@ -1034,6 +1049,13 @@ export default function Home() {
           font-weight: 800;
           background: rgba(255,255,255,.04);
         }
+        .access-links a {
+          padding: 8px 10px;
+          font-size: 10px;
+          color: #94a3b8;
+          background: rgba(255,255,255,.025);
+        }
+        .access-links a:hover { border-color: rgba(0,168,224,.4); color: #7dd3fc; }
         .primary-link { border-color: rgba(0,168,224,.45); background: rgba(0,168,224,.12); color: #7dd3fc; }
         .hero {
           width: min(1180px, calc(100% - 48px));
@@ -1206,17 +1228,46 @@ export default function Home() {
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
-          padding: 28px 0 44px;
+          padding: 30px 0 46px;
           border-top: 1px solid var(--line);
-          display: flex;
-          justify-content: space-between;
-          gap: 18px;
+          display: grid;
+          grid-template-columns: minmax(0,1fr) auto;
+          align-items: center;
+          gap: 22px;
           color: #64748b;
           font-family: "DM Mono", monospace;
           font-size: 9px;
           letter-spacing: .08em;
           text-transform: uppercase;
         }
+        .footer-trust {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .trustpilot-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          border: 1px solid rgba(0,182,122,.34);
+          background: rgba(0,182,122,.08);
+          color: #35d39a;
+          border-radius: 999px;
+          padding: 8px 12px;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: .08em;
+        }
+        .trustpilot-stars { color: #00b67a; letter-spacing: .04em; }
+        .footer-links {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+        .footer-links a { color: #94a3b8; }
+        .footer-links a:hover { color: #7dd3fc; }
         .att-section {
           background: linear-gradient(180deg, rgba(96,165,250,.08), transparent);
           border-top: 1px solid var(--line);
@@ -2541,7 +2592,9 @@ export default function Home() {
           .legend-items { grid-template-columns: 1fr; }
           .section-head { display: block; }
           .section-head p { margin-top: 14px; }
-          .footer { flex-direction: column; line-height: 1.6; }
+          .access-links { width: 100%; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 10px; }
+          .footer { grid-template-columns: 1fr; line-height: 1.6; }
+          .footer-links { justify-content: flex-start; }
           .quote-wizard { padding: 18px; }
           .quote-wizard-header { flex-direction: column; text-align: center; }
           .quote-wizard-avatar { margin: 0 auto; }
@@ -2561,9 +2614,14 @@ export default function Home() {
             <Link href="#services">Services</Link>
             <Link href="#calculator">Calculator</Link>
             <Link href="#why-us">Why us</Link>
-            <Link href="/products">Products</Link>
-            <Link href="/wireless">WGW platform</Link>
-            <Link href="/admin/agent-builder" style={{ fontSize: 10, opacity: 0.5 }}>Agent Builder</Link>
+            <div className="access-links" aria-label="Access links">
+              <span className="access-label">Access</span>
+              <a href="https://white-glove-frontend.vercel.app">Dashboard</a>
+              <Link href="/wireless">WGW platform</Link>
+              <Link href="/products">Products</Link>
+              <Link href="/the-pass">The Pass</Link>
+              <Link href="/admin/agent-builder">Agent Builder</Link>
+            </div>
             <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
         </nav>
@@ -3896,8 +3954,22 @@ export default function Home() {
         </section>
 
         <footer className="footer">
-          <span>© {new Date().getFullYear()} White Glove Wireless</span>
-          <span>Software for sales, service, operations, and AI-assisted pipelines</span>
+          <div className="footer-trust">
+            <a className="trustpilot-badge" href="https://www.trustpilot.com/review/whitegwireless.com" target="_blank" rel="noreferrer">
+              <span>Trustpilot</span>
+              <span className="trustpilot-stars">★★★★★</span>
+            </a>
+            <span>© {new Date().getFullYear()} White Glove Wireless</span>
+            <span>Software for sales, service, operations, and AI-assisted pipelines</span>
+          </div>
+          <div className="footer-links">
+            <a href="https://white-glove-frontend.vercel.app">Dashboard Access</a>
+            <Link href="/wireless">Platform</Link>
+            <Link href="/products">Products</Link>
+            <Link href="/sms-opt-in">SMS Opt-In</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+          </div>
         </footer>
 
         {/* Sophia AI Chat Widget */}
