@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import AppInstallMeta from "../components/AppInstallMeta";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
@@ -286,10 +287,6 @@ const PHONE_CATEGORIES = [
   },
 ];
 
-const TRADE_IN_BRANDS = [
-  "Apple", "Samsung", "Google", "Motorola", "LG", "OnePlus", "Any Other Brand"
-];
-
 const DEVICE_VALUES = {
   "iPhone 17 Pro Max": 950,
   "iPhone 17 Pro": 800,
@@ -327,18 +324,13 @@ const DEVICE_VALUES = {
   "Budget Device": 25,
 };
 
-const TRADE_IN_SHOWCASE = [
-  "iPhone 16", "iPhone 15", "iPhone 14", "iPhone 13", "iPhone 12", "iPhone 11", "iPhone SE",
-  "Samsung Galaxy S25", "Samsung Galaxy S24", "Samsung Galaxy S23", "Samsung Galaxy S22", "Samsung Galaxy S21",
-  "Galaxy Z Fold6", "Galaxy Z Flip6", "Pixel 9", "Pixel 8", "Pixel 7", "Motorola Razr (2024)",
-];
-
 export default function Home() {
   const [tradeInPromos, setTradeInPromos] = useState(DEFAULT_TRADE_IN_TIERS);
   const [promosLoaded, setPromosLoaded] = useState(false);
   const [deviceCatalog, setDeviceCatalog] = useState(DEFAULT_DEVICES);
   const [devicesLoaded, setDevicesLoaded] = useState(false);
   const [carrierPlans, setCarrierPlans] = useState([]);
+  const trustboxRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -1228,7 +1220,21 @@ export default function Home() {
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
-          padding: 30px 0 46px;
+          padding: 0 0 46px;
+        }
+        .footer-trustpilot {
+          border: 1px solid rgba(0,182,122,.28);
+          background: linear-gradient(180deg, rgba(0,182,122,.08), rgba(0,182,122,.02));
+          border-radius: 16px;
+          padding: 20px 24px;
+          margin-bottom: 26px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 68px;
+        }
+        .footer-meta {
+          padding-top: 24px;
           border-top: 1px solid var(--line);
           display: grid;
           grid-template-columns: minmax(0,1fr) auto;
@@ -1246,20 +1252,6 @@ export default function Home() {
           gap: 12px;
           flex-wrap: wrap;
         }
-        .trustpilot-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          border: 1px solid rgba(0,182,122,.34);
-          background: rgba(0,182,122,.08);
-          color: #35d39a;
-          border-radius: 999px;
-          padding: 8px 12px;
-          font-size: 10px;
-          font-weight: 800;
-          letter-spacing: .08em;
-        }
-        .trustpilot-stars { color: #00b67a; letter-spacing: .04em; }
         .footer-links {
           display: flex;
           gap: 12px;
@@ -1364,174 +1356,6 @@ export default function Home() {
           border-top: 1px solid var(--line);
           border-bottom: 1px solid var(--line);
           padding: 80px 0;
-        }
-        .trade-in-brands {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 12px;
-          margin-top: 32px;
-          justify-content: center;
-        }
-        .trade-in-brand {
-          padding: 12px 24px;
-          border: 1px solid var(--line);
-          border-radius: 30px;
-          background: rgba(255,255,255,.04);
-          color: var(--soft);
-          font-size: 14px;
-          font-weight: 600;
-          transition: border-color .2s ease, background .2s ease;
-        }
-        .trade-in-brand:hover {
-          border-color: var(--att-glow);
-          background: var(--att-soft);
-          color: #7dd3fc;
-        }
-        .trade-in-legend {
-          margin: 0 auto 32px;
-          max-width: 780px;
-          border: 1px solid var(--line);
-          border-radius: 12px;
-          background: rgba(255,255,255,.04);
-          padding: 20px 24px;
-        }
-        .legend-title {
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: .12em;
-          text-transform: uppercase;
-          color: var(--soft);
-          margin-bottom: 14px;
-          text-align: center;
-        }
-        .legend-items {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 12px;
-        }
-        .legend-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          text-align: center;
-          padding: 14px;
-          border-radius: 8px;
-          background: rgba(255,255,255,.03);
-        }
-        .legend-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-        }
-        .legend-label {
-          font-size: 13px;
-          font-weight: 700;
-          color: var(--ink);
-        }
-        .legend-range {
-          font-size: 11px;
-          color: var(--muted);
-        }
-        .legend-credit {
-          font-size: 12px;
-          font-weight: 700;
-          color: #34d399;
-        }
-        .trade-in-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 14px;
-          margin-bottom: 32px;
-        }
-        .trade-in-card {
-          border: 1px solid var(--line);
-          border-left: 3px solid var(--tier-color);
-          border-radius: 10px;
-          background: rgba(255,255,255,.04);
-          padding: 18px;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          transition: transform .2s ease, border-color .2s ease, background .2s ease;
-        }
-        .trade-in-card:hover {
-          transform: translateY(-2px);
-          border-color: var(--tier-color);
-          background: rgba(255,255,255,.07);
-        }
-        .trade-in-device {
-          font-size: 15px;
-          font-weight: 700;
-          color: var(--ink);
-        }
-        .trade-in-value {
-          font-size: 18px;
-          font-weight: 800;
-          color: var(--att);
-        }
-        .trade-in-tier {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          font-size: 11px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: .06em;
-          color: var(--soft);
-        }
-        .tier-dot {
-          width: 8px;
-          height: 8px;
-          border-radius: 50%;
-        }
-        .trade-in-qualifies {
-          font-size: 12px;
-          color: var(--muted);
-          margin-top: 4px;
-        }
-        .trade-in-qualifies b { color: var(--ink); }
-        .trade-in-disclaimer {
-          margin: 0 auto 32px;
-          max-width: 780px;
-          border: 1px solid var(--line);
-          border-radius: 10px;
-          background: rgba(255,255,255,.04);
-          padding: 20px 24px;
-          color: var(--muted);
-          font-size: 12px;
-          line-height: 1.7;
-        }
-        .trade-in-disclaimer p { margin: 0 0 10px; }
-        .trade-in-disclaimer p:last-child { margin-bottom: 0; }
-        .trade-in-disclaimer a { color: #7dd3fc; text-decoration: underline; }
-        .trade-in-source {
-          margin-top: 12px;
-          padding-top: 12px;
-          border-top: 1px solid var(--line);
-          color: var(--soft);
-          font-size: 11px;
-        }
-        .trade-in-cta {
-          margin-top: 40px;
-          text-align: center;
-        }
-        .trade-in-cta .trade-in-link {
-          display: inline-block;
-          padding: 16px 32px;
-          font-size: 16px;
-          background: linear-gradient(135deg, var(--att), #0077b6);
-          border: none;
-          border-radius: 12px;
-          color: #fff;
-          font-weight: 800;
-          cursor: pointer;
-          text-decoration: none;
-          transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .trade-in-cta .trade-in-link:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,168,224,.35);
         }
         /* Sophia AI Chat Widget Styles */
         .sophia-chat-widget {
@@ -2575,8 +2399,7 @@ export default function Home() {
           .quote-step-options { grid-template-columns: 1fr; }
           .hero { grid-template-columns: 1fr; min-height: auto; }
           .proof, .system-grid, .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .att-features, .phone-categories, .trade-in-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-          .legend-items { grid-template-columns: 1fr; }
+          .att-features, .phone-categories { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
         @media (max-width: 640px) {
           .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
@@ -2588,12 +2411,11 @@ export default function Home() {
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
           .hero-copy p { font-size: 14px; }
           .proof, .form-grid, .system-grid, .bill-compare-cta { grid-template-columns: 1fr; }
-          .att-features, .phone-categories, .trade-in-grid { grid-template-columns: 1fr; }
-          .legend-items { grid-template-columns: 1fr; }
+          .att-features, .phone-categories { grid-template-columns: 1fr; }
           .section-head { display: block; }
           .section-head p { margin-top: 14px; }
           .access-links { width: 100%; padding-left: 0; border-left: 0; border-top: 1px solid var(--line); padding-top: 10px; }
-          .footer { grid-template-columns: 1fr; line-height: 1.6; }
+          .footer-meta { grid-template-columns: 1fr; line-height: 1.6; }
           .footer-links { justify-content: flex-start; }
           .quote-wizard { padding: 18px; }
           .quote-wizard-header { flex-direction: column; text-align: center; }
@@ -2724,41 +2546,6 @@ export default function Home() {
               <div className="bill-compare-icon">⏳</div>
               <h3>Businesses wasting time</h3>
               <p>Small business owners spend hours on hold and in stores instead of running their business.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="section" aria-label="Personal guidance">
-          <div className="section-head">
-            <div>
-              <div className="mono">Personal Touch</div>
-              <h2>Real people. Real help. Zero robots.</h2>
-            </div>
-            <p>
-              Technology can estimate, but it can't listen. A local White Glove expert reviews your bill,
-              answers your questions, and guides you to a wireless setup that fits your life or your business.
-            </p>
-          </div>
-          <div className="system-grid">
-            <div className="system-step">
-              <span>🎧</span>
-              <h3>We listen first</h3>
-              <p>Tell us how you use your service. We'll ask the right questions and listen before recommending anything.</p>
-            </div>
-            <div className="system-step">
-              <span>💬</span>
-              <h3>We explain every option</h3>
-              <p>Plans, devices, trade-ins, and promotions — explained in plain language, not carrier jargon.</p>
-            </div>
-            <div className="system-step">
-              <span>🔧</span>
-              <h3>We handle the details</h3>
-              <p>From porting your number to next-day delivery and personalized setup, we manage the switch for you.</p>
-            </div>
-            <div className="system-step">
-              <span>🤝</span>
-              <h3>We are not just a website</h3>
-              <p>A local White Glove expert reviews every bill and follows up personally. You're not talking to a chatbot.</p>
             </div>
           </div>
         </section>
@@ -3794,75 +3581,6 @@ export default function Home() {
             ))}
           </div>
 
-            <div className="section-head" style={{ marginTop: 64 }}>
-              <div>
-                <div className="mono">Device Trade-In</div>
-                <h2 style={{ fontSize: 'clamp(28px, 4vw, 48px)' }}>Get credit for your old device</h2>
-              </div>
-              <p>
-                Trade in your current phone and get instant credit toward a new device. The grid below shows
-                example trade-in devices and the promotional credit tier each may qualify for.
-              </p>
-            </div>
-
-            <div className="trade-in-legend">
-              <div className="legend-title">Promotional credit tiers</div>
-              <div className="legend-items">
-                {tradeInPromos.filter(t => t.promo_credit > 0).map((tier, index) => (
-                  <div className="legend-item" key={index}>
-                    <span className="legend-dot" style={{ background: tier.color }} />
-                    <span className="legend-label">{tier.tier}</span>
-                    <span className="legend-range">{tier.notes || `Eligible: ${(tier.example_models || tier.eligible_devices || []).slice(0, 3).join(", ")}`}</span>
-                    <span className="legend-credit">Up to ${tier.promo_credit} credit</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="trade-in-grid">
-              {TRADE_IN_SHOWCASE.map((device, index) => {
-                const value = DEVICE_VALUES[device] || 0;
-                const tier = findPromoForDevice(device, tradeInPromos) || tradeInPromos[tradeInPromos.length - 1];
-                return (
-                  <div className="trade-in-card" key={index} style={{ "--tier-color": tier.color }}>
-                    <div className="trade-in-device">{device}</div>
-                    <div className="trade-in-value">${value} est. value</div>
-                    <div className="trade-in-tier">
-                      <span className="tier-dot" style={{ background: tier.color }} />
-                      {tier.tier} tier
-                    </div>
-                    <div className="trade-in-qualifies">
-                      {tier.promo_credit > 0
-                        ? <>Qualifies for up to <b>${tier.promo_credit}</b> in promo credits</>
-                        : <>Trade-in value only — no current promo credit</>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="trade-in-disclaimer">
-              <p>
-                <b>Estimates only.</b> Promotional credit tiers are researched daily and refreshed automatically from current carrier offers. Values shown are representative examples based on promotional trade-in tiers and do not guarantee the actual amount you will receive. Trade-in value depends on device condition, carrier, model, storage, and current promotions.
-              </p>
-              <p>
-                Always confirm your actual trade-in value and eligible credits directly with your carrier before making a purchase decision.
-              </p>
-              <p className="trade-in-source">
-                Refreshed daily by WGW Director AI
-              </p>
-            </div>
-
-            <div className="trade-in-brands">
-              {TRADE_IN_BRANDS.map((brand, index) => (
-                <span className="trade-in-brand" key={index}>{brand}</span>
-              ))}
-            </div>
-            <div className="trade-in-cta">
-              <button className="trade-in-link" onClick={() => document.getElementById('calculator')?.scrollIntoView({ behavior: 'smooth' })}>
-                Get Your Trade-In Quote
-              </button>
-            </div>
           </div>
         </section>
 
@@ -3911,38 +3629,21 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="section" aria-label="Compare your bill">
+        <section className="section" aria-label="How it works">
           <div className="section-head">
             <div>
               <div className="mono">Get Started</div>
               <h2>Ready to find your savings?</h2>
             </div>
-            <p>
-              Start with the calculator for a quick estimate, or upload your bill for a personal review.
-              Either way, a local White Glove expert will help you understand your options and next steps.
-            </p>
+            <a
+              className="primary-link"
+              href="#bill-review"
+              onClick={e => { e.preventDefault(); const el = document.getElementById('bill-review'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}
+            >
+              Upload your bill →
+            </a>
           </div>
-          <div className="bill-compare-cta">
-            <div className="bill-compare-card">
-              <div className="bill-compare-icon">📄</div>
-              <h3>See what you could save</h3>
-              <p>Upload a photo or PDF of your current wireless or fiber bill. Our team compares your plan, lines, and usage against current carrier pricing.</p>
-              <a className="primary-link" href="#bill-review" onClick={e => { e.preventDefault(); const el = document.getElementById('bill-review'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }}>
-                Upload your bill →
-              </a>
-            </div>
-            <div className="bill-compare-card">
-              <div className="bill-compare-icon">📊</div>
-              <h3>Get a clear recommendation</h3>
-              <p>We show you the difference line by line — monthly cost, features, and any trade-in or switching bonuses you qualify for.</p>
-            </div>
-            <div className="bill-compare-card">
-              <div className="bill-compare-icon">🚚</div>
-              <h3>Switch without the store</h3>
-              <p>Approve your new plan and devices online, schedule next-day delivery, and get personalized setup — all from home.</p>
-            </div>
-          </div>
-          <div className="system-grid" style={{ marginTop: 48 }}>
+          <div className="system-grid">
             {SYSTEM_STEPS.map(([number, title, copy]) => (
               <div className="system-step" key={number}>
                 <span>{number}</span>
@@ -3954,23 +3655,53 @@ export default function Home() {
         </section>
 
         <footer className="footer">
-          <div className="footer-trust">
-            <a className="trustpilot-badge" href="https://www.trustpilot.com/review/whitegwireless.com" target="_blank" rel="noreferrer">
-              <span>Trustpilot</span>
-              <span className="trustpilot-stars">★★★★★</span>
-            </a>
-            <span>© {new Date().getFullYear()} White Glove Wireless</span>
-            <span>Software for sales, service, operations, and AI-assisted pipelines</span>
+          <div className="footer-trustpilot">
+            {/*
+              Official Trustpilot TrustBox widget ("Horizontal" template) —
+              pulls the real, live star rating and review count directly from
+              Trustpilot for whitegwireless.com, so it's always accurate and
+              never needs manual updates.
+            */}
+            <div
+              ref={trustboxRef}
+              className="trustpilot-widget"
+              data-locale="en-US"
+              data-template-id="5406e65db0d04a09e042d5fc"
+              data-businessunit-id="6a40c26fa44ef875dfcb81a5"
+              data-style-height="52px"
+              data-style-width="100%"
+              data-theme="dark"
+            >
+              <a href="https://www.trustpilot.com/review/whitegwireless.com" target="_blank" rel="noopener noreferrer">
+                Trustpilot
+              </a>
+            </div>
           </div>
-          <div className="footer-links">
-            <a href="https://white-glove-frontend.vercel.app">Dashboard Access</a>
-            <Link href="/wireless">Platform</Link>
-            <Link href="/products">Products</Link>
-            <Link href="/sms-opt-in">SMS Opt-In</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
+          <div className="footer-meta">
+            <div className="footer-trust">
+              <span>© {new Date().getFullYear()} White Glove Wireless</span>
+              <span>Software for sales, service, operations, and AI-assisted pipelines</span>
+            </div>
+            <div className="footer-links">
+              <a href="https://white-glove-frontend.vercel.app">Dashboard Access</a>
+              <Link href="/wireless">Platform</Link>
+              <Link href="/products">Products</Link>
+              <Link href="/sms-opt-in">SMS Opt-In</Link>
+              <Link href="/privacy">Privacy</Link>
+              <Link href="/terms">Terms</Link>
+            </div>
           </div>
         </footer>
+
+        <Script
+          src="https://widget.trustpilot.com/bootstrap/v5/tp.widget.bootstrap.min.js"
+          strategy="lazyOnload"
+          onLoad={() => {
+            if (window.Trustpilot && trustboxRef.current) {
+              window.Trustpilot.loadFromElement(trustboxRef.current, true);
+            }
+          }}
+        />
 
         {/* Sophia AI Chat Widget */}
         <div className="sophia-chat-widget">
