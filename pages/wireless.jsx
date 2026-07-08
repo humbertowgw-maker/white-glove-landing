@@ -20,16 +20,16 @@ const FEATURES = [
 
 const PLANS = [
   {
-    id: "starter", name: "Starter", price: 299, color: "#60a5fa",
+    id: "starter", name: "Silver Service", price: 299, color: "#60a5fa",
     features: ["Up to 3 reps", "500 AI Calls/month", "Unlimited leads", "AI sales team", "Google lead discovery", "Offline field access", "Sales trainer", "Workspace backups"],
   },
   {
-    id: "growth", name: "Growth", price: 699, color: "#f97316", popular: true,
-    features: ["Up to 10 reps", "2,500 AI Calls/month", "Everything in Starter", "Closed-loop AI workflows", "Live AI leadership meetings", "Team coaching and analytics", "Priority support"],
+    id: "growth", name: "Gold Service", price: 699, color: "#f97316", popular: true,
+    features: ["Up to 10 reps", "2,500 AI Calls/month", "Everything in Silver Service", "Closed-loop AI workflows", "Live AI leadership meetings", "Team coaching and analytics", "Priority support"],
   },
   {
-    id: "scale", name: "Scale", price: 1499, color: "#a78bfa",
-    features: ["Up to 25 reps", "7,500 AI Calls/month", "Everything in Growth", "Apollo workflow", "Custom branding and domain", "Advanced controls", "Dedicated support"],
+    id: "scale", name: "Platinum Service", price: 1499, color: "#a78bfa",
+    features: ["Up to 25 reps", "7,500 AI Calls/month", "Everything in Gold Service", "Apollo workflow", "Custom branding and domain", "Advanced controls", "Dedicated support"],
   },
 ];
 
@@ -52,6 +52,11 @@ export default function WirelessLanding() {
       const { data: authData, error: authError } = await supabase.auth.signUp({ email: form.email, password: form.password });
       if (authError) throw new Error(authError.message);
 
+      // No Stripe checkout here — every new org starts on a 3-day, no-card
+      // trial with full Platinum Service access (see backend
+      // lib/createDealerOrg.js / create_org_with_owner). selectedPlan is
+      // just which plan they're leaning toward; they upgrade in-app via the
+      // billing prompts once they've actually tried it.
       const orgRes = await fetch(`${API}/api/organizations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -65,25 +70,8 @@ export default function WirelessLanding() {
         }),
       });
       if (!orgRes.ok) throw new Error("Failed to create organization");
-      const { org } = await orgRes.json();
 
-      const checkoutRes = await fetch(`${API}/api/billing/create-checkout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authData.session?.access_token ? { "Authorization": `Bearer ${authData.session.access_token}` } : {}),
-        },
-        body: JSON.stringify({ plan: selectedPlan, org_id: org.id, email: form.email }),
-      });
-
-      if (!checkoutRes.ok) throw new Error("Failed to create checkout");
-      const { url } = await checkoutRes.json();
-
-      if (url) {
-        window.location.href = url;
-      } else {
-        setStep("success");
-      }
+      setStep("success");
     } catch (e) {
       setError(e.message);
       setLoading(false);
@@ -243,7 +231,10 @@ export default function WirelessLanding() {
           <div id="pricing" style={{padding:"60px 40px",maxWidth:1000,margin:"0 auto"}}>
             <div style={{textAlign:"center",marginBottom:48}}>
               <div style={{fontFamily:"'Syne',sans-serif",fontSize:32,fontWeight:800,color:"#f1f5f9",marginBottom:12}}>Platform Pricing, Not Another Tool Fee</div>
-              <div style={{fontSize:12,color:"#475569",lineHeight:1.7}}>Replace disconnected CRM, dialer, coaching, research, task, and reporting subscriptions with one operating system.</div>
+              <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:16}}>Replace disconnected CRM, dialer, coaching, research, task, and reporting subscriptions with one operating system.</div>
+              <div style={{display:"inline-block",fontSize:11,color:"#34d399",background:"rgba(52,211,153,.1)",border:"1px solid rgba(52,211,153,.3)",borderRadius:20,padding:"6px 16px",fontWeight:600}}>
+                Every plan starts with a 3-day full-access trial · No credit card required
+              </div>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(260px,1fr))",gap:20}}>
               {PLANS.map(plan=>(
@@ -286,8 +277,8 @@ export default function WirelessLanding() {
             <button onClick={()=>setStep("landing")} style={{background:"none",border:"none",color:"#475569",cursor:"pointer",fontSize:11,marginBottom:24,letterSpacing:".08em"}}>← BACK</button>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f97316",marginBottom:4}}>WHITE GLOVE</div>
             <div style={{fontSize:10,color:"#334155",letterSpacing:".18em",marginBottom:28}}>WIRELESS · AI PLATFORM</div>
-            <div style={{fontSize:14,fontWeight:600,color:"#f1f5f9",marginBottom:6}}>Choose your WGW plan</div>
-            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>Select the plan that matches your team size and AI calling volume.</div>
+            <div style={{fontSize:14,fontWeight:600,color:"#f1f5f9",marginBottom:6}}>Start your free trial</div>
+            <div style={{fontSize:11,color:"#475569",marginBottom:24}}>3 days, full Platinum Service access, no credit card. Pick the plan you're leaning toward — you can change it anytime.</div>
 
             <div style={{display:"flex",gap:8,marginBottom:24}}>
               {PLANS.map(p=>(
@@ -315,11 +306,11 @@ export default function WirelessLanding() {
             {error&&<div style={{marginTop:16,padding:"10px 14px",background:"rgba(239,68,68,.08)",border:"1px solid rgba(239,68,68,.2)",borderRadius:4,fontSize:11,color:"#ef4444"}}>{error}</div>}
 
             <button className="btn" style={{width:"100%",marginTop:20,padding:14}} onClick={handleSignup} disabled={loading}>
-              {loading ? "Setting up your account..." : "Continue to Checkout"}
+              {loading ? "Setting up your account..." : "Start 3-Day Free Trial"}
             </button>
 
             <div style={{marginTop:12,fontSize:10,color:"#334155",textAlign:"center",lineHeight:1.6}}>
-              By continuing you agree to our terms. You'll be redirected to Stripe to finish checkout.
+              By continuing you agree to our terms. No credit card required — full Platinum Service access for 3 days.
             </div>
 
             <div style={{marginTop:16,fontSize:10,color:"#334155",textAlign:"center"}}>
@@ -334,7 +325,7 @@ export default function WirelessLanding() {
           <div className="card" style={{width:"100%",maxWidth:480,padding:48,textAlign:"center"}}>
             <div style={{fontSize:48,marginBottom:20}}>🎉</div>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#f1f5f9",marginBottom:8}}>Welcome to White Glove Wireless!</div>
-            <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:32}}>Your WGW workspace is ready. Check your email to confirm your account, then sign into your dashboard.</div>
+            <div style={{fontSize:12,color:"#475569",lineHeight:1.7,marginBottom:32}}>Your 3-day trial is live with full Platinum Service access — no credit card needed. Check your email to confirm your account, then sign into your dashboard to get started.</div>
             <a href="https://white-glove-frontend.vercel.app"><button className="btn" style={{width:"100%",padding:14}}>Go to Dashboard →</button></a>
           </div>
         </div>
