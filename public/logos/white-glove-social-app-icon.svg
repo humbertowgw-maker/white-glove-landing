@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">White Glove Social app icon</title>
+  <desc id="desc">A dark social feed tile with a cyan message mark and clean White Glove styling.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#081522"/>
+      <stop offset="1" stop-color="#05070b"/>
+    </linearGradient>
+    <linearGradient id="social" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#000" flood-opacity=".48"/>
+    </filter>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" rx="226" fill="url(#bg)"/>
+  <ellipse cx="512" cy="206" rx="340" ry="150" fill="#38bdf8" fill-opacity=".12"/>
+  <rect x="136" y="132" width="752" height="760" rx="32" fill="#07111c" stroke="#7dd3fc" stroke-opacity=".18" stroke-width="4" filter="url(#shadow)"/>
+  <rect x="188" y="192" width="648" height="148" rx="24" fill="#0b1b2b" stroke="#7dd3fc" stroke-opacity=".16" stroke-width="4"/>
+  <circle cx="256" cy="266" r="34" fill="url(#social)" filter="url(#glow)"/>
+  <path d="M320 240H702M320 292H612" stroke="#e0f2fe" stroke-opacity=".8" stroke-width="24" stroke-linecap="round"/>
+  <rect x="188" y="390" width="648" height="148" rx="24" fill="#0b1b2b" stroke="#7dd3fc" stroke-opacity=".16" stroke-width="4"/>
+  <circle cx="256" cy="464" r="34" fill="#e0f2fe" fill-opacity=".9"/>
+  <path d="M320 438H694M320 490H568" stroke="#7dd3fc" stroke-opacity=".76" stroke-width="24" stroke-linecap="round"/>
+  <path d="M280 616H682C748 616 802 670 802 736C802 802 748 856 682 856H364L278 910V856C216 852 166 800 166 736C166 670 214 616 280 616Z" fill="url(#social)" filter="url(#glow)"/>
+  <path d="M332 714H638M332 776H568" stroke="#04111d" stroke-opacity=".8" stroke-width="30" stroke-linecap="round"/>
+  <path d="M724 570L740 612L784 616L750 644L760 688L724 664L686 688L698 644L662 616L706 612Z" fill="#e0f2fe" fill-opacity=".95"/>
+  <text x="512" y="590" text-anchor="middle" fill="#e0f2fe" font-family="Arial Black, Arial, sans-serif" font-size="98" font-weight="900" letter-spacing="-4">WGS</text>
+</svg>
