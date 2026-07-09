@@ -31,6 +31,15 @@ export const PRODUCTS = [
     accent: "#a78bfa",
   },
   {
+    id: "white-glove-social",
+    name: "White Glove Social",
+    label: "Social OS",
+    description: "AI-assisted content planning, media review, and social publishing workflows for growing brands.",
+    logo: "/logos/white-glove-social-app-icon.svg",
+    href: "https://white-glove-social.vercel.app",
+    accent: "#38bdf8",
+  },
+  {
     id: "repairscout",
     name: "RepairScout",
     label: "Repair intelligence",
