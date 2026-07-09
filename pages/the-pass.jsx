@@ -32,13 +32,13 @@ export default function ThePassLanding() {
         .pass-nav{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:24px 0;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
         .back-link,.nav-launch,.ticket-label,.micro{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.15em;text-transform:uppercase}
         .back-link{color:#8f8575;text-decoration:none}.back-link:hover{color:var(--ink)}
-        .nav-actions{display:flex;align-items:center;gap:10px}.nav-launch{padding:11px 15px;color:#16130f;background:var(--fire);text-decoration:none;font-weight:500}.nav-tip{padding:10px 13px;border:1px solid var(--line);color:var(--ink);text-decoration:none}
+        .nav-actions{display:flex;align-items:center;gap:10px}.nav-launch{padding:11px 15px;color:#16130f;background:var(--fire);text-decoration:none;font-weight:500}.nav-tip{padding:10px 13px;border:1px solid rgba(232,84,30,.72);color:var(--ink);text-decoration:none;background:rgba(232,84,30,.14);box-shadow:0 0 0 1px rgba(232,84,30,.12)}
         .hero{width:min(1180px,calc(100% - 48px));margin:0 auto;padding:86px 0 76px;display:grid;grid-template-columns:1.08fr .92fr;gap:70px;align-items:center}.pass-logo{width:70px;height:70px;border-radius:18px;margin-bottom:24px;box-shadow:0 15px 40px rgba(0,0,0,.45)}
         .micro{color:var(--gold);margin-bottom:20px}h1,h2,h3{font-family:"Oswald",sans-serif;text-transform:uppercase}
         h1{margin:0 0 24px;font-size:clamp(76px,11vw,156px);line-height:.82;letter-spacing:-.055em}h1 span{color:var(--fire)}
         .hero-copy>p{max-width:610px;margin:0 0 32px;color:#b9ad9b;font-size:17px;line-height:1.7}
         .hero-actions{display:flex;flex-wrap:wrap;gap:12px}.primary,.secondary{padding:15px 20px;text-decoration:none;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;transition:transform .2s,border-color .2s}
-        .primary{color:#16130f;background:var(--fire);font-weight:500}.secondary{color:var(--ink);border:1px solid var(--line)}.primary:hover,.secondary:hover{transform:translateY(-2px)}.secondary:hover{border-color:var(--gold)}
+        .primary{color:#16130f;background:var(--fire);font-weight:500}.secondary{color:var(--ink);border:1px solid var(--line)}.tip-cta{position:relative;padding-right:52px;border-color:rgba(232,84,30,.72);background:linear-gradient(135deg,rgba(232,84,30,.2),rgba(243,181,98,.06));box-shadow:0 10px 34px rgba(0,0,0,.22)}.tip-cta:after{content:"→";position:absolute;right:15px;top:50%;width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:var(--fire);color:#16130f;transform:translateY(-50%);font-weight:700}.primary:hover,.secondary:hover{transform:translateY(-2px)}.secondary:hover{border-color:var(--gold)}.tip-cta:hover{border-color:#ff6326}
         .order-ticket{position:relative;padding:28px;border:1px solid var(--line);background:repeating-linear-gradient(0deg,transparent 0 27px,rgba(242,235,221,.028) 28px),#1b1711;box-shadow:0 30px 90px rgba(0,0,0,.36)}
         .order-ticket:before{content:"";position:absolute;inset:10px;border:1px dashed rgba(242,235,221,.08);pointer-events:none}
         .ticket-head{display:flex;justify-content:space-between;gap:20px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--line)}.ticket-label{color:#8f8575}
@@ -58,7 +58,7 @@ export default function ThePassLanding() {
         <nav className="pass-nav">
           <Link href="/" className="back-link">← All products</Link>
           <div className="nav-actions">
-            <a href={TIP_URL} className="nav-tip back-link">Wallet tip</a>
+            <a href={TIP_URL} className="nav-tip back-link">Wallet tip →</a>
             <a href={APP_URL} className="nav-launch">Open The Pass ↗</a>
           </div>
         </nav>
@@ -71,7 +71,7 @@ export default function ThePassLanding() {
             <p>Stop staring into the fridge waiting for inspiration. Tell The Pass what you have on hand and three AI kitchen roles work together to turn it into dinner.</p>
             <div className="hero-actions">
               <a href={APP_URL} className="primary">Fire The Pass ↗</a>
-              <a href={TIP_URL} className="secondary">Tip with Apple Pay / Google Pay</a>
+              <a href={TIP_URL} className="secondary tip-cta">Tip with Apple Pay / Google Pay</a>
               <a href="#brigade" className="secondary">Meet the brigade</a>
             </div>
           </div>
@@ -105,7 +105,7 @@ export default function ThePassLanding() {
             <h2>Tip the brigade.</h2>
             <p>When the Head Chef, Sous Chef, and Critic save dinner, send a little thanks back to the line with Apple Pay, Google Pay, cards, or supported wallet checkout.</p>
           </div>
-          <a href={TIP_URL} className="secondary">Open tip jar ↗</a>
+          <a href={TIP_URL} className="secondary tip-cta">Open tip jar</a>
         </section>
 
         <section className="cta">
@@ -114,7 +114,7 @@ export default function ThePassLanding() {
           <p>List your ingredients. Pantry staples are assumed.</p>
           <div className="hero-actions" style={{ justifyContent: "center" }}>
             <a href={APP_URL} className="primary">Create My Recipe ↗</a>
-            <a href={TIP_URL} className="secondary">Tip with wallet checkout</a>
+            <a href={TIP_URL} className="secondary tip-cta">Tip with wallet checkout</a>
           </div>
         </section>
 
