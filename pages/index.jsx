@@ -473,35 +473,30 @@ export default function Home() {
   // Sophia AI Chat Functions
   const handleChatSubmit = async (e) => {
     e.preventDefault();
-    if (!chatInput.trim()) return;
+    if (!chatInput.trim() || isTyping) return;
 
     const userMessage = { role: "user", content: chatInput };
+    const history = chatMessages.filter(m => m.role === "user" || m.role === "assistant");
     setChatMessages(prev => [...prev, userMessage]);
     setChatInput("");
     setIsTyping(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
-      let aiResponse = "";
-      const lowerInput = userMessage.content.toLowerCase();
-
-      if (lowerInput.includes("switch") || lowerInput.includes("carrier")) {
-        aiResponse = "Great question! Switching with White Glove Wireless is seamless. We handle the entire porting process, you keep your number, and you'll get access to a reliable 5G network. Plus, we have exclusive switching bonuses including bill credits and device deals. Would you like me to help you start the switching process?";
-      } else if (lowerInput.includes("phone") || lowerInput.includes("iphone") || lowerInput.includes("samsung")) {
-        aiResponse = "We have the latest devices available! Including iPhone 17 series, Samsung Galaxy S26 series, Google Pixel 10 series, Motorola Razr, and more. With flexible payment options and trade-in deals, upgrading is affordable. What type of phone are you interested in?";
-      } else if (lowerInput.includes("trade") || lowerInput.includes("credit")) {
-        aiResponse = "Our trade-in program is fantastic! We accept phones from any carrier regardless of condition - even cracked screens qualify. You get instant credit toward a new device. Just upload your current bill in the form above, and I can help estimate your trade-in value. What device are you currently using?";
-      } else if (lowerInput.includes("quote") || lowerInput.includes("price") || lowerInput.includes("cost")) {
-        aiResponse = "I'd be happy to help you get a quote! The fastest way is to upload your current wireless bill using the form on this page. Our AI team will analyze it and provide personalized savings recommendations. You can also use our interactive calculator coming soon. What's your current monthly bill roughly?";
-      } else if (lowerInput.includes("help") || lowerInput.includes("hello") || lowerInput.includes("hi")) {
-        aiResponse = "Hello! I'm here to help you with anything related to White Glove Wireless services. I can assist with switching information, phone upgrades, trade-in quotes, bill reviews, or answer any questions you might have. What would you like to know more about?";
-      } else {
-        aiResponse = "Thanks for your question! I can help you with switching carriers, new phones, trade-in deals, and bill reviews. For specific quotes, I recommend uploading your bill using the form on this page so our team can give you personalized recommendations. Is there anything specific about our services you'd like to know more about?";
-      }
-
+    try {
+      const res = await fetch(`${API}/api/public-chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage.content, history }),
+      });
+      const data = await res.json();
+      const aiResponse = res.ok
+        ? (data.reply || "Sorry, I didn't catch that — could you rephrase?")
+        : (data.error || "Something went wrong. Please try again in a moment.");
       setChatMessages(prev => [...prev, { role: "assistant", content: aiResponse }]);
+    } catch {
+      setChatMessages(prev => [...prev, { role: "assistant", content: "Sorry, I'm having trouble connecting right now — please try again in a moment, or upload your bill using the form above." }]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   // Quote Calculator Functions
