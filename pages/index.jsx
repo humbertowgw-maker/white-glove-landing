@@ -2433,10 +2433,9 @@ export default function Home() {
             <Link href="#why-us">Why us</Link>
             <div className="access-links" aria-label="Access links">
               <span className="access-label">Access</span>
-              <a href="https://white-glove-frontend.vercel.app">Dashboard</a>
+              <a href="/app">Dashboard</a>
               <Link href="/wireless">WGW platform</Link>
               <Link href="/products">Products</Link>
-              <Link href="/the-pass">The Pass</Link>
               <Link href="/admin/agent-builder">Agent Builder</Link>
             </div>
             <a className="primary-link" href="#bill-review">Upload bill</a>
@@ -3678,7 +3677,7 @@ export default function Home() {
               <span>Software for sales, service, operations, and AI-assisted pipelines</span>
             </div>
             <div className="footer-links">
-              <a href="https://white-glove-frontend.vercel.app">Dashboard Access</a>
+              <a href="/app">Dashboard Access</a>
               <Link href="/wireless">Platform</Link>
               <Link href="/products">Products</Link>
               <Link href="/sms-opt-in">SMS Opt-In</Link>
