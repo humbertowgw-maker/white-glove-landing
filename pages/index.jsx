@@ -948,16 +948,16 @@ export default function Home() {
       <style jsx global>{`
         :root {
           color-scheme: dark;
-          --page: #070707;
-          --ink: #f8fafc;
+          --page: #0b1120;
+          --ink: #f1f5f9;
           --muted: #94a3b8;
           --soft: #cbd5e1;
           --line: rgba(255,255,255,.12);
-          --att: #00A8E0;
-          --att-soft: rgba(0,168,224,.18);
-          --att-glow: rgba(0,168,224,.35);
+          --accent: #d4a373;
+          --accent-soft: rgba(212,163,115,.18);
+          --accent-glow: rgba(212,163,115,.35);
           --amber: #f59e0b;
-          --amber-soft: rgba(245,158,11,.18);
+          --accent-soft: rgba(245,158,11,.18);
           --green: #34d399;
           --blue: #60a5fa;
         }
@@ -969,10 +969,10 @@ export default function Home() {
           color: var(--ink);
           font-family: "Manrope", sans-serif;
           background:
-            radial-gradient(circle at 82% 8%, rgba(0,168,224,.22), transparent 32%),
-            radial-gradient(circle at 8% 18%, rgba(0,119,182,.15), transparent 26%),
-            radial-gradient(circle at 50% 75%, rgba(0,168,224,.08), transparent 45%),
-            linear-gradient(180deg, #070707 0%, #0a0d12 58%, #070707 100%);
+            radial-gradient(circle at 82% 8%, rgba(212,163,115,.22), transparent 32%),
+            radial-gradient(circle at 8% 18%, rgba(212,163,115,.15), transparent 26%),
+            radial-gradient(circle at 50% 75%, rgba(212,163,115,.08), transparent 45%),
+            linear-gradient(180deg, #0b1120 0%, #111c33 58%, #0b1120 100%);
         }
         a { color: inherit; text-decoration: none; }
         button, input, select, textarea { font: inherit; }
@@ -1012,7 +1012,7 @@ export default function Home() {
           letter-spacing: .14em;
           text-transform: uppercase;
         }
-        .att-badge {
+        .accent-badge {
           display: inline-flex;
           align-items: center;
           gap: 8px;
@@ -1020,14 +1020,14 @@ export default function Home() {
           background: rgba(0,168,224,.08);
           border-radius: 8px;
           padding: 7px 11px;
-          color: #7dd3fc;
+          color: #e9c46a;
           font-size: 10px;
           font-weight: 700;
           letter-spacing: .06em;
           text-transform: uppercase;
           white-space: nowrap;
         }
-        .att-globe { width: 18px; height: 18px; flex-shrink: 0; }
+        .accent-globe { width: 18px; height: 18px; flex-shrink: 0; }
         .nav-actions a, .primary-link {
           border: 1px solid var(--line);
           border-radius: 8px;
@@ -1042,8 +1042,8 @@ export default function Home() {
           color: #94a3b8;
           background: rgba(255,255,255,.025);
         }
-        .access-links a:hover { border-color: rgba(0,168,224,.4); color: #7dd3fc; }
-        .primary-link { border-color: rgba(0,168,224,.45); background: rgba(0,168,224,.12); color: #7dd3fc; }
+        .access-links a:hover { border-color: rgba(212,163,115,.4); color: #e9c46a; }
+        .primary-link { border-color: rgba(0,168,224,.45); background: rgba(212,163,115,.12); color: #e9c46a; }
         .hero {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
@@ -1061,7 +1061,7 @@ export default function Home() {
           letter-spacing: 0;
           max-width: 760px;
         }
-        .hero-copy h1 span { color: var(--att); }
+        .hero-copy h1 span { color: var(--accent); }
         .hero-copy p {
           margin: 0;
           max-width: 640px;
@@ -1080,7 +1080,7 @@ export default function Home() {
           border-top: 1px solid var(--line);
           padding-top: 13px;
         }
-        .proof b { display: block; color: var(--att); font-size: 21px; }
+        .proof b { display: block; color: var(--accent); font-size: 21px; }
         .proof span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.45; }
         .bill-panel {
           border: 1px solid rgba(255,255,255,.16);
@@ -1095,7 +1095,7 @@ export default function Home() {
           align-items: center;
           gap: 14px;
           border-bottom: 1px solid var(--line);
-          background: linear-gradient(135deg, rgba(0,168,224,.18), rgba(0,119,182,.1));
+          background: linear-gradient(135deg, rgba(212,163,115,.18), rgba(212,163,115,.1));
         }
         .panel-head img { border-radius: 8px; flex: 0 0 auto; }
         .panel-head h2 { margin: 0 0 4px; font-size: 20px; line-height: 1.05; }
@@ -1118,7 +1118,7 @@ export default function Home() {
           cursor: pointer;
           background: rgba(255,255,255,.035);
         }
-        .segmented input { accent-color: var(--att); }
+        .segmented input { accent-color: var(--accent); }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .field, .file-field {
           width: 100%;
@@ -1131,20 +1131,20 @@ export default function Home() {
           outline: none;
         }
         .field:focus, .file-field:focus-within {
-          border-color: var(--att-glow);
-          box-shadow: 0 0 0 3px var(--att-soft);
+          border-color: var(--accent-glow);
+          box-shadow: 0 0 0 3px var(--accent-soft);
         }
         textarea.field { min-height: 84px; resize: vertical; grid-column: 1 / -1; }
         .file-field { display: grid; gap: 7px; color: var(--muted); }
         .file-field input { color: var(--muted); font-size: 12px; }
         .consent { display: flex; gap: 9px; color: var(--soft); font-size: 11px; line-height: 1.5; }
-        .consent input { margin-top: 2px; accent-color: var(--att); }
+        .consent input { margin-top: 2px; accent-color: var(--accent); }
         .submit {
           border: 0;
           border-radius: 8px;
           padding: 13px 16px;
           color: #fff;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           font-weight: 900;
           cursor: pointer;
         }
@@ -1190,7 +1190,7 @@ export default function Home() {
           border-bottom: 1px solid var(--line);
           background: rgba(255,255,255,.035);
         }
-        .system-step span { color: var(--att); font-family: "DM Mono", monospace; font-size: 10px; }
+        .system-step span { color: var(--accent); font-family: "DM Mono", monospace; font-size: 10px; }
         .system-step h3 { margin: 34px 0 9px; font-size: 20px; }
         .system-step p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.65; }
         .bill-compare-cta {
@@ -1207,7 +1207,7 @@ export default function Home() {
           flex-direction: column;
           gap: 10px;
         }
-        .bill-compare-card:hover { border-color: var(--att); background: rgba(0,168,224,.06); }
+        .bill-compare-card:hover { border-color: var(--accent); background: rgba(0,168,224,.06); }
         .bill-compare-icon { font-size: 28px; line-height: 1; }
         .bill-compare-card h3 { margin: 0; font-size: 18px; }
         .bill-compare-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
@@ -1254,7 +1254,7 @@ export default function Home() {
           justify-content: flex-end;
         }
         .footer-links a { color: #94a3b8; }
-        .footer-links a:hover { color: #7dd3fc; }
+        .footer-links a:hover { color: #e9c46a; }
         .att-section {
           background: linear-gradient(180deg, rgba(96,165,250,.08), transparent);
           border-top: 1px solid var(--line);
@@ -1364,7 +1364,7 @@ export default function Home() {
           width: 64px;
           height: 64px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           border: none;
           cursor: pointer;
           display: flex;
@@ -1375,7 +1375,7 @@ export default function Home() {
         }
         .sophia-chat-button:hover {
           transform: scale(1.05);
-          box-shadow: 0 12px 32px rgba(0,168,224,.5);
+          box-shadow: 0 12px 32px rgba(212,163,115,.5);
         }
         .sophia-chat-button svg {
           width: 32px;
@@ -1417,7 +1417,7 @@ export default function Home() {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1512,14 +1512,14 @@ export default function Home() {
           outline: none;
         }
         .sophia-input:focus {
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(255,255,255,.08);
         }
         .sophia-send {
           width: 44px;
           height: 44px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           border: none;
           cursor: pointer;
           display: flex;
@@ -1579,7 +1579,7 @@ export default function Home() {
           width: 48px;
           height: 48px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1612,7 +1612,7 @@ export default function Home() {
         }
         .quote-step.active {
           opacity: 1;
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(0,168,224,.06);
         }
         .quote-step-question {
@@ -1622,7 +1622,7 @@ export default function Home() {
           margin-bottom: 10px;
           line-height: 1.5;
         }
-        .quote-step-question b { color: var(--att); }
+        .quote-step-question b { color: var(--accent); }
         .quote-step-hint {
           margin: -6px 0 12px;
           color: var(--muted);
@@ -1642,7 +1642,7 @@ export default function Home() {
         }
         .quote-step-input input:focus,
         .quote-step-input select:focus {
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(255,255,255,.08);
         }
         .quote-step-options {
@@ -1664,12 +1664,12 @@ export default function Home() {
           transition: border-color .2s ease, background .2s ease;
         }
         .quote-step-option:hover {
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(0,168,224,.08);
         }
         .quote-step-option.selected {
-          border-color: var(--att);
-          background: rgba(0,168,224,.12);
+          border-color: var(--accent);
+          background: rgba(212,163,115,.12);
         }
         .quote-step-option b { color: var(--ink); }
         .quote-step-option span { font-size: 12px; color: var(--muted); }
@@ -1779,7 +1779,7 @@ export default function Home() {
           content: '✓';
           position: absolute;
           left: 0;
-          color: var(--att);
+          color: var(--accent);
           font-size: 12px;
         }
         .quote-guide-list li b {
@@ -1788,7 +1788,7 @@ export default function Home() {
         }
         .quote-guide-note {
           padding: 14px;
-          border-left: 3px solid var(--att);
+          border-left: 3px solid var(--accent);
           border-radius: 0 8px 8px 0;
           background: rgba(0,168,224,.08);
           color: var(--muted);
@@ -1863,7 +1863,7 @@ export default function Home() {
         .quote-wg-review-note {
           margin-top: 18px;
           padding: 16px;
-          border-left: 3px solid var(--att);
+          border-left: 3px solid var(--accent);
           border-radius: 0 10px 10px 0;
           background: rgba(0,168,224,.08);
           color: var(--soft);
@@ -1893,7 +1893,7 @@ export default function Home() {
           font-size: 12px;
           font-weight: 600;
         }
-        .quote-step-warning a { color: #7dd3fc; text-decoration: underline; }
+        .quote-step-warning a { color: #e9c46a; text-decoration: underline; }
         .quote-wizard-nav {
           display: flex;
           gap: 10px;
@@ -1915,7 +1915,7 @@ export default function Home() {
         }
         .quote-wizard-next {
           border: none;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           color: #fff;
         }
         .quote-wizard-nav button:hover {
@@ -1939,7 +1939,7 @@ export default function Home() {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1964,7 +1964,7 @@ export default function Home() {
         }
         .quote-badge.estimate {
           background: rgba(0,168,224,.2);
-          color: #7dd3fc;
+          color: #e9c46a;
           border: 1px solid rgba(0,168,224,.4);
         }
         .quote-badge.real {
@@ -2055,7 +2055,7 @@ export default function Home() {
         .contact-capture h4 {
           margin: 0 0 8px;
           font-size: 20px;
-          color: var(--att);
+          color: var(--accent);
         }
         .capture-subtitle {
           margin: 0 0 20px;
@@ -2092,7 +2092,7 @@ export default function Home() {
         .capture-input::placeholder { color: var(--muted); }
         .capture-input:focus,
         .capture-form select:focus {
-          border-color: var(--att);
+          border-color: var(--accent);
           box-shadow: 0 0 0 3px rgba(0,168,224,.15);
         }
         .capture-radio {
@@ -2107,7 +2107,7 @@ export default function Home() {
           font-size: 14px;
           color: var(--soft);
         }
-        .capture-radio input { accent-color: var(--att); }
+        .capture-radio input { accent-color: var(--accent); }
         .capture-checkbox {
           display: flex;
           align-items: flex-start;
@@ -2119,12 +2119,12 @@ export default function Home() {
         }
         .capture-checkbox input {
           margin-top: 2px;
-          accent-color: var(--att);
+          accent-color: var(--accent);
           flex-shrink: 0;
         }
         .capture-submit {
           padding: 14px 20px;
-          background: linear-gradient(135deg, var(--att), #0077b6);
+          background: linear-gradient(135deg, var(--accent), #0077b6);
           border: none;
           border-radius: 10px;
           color: white;
@@ -2159,7 +2159,7 @@ export default function Home() {
         }
         .capture-status.loading {
           background: rgba(0,168,224,.15);
-          color: #7dd3fc;
+          color: #e9c46a;
           border: 1px solid rgba(0,168,224,.3);
         }
         .capture-success { display: flex; flex-direction: column; gap: 16px; }
@@ -2212,13 +2212,13 @@ export default function Home() {
           transition: border-color .2s ease, background .2s ease;
         }
         .discount-option:hover {
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(0,168,224,.06);
         }
         .discount-option input {
           width: 18px;
           height: 18px;
-          accent-color: var(--att);
+          accent-color: var(--accent);
           flex-shrink: 0;
         }
         .discount-option span {
@@ -2231,7 +2231,7 @@ export default function Home() {
           border-radius: 6px;
           padding: 12px 0;
         }
-        .discount-row .result-label { color: #7dd3fc; }
+        .discount-row .result-label { color: #e9c46a; }
         .trade-in-selector { position: relative; }
         .trade-in-selector input {
           width: 100%;
@@ -2244,7 +2244,7 @@ export default function Home() {
           outline: none;
         }
         .trade-in-selector input:focus {
-          border-color: var(--att-glow);
+          border-color: var(--accent-glow);
           background: rgba(255,255,255,.08);
         }
         .trade-in-suggestions {
@@ -2275,7 +2275,7 @@ export default function Home() {
         .trade-in-suggestion:last-child { border-bottom: none; }
         .trade-in-suggestion:hover {
           background: rgba(0,168,224,.1);
-          color: #7dd3fc;
+          color: #e9c46a;
         }
         .trade-in-list {
           margin-top: 14px;
@@ -2290,7 +2290,7 @@ export default function Home() {
           align-items: center;
           padding: 12px;
           border: 1px solid var(--line);
-          border-left: 3px solid var(--row-color, var(--att));
+          border-left: 3px solid var(--row-color, var(--accent));
           border-radius: 8px;
           background: rgba(255,255,255,.04);
         }
@@ -2354,7 +2354,7 @@ export default function Home() {
         }
         .result-trade-in-total {
           font-weight: 700;
-          color: var(--att);
+          color: var(--accent);
         }
         .result-trade-in-item {
           display: flex;
@@ -2375,7 +2375,7 @@ export default function Home() {
         }
         .result-total .result-value {
           font-size: 28px;
-          color: var(--att);
+          color: var(--accent);
         }
         .placeholder-hint {
           margin: 18px 0 0;
@@ -2400,7 +2400,7 @@ export default function Home() {
           .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
           .nav { align-items: flex-start; }
           .brand span { display: none; }
-          .att-badge { display: none; }
+          .accent-badge { display: none; }
           .nav-actions a:not(.primary-link) { display: none; }
           .hero { padding-top: 28px; }
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
