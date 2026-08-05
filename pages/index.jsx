@@ -3677,6 +3677,7 @@ export default function Home() {
               <span>Software for sales, service, operations, and AI-assisted pipelines</span>
             </div>
             <div className="footer-links">
+              <Link href="/apps">Apps</Link>
               <a href="/app">Dashboard Access</a>
               <Link href="/wireless">Platform</Link>
               <Link href="/products">Products</Link>
