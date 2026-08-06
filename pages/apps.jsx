@@ -1,72 +1,13 @@
 import Head from "next/head";
 import Link from "next/link";
+import { PRODUCTS } from "../components/ProductGrid";
 
-const apps = [
-  {
-    name: "PoopSense",
-    icon: "🐾",
-    url: "https://poopsense.whitegwireless.com",
-    description: "AI-assisted visual wellness screening for dog and cat stool and skin concerns.",
-    tag: "Pet wellness",
-    accent: "#65d6ad",
-  },
-  {
-    name: "RepairScout",
-    icon: "🔧",
-    url: "https://repairscout.whitegwireless.com",
-    description: "Understand vehicle symptoms, compare repair costs, and connect with trusted shops.",
-    tag: "Auto care",
-    accent: "#7dd3a8",
-  },
-  {
-    name: "WL Sales Platform",
-    icon: "📈",
-    url: "https://sales.whitegwireless.com",
-    description: "White-label CRM with AI calling, SMS, field activity, and lead intelligence.",
-    tag: "Business",
-    accent: "#60a5fa",
-  },
-  {
-    name: "Sales Trainer",
-    icon: "🎯",
-    url: "https://trainer.whitegwireless.com",
-    description: "Practice telecom sales conversations, sharpen pitches, and track performance.",
-    tag: "Training",
-    accent: "#f1c27d",
-  },
-  {
-    name: "SpendSense",
-    icon: "💸",
-    url: "https://spendsense-seven.vercel.app",
-    description: "Make everyday spending easier to understand with an app-first financial dashboard.",
-    tag: "Finance",
-    accent: "#c084fc",
-  },
-  {
-    name: "The Pass",
-    icon: "🍽️",
-    url: "https://thepass.whitegwireless.com",
-    description: "Turn the ingredients you already have into creative meal ideas from an AI kitchen brigade.",
-    tag: "Food",
-    accent: "#fb923c",
-  },
-  {
-    name: "PhysicalKey",
-    icon: "🔐",
-    url: "https://physicalkey.whitegwireless.com",
-    description: "Explore White G Wireless physical-security and identity technology.",
-    tag: "Security",
-    accent: "#94a3b8",
-  },
-  {
-    name: "Options Scanner",
-    icon: "📊",
-    url: "https://scanner.whitegwireless.com",
-    description: "Research and monitor options opportunities from a focused trading workspace.",
-    tag: "Markets",
-    accent: "#38bdf8",
-  },
-];
+const apps = PRODUCTS.map(product => ({
+  ...product,
+  icon: product.initial || product.name.split(/\s+/).map(word => word[0]).join("").slice(0, 2),
+  url: `/products/${product.id}`,
+  tag: product.label,
+}));
 
 export default function AppsHub() {
   return (
@@ -90,13 +31,13 @@ export default function AppsHub() {
           <div className="eyebrow">THE WHITE G APP COLLECTION</div>
           <h1>Useful tools.<br /><em>One trusted home.</em></h1>
           <p>
-            Explore apps for pet wellness, automotive care, business growth,
-            training, finance, food, security, and market research.
+            Explore every first-version product in development, from sales and finance
+            to media, food, security, local discovery, and private AI.
           </p>
           <div className="hero-meta">
             <span>{apps.length} apps</span>
-            <span>Mobile ready</span>
-            <span>Built by White G</span>
+            <span>Coming Soon previews</span>
+            <span>Built by White Glove</span>
           </div>
         </section>
 
@@ -104,9 +45,9 @@ export default function AppsHub() {
           <div className="section-heading">
             <div>
               <span>APP DIRECTORY</span>
-              <h2 id="apps-heading">Choose an app and get started.</h2>
+              <h2 id="apps-heading">Choose a project for a sneak peek.</h2>
             </div>
-            <p>Each app opens in its own secure workspace. Save your favorites to your phone’s home screen for an app-like experience.</p>
+            <p>Every card opens a short Coming Soon page explaining what the first version is becoming and what is already available to preview.</p>
           </div>
 
           <div className="app-grid">
@@ -123,7 +64,7 @@ export default function AppsHub() {
                 </div>
                 <h3>{app.name}</h3>
                 <p>{app.description}</p>
-                <span className="open">Open app <b>↗</b></span>
+                <span className="open">See sneak peek <b>→</b></span>
               </a>
             ))}
           </div>
