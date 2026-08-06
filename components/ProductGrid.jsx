@@ -26,6 +26,16 @@ export const PRODUCTS = [
     accent: "#a78bfa",
   },
   {
+    id: "agent-builder",
+    name: "Agent Builder",
+    label: "AI operations control",
+    description: "A private control surface for configuring bounded AI agents, reviewing proposals, and monitoring operational workflows.",
+    sneakPeek: "Agent Builder is being designed as the human-control layer for creating specialized agents, assigning clear responsibilities, reviewing their proposed actions, and inspecting the audit trail before anything consequential happens.",
+    features: ["Role and responsibility configuration", "Human-reviewed agent proposals", "Operational status and audit visibility"],
+    initial: "AB",
+    accent: "#818cf8",
+  },
+  {
     id: "spendsense",
     name: "SpendSense",
     label: "Founder finance",

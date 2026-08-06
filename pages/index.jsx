@@ -2450,7 +2450,7 @@ export default function Home() {
               <a href="/app">Dashboard</a>
               <Link href="/wireless">WGW platform</Link>
               <Link href="/products">Products</Link>
-              <Link href="/admin/agent-builder">Agent Builder</Link>
+              <Link href="/products/agent-builder">Agent Builder</Link>
             </div>
             <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
