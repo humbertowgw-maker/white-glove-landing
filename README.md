@@ -2,6 +2,8 @@
 
 Public Next.js site for White Glove Wireless and the products built under its portfolio.
 
+> **Portfolio status:** This site presents first and early public versions of the portfolio projects. Individual products remain in active development and should not be read as finished solely because a live preview is available.
+
 **Live site:** [whitegwireless.com](https://whitegwireless.com)
 
 ## Product pages
