@@ -12,7 +12,7 @@ Public Next.js site for White Glove Wireless and the products built under its po
 - RepairScout — AI-assisted automotive repair research and quoting
 - TruckTracker — live food-truck discovery and community
 - BrainOS — private local-first personal AI operator
-- The Pass — telecommunications and digital-access product concept
+- The Pass — multi-model AI kitchen brigade for reviewed, practical recipes
 
 The site also hosts product-specific privacy, terms, SMS consent, and opt-in pages.
 
