@@ -7,7 +7,7 @@ Public Next.js site for White Glove Wireless and the products built under its po
 ## Product pages
 
 - White Glove Wireless — AI-assisted sales operations
-- Sales Platform — configurable white-label CRM
+- Sales Platform — approximately halfway-built white-label CRM in active development
 - SpendSense — financial intelligence for founders
 - RepairScout — AI-assisted automotive repair research and quoting
 - TruckTracker — live food-truck discovery and community
