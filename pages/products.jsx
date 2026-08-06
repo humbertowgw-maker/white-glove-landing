@@ -118,6 +118,7 @@ export default function Products() {
           border: 1px solid rgba(255,255,255,.1);
           border-radius: 14px;
           transition: transform .15s, border-color .15s, box-shadow .15s;
+          min-height: 220px;
         }
         .product:hover {
           transform: translateY(-2px);
@@ -127,6 +128,25 @@ export default function Products() {
         .product-logo {
           border-radius: 12px;
           flex-shrink: 0;
+          width: 56px;
+          height: 56px;
+          object-fit: cover;
+        }
+        .product-monogram {
+          display: grid;
+          place-items: center;
+          color: var(--accent);
+          background: color-mix(in srgb, var(--accent) 14%, #111827);
+          border: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+          font-family: "DM Mono", monospace;
+          font-weight: 700;
+          font-size: 16px;
+        }
+        .product-copy {
+          display: flex;
+          flex: 1;
+          min-width: 0;
+          flex-direction: column;
         }
         .product span {
           font-family: "DM Mono", monospace;
@@ -145,6 +165,26 @@ export default function Products() {
           font-size: 13px;
           color: var(--muted);
           line-height: 1.5;
+        }
+        .product-card-foot {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          margin-top: auto;
+          padding-top: 18px;
+        }
+        .product-card-foot strong {
+          color: var(--accent);
+          font-family: "DM Mono", monospace;
+          font-size: 10px;
+          letter-spacing: .08em;
+          text-transform: uppercase;
+        }
+        .product-card-foot b {
+          color: var(--soft);
+          font-size: 11px;
+          font-weight: 700;
         }
         .products-footer {
           text-align: center;
