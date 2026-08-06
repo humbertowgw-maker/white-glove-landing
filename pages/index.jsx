@@ -936,6 +936,20 @@ export default function Home() {
           name="description"
           content="Switch wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
         />
+        <link rel="canonical" href="https://whitegwireless.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="White Glove Wireless" />
+        <meta property="og:url" content="https://whitegwireless.com/" />
+        <meta property="og:title" content="White Glove Wireless — Wireless & Fiber Without the Store" />
+        <meta property="og:description" content="Personalized wireless and fiber setup, bill review, and service from your couch." />
+        <meta property="og:image" content="https://whitegwireless.com/og-image.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="White Glove Wireless — Wireless and Fiber Without the Store" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="White Glove Wireless — Wireless & Fiber Without the Store" />
+        <meta name="twitter:description" content="Personalized wireless and fiber setup, bill review, and service from your couch." />
+        <meta name="twitter:image" content="https://whitegwireless.com/og-image.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
