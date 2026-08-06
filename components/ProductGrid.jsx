@@ -11,7 +11,8 @@ export const PRODUCTS = [
     sneakPeek: "A connected operating system for wireless sales teams that brings lead intake, customer follow-up, field execution, onboarding, and performance visibility into one place.",
     features: ["Lead and territory workflows", "AI-assisted calling and messaging", "Owner dashboards and approvals"],
     logo: "/logos/white-glove-wireless-app-icon-selected.png",
-    previewHref: "/wireless",
+    liveHref: "https://white-glove-frontend.vercel.app/",
+    status: "live",
     accent: "#00A8E0",
   },
   {
@@ -22,7 +23,8 @@ export const PRODUCTS = [
     sneakPeek: "A configurable foundation businesses can brand and adapt to their own pipeline, team roles, customer journey, communications, and operating rules.",
     features: ["Industry presets and branding", "Calling, SMS, and lead workflows", "Hiring, onboarding, and billing modules"],
     logo: "/logos/sales-platform-app-icon-selected.png",
-    previewHref: "/sales-platform",
+    liveHref: "https://sales.whitegwireless.com/",
+    status: "live",
     accent: "#a78bfa",
   },
   {
@@ -33,6 +35,7 @@ export const PRODUCTS = [
     sneakPeek: "Agent Builder is being designed as the human-control layer for creating specialized agents, assigning clear responsibilities, reviewing their proposed actions, and inspecting the audit trail before anything consequential happens.",
     features: ["Role and responsibility configuration", "Human-reviewed agent proposals", "Operational status and audit visibility"],
     initial: "AB",
+    status: "coming-soon",
     accent: "#818cf8",
   },
   {
@@ -43,7 +46,8 @@ export const PRODUCTS = [
     sneakPeek: "A founder-focused financial command center designed to explain where money is going, how long the company can operate, and which metrics need attention next.",
     features: ["Burn and runway visibility", "Founder and investor metrics", "Spending signals and guidance"],
     logo: "/logos/spendsense-brand-lockup-selected.png",
-    previewHref: "/spendsense",
+    liveHref: "https://spendsense-seven.vercel.app/",
+    status: "live",
     accent: "#2dd4bf",
   },
   {
@@ -54,7 +58,8 @@ export const PRODUCTS = [
     sneakPeek: "Drivers get clearer context before authorizing a repair, while shops get structured concerns, evidence, estimates, and a cleaner customer communication trail.",
     features: ["Preliminary vehicle assessments", "Transparent quote requests", "Shop verification and repair stages"],
     logo: "/logos/repairscout-brand-lockup-selected.png",
-    previewHref: "/repairscout",
+    liveHref: "https://repairscout-smoky.vercel.app/",
+    status: "live",
     accent: "#c8ff18",
   },
   {
@@ -65,7 +70,8 @@ export const PRODUCTS = [
     sneakPeek: "A local discovery network where customers can find active trucks and vendors can build a following around location, menu highlights, and real community feedback.",
     features: ["Live location discovery", "Food stories and dish reviews", "Vendor and community signals"],
     logo: "/logos/trucktracker-app-icon-selected.png",
-    previewHref: "/trucktracker",
+    liveHref: "https://trucktracker-eight.vercel.app/",
+    status: "live",
     accent: "#ffb21c",
   },
   {
@@ -76,7 +82,8 @@ export const PRODUCTS = [
     sneakPeek: "Pet owners receive clearly limited, non-diagnostic information about what they photographed and can quickly search for nearby routine or emergency veterinary care.",
     features: ["Stool and skin photo screening", "Urgency-oriented safety language", "Location-based veterinary finder"],
     logo: "/logos/poopsense-app-icon.svg",
-    previewHref: "https://web-production-fb2d1.up.railway.app/",
+    liveHref: "https://web-production-fb2d1.up.railway.app/",
+    status: "live",
     accent: "#fb7185",
   },
   {
@@ -87,7 +94,8 @@ export const PRODUCTS = [
     sneakPeek: "Groq proposes dishes, while OpenAI and Anthropic review the proposals in parallel for practical corrections, ingredient fidelity, and food-safety concerns.",
     features: ["Four recipe directions per ticket", "Parallel multi-model review", "Ingredient and cookability checks"],
     logo: "/logos/the-pass-app-icon.svg",
-    previewHref: "/the-pass",
+    liveHref: "https://purple-beach-0c1e8a510.7.azurestaticapps.net/",
+    status: "live",
     accent: "#e8541e",
   },
   {
@@ -98,7 +106,8 @@ export const PRODUCTS = [
     sneakPeek: "A physical proof-of-possession system designed around phone biometrics, BLE hardware, and Ed25519 challenge-response instead of relying on a copyable secret alone.",
     features: ["Native iOS and ESP32 pairing", "Ed25519 challenge-response", "Device and organization controls"],
     initial: "PK",
-    previewHref: "https://physicalkey.whitegwireless.com/",
+    liveHref: "https://physicalkey.whitegwireless.com/",
+    status: "live",
     accent: "#c06a3d",
   },
   {
@@ -109,7 +118,7 @@ export const PRODUCTS = [
     sneakPeek: "A private AI workspace that runs on owner-controlled hardware, remembers approved context, coordinates specialist workflows, and keeps consequential actions behind explicit approval.",
     features: ["Local models and durable memory", "Bounded specialist agents", "Approval-gated communications and coding"],
     initial: "B",
-    previewHref: "/brainos",
+    status: "coming-soon",
     accent: "#60a5fa",
   },
   {
@@ -120,6 +129,8 @@ export const PRODUCTS = [
     sneakPeek: "A focused content operating system intended to help small teams move from ideas to reviewed, scheduled media without losing human control of the brand.",
     features: ["Content planning and briefs", "Media review and approval", "Publishing workflow coordination"],
     logo: "/logos/white-glove-social-app-icon.svg",
+    liveHref: "https://white-glove-social.vercel.app/",
+    status: "live",
     accent: "#38bdf8",
   },
   {
@@ -130,7 +141,8 @@ export const PRODUCTS = [
     sneakPeek: "Reps can rehearse realistic customer conversations, receive structured coaching, and improve the specific parts of a pitch that affect trust and conversion.",
     features: ["Scenario-based practice", "Pitch feedback and coaching", "Progress and performance tracking"],
     initial: "ST",
-    previewHref: "https://trainer.whitegwireless.com/",
+    liveHref: "https://trainer.whitegwireless.com/",
+    status: "live",
     accent: "#22c55e",
   },
   {
@@ -141,7 +153,8 @@ export const PRODUCTS = [
     sneakPeek: "The scanner filters live options data, explains candidate setups, and routes any enabled broker action through a multi-stage risk and compliance approval pipeline.",
     features: ["Options-chain scanning and scoring", "Risk gates and kill switch", "Traceable decision journal"],
     initial: "PS",
-    previewHref: "https://scanner.whitegwireless.com/",
+    liveHref: "https://scanner.whitegwireless.com/",
+    status: "live",
     accent: "#facc15",
   },
   {
@@ -152,6 +165,7 @@ export const PRODUCTS = [
     sneakPeek: "The project explores low-cost model routing and a reusable media pipeline that turns short scripts into character art, dialogue, and assembled animated episodes.",
     features: ["AI provider cost and rate dashboard", "Pet-story media pipeline", "Sophia synchronized companion"],
     initial: "FF",
+    status: "coming-soon",
     accent: "#f472b6",
   },
   {
@@ -162,6 +176,7 @@ export const PRODUCTS = [
     sneakPeek: "Creators guide scripts, voices, assets, video rendering, and private draft uploads through approval checkpoints rather than letting automation publish on its own.",
     features: ["English and Spanish production", "Human approval at every stage", "Distributed rendering and private drafts"],
     initial: "DF",
+    status: "coming-soon",
     accent: "#fb923c",
   },
 ];
@@ -177,7 +192,7 @@ export default function ProductGrid() {
   return (
     <div className="products">
       {PRODUCTS.map(product => (
-        <Link href={`/products/${product.id}`} key={product.id}>
+        <Link href={product.liveHref || `/products/${product.id}`} key={product.id} target={product.liveHref ? "_blank" : undefined} rel={product.liveHref ? "noreferrer" : undefined}>
           <article className="product" style={{ "--accent": product.accent }}>
             <ProductMark product={product} />
             <div className="product-copy">
@@ -185,8 +200,8 @@ export default function ProductGrid() {
               <h3>{product.name}</h3>
               <p>{product.description}</p>
               <div className="product-card-foot">
-                <strong>Coming soon</strong>
-                <b>See sneak peek →</b>
+                <strong>{product.status === "live" ? "Live preview" : "Coming soon"}</strong>
+                <b>{product.status === "live" ? "Open product ↗" : "See sneak peek →"}</b>
               </div>
             </div>
           </article>

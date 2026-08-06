@@ -16,7 +16,7 @@ export function getStaticProps({ params }) {
 }
 
 export default function ProductSneakPeek({ product }) {
-  const external = product.previewHref?.startsWith("http");
+  const external = product.liveHref?.startsWith("http");
   return (
     <>
       <Head>
@@ -83,10 +83,8 @@ export default function ProductSneakPeek({ product }) {
               <p className="lead">{product.description}</p>
               <p className="detail">{product.sneakPeek}</p>
               <div className="peek-actions">
-                {product.previewHref && (external
-                  ? <a className="peek-button" href={product.previewHref} target="_blank" rel="noreferrer">Open current preview ↗</a>
-                  : <Link className="peek-button" href={product.previewHref}>Explore the current preview →</Link>)}
-                <Link className="peek-button secondary" href="/products">View every product</Link>
+                {product.liveHref && external && <a className="peek-button" href={product.liveHref} target="_blank" rel="noreferrer">Open current preview ↗</a>}
+                <Link className="peek-button secondary" href="/apps">View every product</Link>
               </div>
             </div>
             <aside className="peek-panel">

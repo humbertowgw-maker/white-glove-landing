@@ -2449,7 +2449,7 @@ export default function Home() {
               <span className="access-label">Access</span>
               <a href="/app">Dashboard</a>
               <Link href="/wireless">WGW platform</Link>
-              <Link href="/products">Products</Link>
+              <Link href="/apps">Products</Link>
               <Link href="/products/agent-builder">Agent Builder</Link>
             </div>
             <a className="primary-link" href="#bill-review">Upload bill</a>
@@ -3694,7 +3694,7 @@ export default function Home() {
               <Link href="/apps">Apps</Link>
               <a href="/app">Dashboard Access</a>
               <Link href="/wireless">Platform</Link>
-              <Link href="/products">Products</Link>
+              <Link href="/apps">Products</Link>
               <Link href="/sms-opt-in">SMS Opt-In</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>

@@ -1,11 +1,12 @@
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import { PRODUCTS } from "../components/ProductGrid";
 
 const apps = PRODUCTS.map(product => ({
   ...product,
   icon: product.initial || product.name.split(/\s+/).map(word => word[0]).join("").slice(0, 2),
-  url: `/products/${product.id}`,
+  url: product.liveHref || `/products/${product.id}`,
   tag: product.label,
 }));
 
@@ -13,8 +14,8 @@ export default function AppsHub() {
   return (
     <>
       <Head>
-        <title>Apps | White Glove Wireless</title>
-        <meta name="description" content="Explore the apps built by White Glove Wireless." />
+        <title>Products | White Glove Wireless</title>
+        <meta name="description" content="Explore live previews and coming-soon products built by White Glove Wireless." />
         <meta name="theme-color" content="#07101f" />
       </Head>
 
@@ -35,8 +36,8 @@ export default function AppsHub() {
             to media, food, security, local discovery, and private AI.
           </p>
           <div className="hero-meta">
-            <span>{apps.length} apps</span>
-            <span>Coming Soon previews</span>
+            <span>{apps.length} products</span>
+            <span>{apps.filter(app => app.status === "live").length} live previews</span>
             <span>Built by White Glove</span>
           </div>
         </section>
@@ -59,12 +60,18 @@ export default function AppsHub() {
                 style={{ "--accent": app.accent }}
               >
                 <div className="card-top">
-                  <span className="app-icon">{app.icon}</span>
-                  <span className="tag">{app.tag}</span>
+                  <span className="app-icon">
+                    {app.logo ? <Image src={app.logo} alt={`${app.name} logo`} width={54} height={54} /> : app.icon}
+                  </span>
+                  <span className={`tag ${app.status === "live" ? "live" : "soon"}`}>
+                    {app.status === "live" ? "Live preview" : "Coming soon"}
+                  </span>
                 </div>
                 <h3>{app.name}</h3>
                 <p>{app.description}</p>
-                <span className="open">See sneak peek <b>→</b></span>
+                <span className="open">
+                  {app.status === "live" ? "Open live product" : "See sneak peek"} <b>{app.status === "live" ? "↗" : "→"}</b>
+                </span>
               </a>
             ))}
           </div>
@@ -116,8 +123,11 @@ export default function AppsHub() {
         .app-card { min-height: 290px; display: flex; flex-direction: column; padding: 24px; border: 1px solid rgba(255,255,255,.09); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025)); text-decoration: none; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
         .app-card:hover { transform: translateY(-5px); border-color: var(--accent); background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, transparent), rgba(255,255,255,.03)); }
         .card-top { display: flex; align-items: center; justify-content: space-between; }
-        .app-icon { width: 54px; height: 54px; display: grid; place-items: center; border-radius: 16px; background: color-mix(in srgb, var(--accent) 16%, #0a1426); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); font-size: 25px; }
+        .app-icon { width: 54px; height: 54px; display: grid; place-items: center; overflow: hidden; border-radius: 16px; background: color-mix(in srgb, var(--accent) 16%, #0a1426); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); font-size: 17px; font-weight: 900; }
+        .app-icon :global(img) { width: 100%; height: 100%; padding: 5px; object-fit: contain; }
         .tag { color: var(--accent); font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+        .tag.live { color: #6ee7b7; }
+        .tag.soon { color: #fbbf24; }
         .app-card h3 { margin: 24px 0 10px; font-size: 21px; letter-spacing: -.02em; }
         .app-card p { margin: 0; color: #98a6ba; font-size: 14px; line-height: 1.65; }
         .open { margin-top: auto; padding-top: 24px; color: #e7edf7; font-size: 13px; font-weight: 700; }
