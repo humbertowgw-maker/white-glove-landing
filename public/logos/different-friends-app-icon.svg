@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Different Friends Studio">
+  <defs><linearGradient id="df" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fb923c"/><stop offset=".52" stop-color="#ec4899"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>
+  <rect width="512" height="512" rx="112" fill="#111827"/><rect x="78" y="78" width="356" height="356" rx="82" fill="url(#df)"/>
+  <path d="m218 169 146 87-146 87Z" fill="#fff"/><path d="M139 139h86v22h-64v64h-22zm234 0v86h-22v-64h-64v-22zM139 373v-86h22v64h64v22zm234 0h-86v-22h64v-64h22z" fill="#fff" fill-opacity=".76"/>
+</svg>
