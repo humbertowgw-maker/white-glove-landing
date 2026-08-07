@@ -57,7 +57,7 @@ export const PRODUCTS = [
     description: "A two-sided automotive workflow for preliminary vehicle research, evidence-backed quotes, and repair-shop communication.",
     sneakPeek: "Drivers get clearer context before authorizing a repair, while shops get structured concerns, evidence, estimates, and a cleaner customer communication trail.",
     features: ["Preliminary vehicle assessments", "Transparent quote requests", "Shop verification and repair stages"],
-    logo: "/logos/repairscout-app-icon.svg",
+    logo: "/logos/repairscout-brand-lockup-selected.png",
     liveHref: "https://repairscout-smoky.vercel.app/",
     status: "live",
     accent: "#c8ff18",
