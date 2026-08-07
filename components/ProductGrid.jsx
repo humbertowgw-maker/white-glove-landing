@@ -14,6 +14,7 @@ export const PRODUCTS = [
     liveHref: "https://white-glove-frontend.vercel.app/",
     status: "live",
     accent: "#00A8E0",
+    companion: { name: "Nova", role: "Bird Frog · Workflow Guardian" },
   },
   {
     id: "sales-platform",
@@ -26,6 +27,7 @@ export const PRODUCTS = [
     liveHref: "https://sales.whitegwireless.com/",
     status: "live",
     accent: "#a78bfa",
+    companion: { name: "Pip", role: "Sales Fox · Pipeline Guide", image: "/companions/pip-sales-fox.png" },
   },
   {
     id: "agent-builder",
@@ -49,6 +51,7 @@ export const PRODUCTS = [
     liveHref: "https://spendsense-seven.vercel.app/",
     status: "live",
     accent: "#2dd4bf",
+    companion: { name: "Penny", role: "Savings Otter · Money Guide", image: "/companions/penny-savings-otter.png" },
   },
   {
     id: "repairscout",
@@ -61,6 +64,7 @@ export const PRODUCTS = [
     liveHref: "https://repairscout-smoky.vercel.app/",
     status: "live",
     accent: "#c8ff18",
+    companion: { name: "Gauge", role: "Repair Beaver · Diagnostic Guide", image: "/companions/gauge-repair-beaver.png" },
   },
   {
     id: "trucktracker",
@@ -73,6 +77,7 @@ export const PRODUCTS = [
     liveHref: "https://trucktracker-eight.vercel.app/",
     status: "live",
     accent: "#ffb21c",
+    companion: { name: "Axle", role: "Route Raccoon · Discovery Guide", image: "/companions/axle-route-raccoon.png" },
   },
   {
     id: "poopsense",
@@ -85,6 +90,7 @@ export const PRODUCTS = [
     liveHref: "https://web-production-fb2d1.up.railway.app/",
     status: "live",
     accent: "#fb7185",
+    companion: { name: "Miso", role: "Wellness Corgi · Safety Guide", image: "/companions/miso-wellness-corgi.png" },
   },
   {
     id: "the-pass",
@@ -120,6 +126,7 @@ export const PRODUCTS = [
     logo: "/logos/brainos-app-icon.svg",
     status: "coming-soon",
     accent: "#60a5fa",
+    companion: { name: "Bunny Bear", role: "Memory Keeper" },
   },
   {
     id: "white-glove-social",
@@ -132,6 +139,7 @@ export const PRODUCTS = [
     liveHref: "https://white-glove-social.vercel.app/",
     status: "live",
     accent: "#38bdf8",
+    companion: { name: "Chirp", role: "Hummingbird · Content Producer", image: "/companions/chirp-hummingbird.png" },
   },
   {
     id: "sales-trainer",
@@ -156,6 +164,7 @@ export const PRODUCTS = [
     liveHref: "https://scanner.whitegwireless.com/",
     status: "live",
     accent: "#facc15",
+    companion: { name: "Ticker", role: "Market Owl · Risk Guide", image: "/companions/ticker-market-owl.png" },
   },
   {
     id: "friendlyfriends",
@@ -163,10 +172,11 @@ export const PRODUCTS = [
     label: "AI + media lab",
     description: "A self-hosted AI usage dashboard, animated pet-story pipeline, and synchronized desktop companion in one experimental workspace.",
     sneakPeek: "The project explores low-cost model routing and a reusable media pipeline that turns short scripts into character art, dialogue, and assembled animated episodes.",
-    features: ["AI provider cost and rate dashboard", "Pet-story media pipeline", "Sophia synchronized companion"],
+    features: ["AI provider cost and rate dashboard", "Pet-story media pipeline", "Maria synchronized companion"],
     logo: "/logos/friendlyfriends-app-icon.svg",
     status: "coming-soon",
     accent: "#f472b6",
+    companion: { name: "Maria", role: "Storybook Second Brain" },
   },
   {
     id: "different-friends",
@@ -178,6 +188,7 @@ export const PRODUCTS = [
     logo: "/logos/different-friends-app-icon.svg",
     status: "coming-soon",
     accent: "#fb923c",
+    companion: { name: "Doodle", role: "Studio Chameleon · Story Guide", image: "/companions/doodle-studio-chameleon.png" },
   },
 ];
 
@@ -199,6 +210,7 @@ export default function ProductGrid() {
               <span>{product.label}</span>
               <h3>{product.name}</h3>
               <p>{product.description}</p>
+              {product.companion && <div style={{ display:"flex", alignItems:"center", gap:8, margin:"10px 0", color:"var(--accent)" }}>{product.companion.image && <Image src={product.companion.image} alt="" width={36} height={36} style={{ objectFit:"contain" }}/>}<span><strong style={{ display:"block", fontSize:12 }}>{product.companion.name}</strong><small>{product.companion.role}</small></span></div>}
               <div className="product-card-foot">
                 <strong>{product.status === "live" ? "Live preview" : "Coming soon"}</strong>
                 <b>{product.status === "live" ? "Open product ↗" : "See sneak peek →"}</b>

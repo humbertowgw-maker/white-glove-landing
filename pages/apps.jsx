@@ -69,6 +69,7 @@ export default function AppsHub() {
                 </div>
                 <h3>{app.name}</h3>
                 <p>{app.description}</p>
+                {app.companion && <div className="companion"><span>{app.companion.image ? <Image src={app.companion.image} alt="" width={42} height={42} /> : "✦"}</span><div><b>{app.companion.name}</b><small>{app.companion.role}</small></div></div>}
                 <span className="open">
                   {app.status === "live" ? "Open live product" : "See sneak peek"} <b>{app.status === "live" ? "↗" : "→"}</b>
                 </span>
@@ -121,6 +122,12 @@ export default function AppsHub() {
         .section-heading p { margin: 0; color: #8f9db3; line-height: 1.7; }
         .app-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
         .app-card { min-height: 290px; display: flex; flex-direction: column; padding: 24px; border: 1px solid rgba(255,255,255,.09); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025)); text-decoration: none; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+        .companion { display:flex; align-items:center; gap:9px; margin:12px 0; padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); }
+        .companion > span { width:42px; height:42px; display:grid; place-items:center; border-radius:50%; background:color-mix(in srgb,var(--accent) 14%,#0a1426); overflow:hidden; }
+        .companion :global(img) { width:100%; height:100%; object-fit:contain; }
+        .companion b,.companion small { display:block; }
+        .companion b { font-size:12px; color:#fff; }
+        .companion small { margin-top:2px; color:#8f9db3; font-size:10px; }
         .app-card:hover { transform: translateY(-5px); border-color: var(--accent); background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 12%, transparent), rgba(255,255,255,.03)); }
         .card-top { display: flex; align-items: center; justify-content: space-between; }
         .app-icon { width: 54px; height: 54px; display: grid; place-items: center; overflow: hidden; border-radius: 16px; background: color-mix(in srgb, var(--accent) 16%, #0a1426); border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent); color: var(--accent); font-size: 17px; font-weight: 900; }
