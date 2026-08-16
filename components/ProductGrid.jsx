@@ -191,6 +191,16 @@ export const PRODUCTS = [
     companion: { name: "Doodle", role: "Studio Chameleon · Story Guide", image: "/companions/doodle-studio-chameleon.png" },
   },
   {
+    id: "canine-cgm-bridge",
+    name: "Aegis CGM Bridge",
+    label: "Pet health hardware",
+    description: "A continuous glucose monitoring bridge for diabetic dogs and cats, built on an off-label human CGM sensor instead of new biosensor hardware.",
+    sneakPeek: "Modeled on xDrip+ and Nightscout's architecture but built from scratch in Python — a live glucose trend dashboard with hypoglycemia-drop alerts, running entirely on simulated data today while a physical ESP32 prototype using a Dexcom Stelo sensor is built out.",
+    features: ["Live glucose trend dashboard", "Hypoglycemia-velocity alerts", "Reuses an FDA-approved human CGM sensor"],
+    status: "coming-soon",
+    accent: "#34d399",
+  },
+  {
     id: "screenshot-analyzer",
     name: "Screenshot Analyzer",
     label: "Idea capture",

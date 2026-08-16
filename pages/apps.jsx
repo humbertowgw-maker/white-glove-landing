@@ -54,11 +54,16 @@ export default function AppsHub() {
           <div className="app-grid">
             {apps.map((app) => (
               <a
-                className="app-card"
+                className={`app-card${app.status !== "live" ? " app-card--soon" : ""}`}
                 href={app.url}
                 key={app.name}
                 style={{ "--accent": app.accent }}
               >
+                {app.status !== "live" && (
+                  <div className="caution-ribbon" aria-hidden="true">
+                    <span>In progress</span>
+                  </div>
+                )}
                 <div className="card-top">
                   <span className="app-icon">
                     {app.logo ? <Image src={app.logo} alt={`${app.name} logo`} width={54} height={54} /> : app.icon}
@@ -121,7 +126,10 @@ export default function AppsHub() {
         .section-heading h2 { margin: 8px 0 0; font-size: clamp(28px, 4vw, 44px); letter-spacing: -.035em; }
         .section-heading p { margin: 0; color: #8f9db3; line-height: 1.7; }
         .app-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-        .app-card { min-height: 290px; display: flex; flex-direction: column; padding: 24px; border: 1px solid rgba(255,255,255,.09); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025)); text-decoration: none; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+        .app-card { position: relative; overflow: hidden; min-height: 290px; display: flex; flex-direction: column; padding: 24px; border: 1px solid rgba(255,255,255,.09); border-radius: 22px; background: linear-gradient(145deg, rgba(255,255,255,.065), rgba(255,255,255,.025)); text-decoration: none; transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+        .app-card--soon { border-color: rgba(251,191,36,.3); }
+        .caution-ribbon { position: absolute; top: 22px; right: -46px; width: 170px; transform: rotate(45deg); background: repeating-linear-gradient(45deg, #fbbf24, #fbbf24 12px, #14161b 12px, #14161b 24px); text-align: center; padding: 5px 0; z-index: 2; box-shadow: 0 3px 10px rgba(0,0,0,.45); }
+        .caution-ribbon span { font-size: 9px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; color: #fff; text-shadow: 0 1px 1px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.7); }
         .companion { display:flex; align-items:center; gap:9px; margin:12px 0; padding:8px 10px; border-radius:12px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); }
         .companion > span { width:42px; height:42px; display:grid; place-items:center; border-radius:50%; background:color-mix(in srgb,var(--accent) 14%,#0a1426); overflow:hidden; }
         .companion :global(img) { width:100%; height:100%; object-fit:contain; }
