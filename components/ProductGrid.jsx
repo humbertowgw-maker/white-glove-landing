@@ -198,7 +198,7 @@ export const PRODUCTS = [
     sneakPeek: "Four tiers from free manual logging to full continuous monitoring, all sharing one calibration engine and hypoglycemia-drop alert system — 54 automated tests, real ESP32 firmware for two sensor bridges, and a real iOS companion app, all independently verified.",
     features: ["Free manual + photo-capture logging", "Real-time BLE and continuous-sensor bridges", "Formula-reference dose guidance, never a recommendation"],
     initial: "🛡️",
-    liveHref: "https://aegis-landing-seven.vercel.app/",
+    liveHref: "https://aegis.whitegwireless.com/",
     status: "live",
     accent: "#E0A85C",
   },
