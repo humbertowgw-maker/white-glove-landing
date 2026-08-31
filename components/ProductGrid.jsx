@@ -206,7 +206,7 @@ export const PRODUCTS = [
     id: "screenshot-analyzer",
     name: "Screenshot Analyzer",
     label: "Idea capture",
-    description: "Turns your screenshots into organized, researched product ideas — with a Face ID-gated vault for anything sensitive.",
+    description: "Turns your screenshots into organized, researched product ideas — with a Face ID-gated vault for anything sensitive. Free to use, tips welcome.",
     sneakPeek: "Photos sync automatically from your phone, get analyzed and grouped into sequences, then fact-checked against real web search results before landing on an animated idea board you can export straight into a coding agent.",
     features: ["Automatic Photos sync and swipe review", "Free web-search-grounded fact-checking", "Face ID-gated vault for sensitive screenshots"],
     logo: "/logos/screenshot-analyzer-app-icon.png",
