@@ -1226,6 +1226,10 @@ export default function Home() {
         .bill-compare-card h3 { margin: 0; font-size: 18px; }
         .bill-compare-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
         .bill-compare-card .primary-link { margin-top: auto; }
+        .post-bill-upsell { margin-top: 18px; }
+        .post-bill-upsell-lead { margin: 0 0 10px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+        .post-bill-upsell .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+        .post-bill-upsell .bill-compare-card { padding: 16px; text-decoration: none; color: inherit; }
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
@@ -2447,10 +2451,9 @@ export default function Home() {
             <Link href="#why-us">Why us</Link>
             <div className="access-links" aria-label="Access links">
               <span className="access-label">Access</span>
-              <a href="/app">Dashboard</a>
-              <Link href="/wireless">WGW platform</Link>
-              <Link href="/apps">Products</Link>
-              <Link href="/products/agent-builder">Agent Builder</Link>
+              <a href="https://white-glove-frontend.vercel.app/">Dashboard</a>
+              <Link href="/apps">Our apps</Link>
+              <Link href="/sales-platform">License our platform</Link>
             </div>
             <a className="primary-link" href="#bill-review">Upload bill</a>
           </div>
@@ -2520,6 +2523,25 @@ export default function Home() {
                 {status.message || "Choose consumer or business so WGW starts the right workflow."}
               </div>
             </form>
+            {status.kind === "success" && (
+              <div className="post-bill-upsell">
+                <p className="post-bill-upsell-lead">While the team reviews your bill:</p>
+                <div className="bill-compare-cta">
+                  <Link className="bill-compare-card" href="/apps">
+                    <div className="bill-compare-icon">🧭</div>
+                    <h3>See our other apps</h3>
+                    <p>RepairScout, SpendSense, TruckTracker, and more — built by the same team.</p>
+                    <span className="primary-link">Explore the app collection →</span>
+                  </Link>
+                  <Link className="bill-compare-card" href="/sales-platform">
+                    <div className="bill-compare-icon">🏷️</div>
+                    <h3>Run a wireless or service business?</h3>
+                    <p>License the same AI-assisted sales platform under your own brand.</p>
+                    <span className="primary-link">See the white-label platform →</span>
+                  </Link>
+                </div>
+              </div>
+            )}
           </aside>
         </section>
 
@@ -3692,9 +3714,8 @@ export default function Home() {
             </div>
             <div className="footer-links">
               <Link href="/apps">Apps</Link>
-              <a href="/app">Dashboard Access</a>
-              <Link href="/wireless">Platform</Link>
-              <Link href="/apps">Products</Link>
+              <a href="https://white-glove-frontend.vercel.app/">Dashboard Access</a>
+              <Link href="/sales-platform">License our platform</Link>
               <Link href="/sms-opt-in">SMS Opt-In</Link>
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>

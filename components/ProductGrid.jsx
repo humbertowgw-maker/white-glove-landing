@@ -24,7 +24,7 @@ export const PRODUCTS = [
     sneakPeek: "A configurable foundation businesses can brand and adapt to their own pipeline, team roles, customer journey, communications, and operating rules.",
     features: ["Industry presets and branding", "Calling, SMS, and lead workflows", "Hiring, onboarding, and billing modules"],
     logo: "/logos/sales-platform-app-icon-selected.png",
-    liveHref: "https://sales.whitegwireless.com/",
+    liveHref: "/sales-platform",
     status: "live",
     accent: "#a78bfa",
     companion: { name: "Pip", role: "Sales Fox · Pipeline Guide", image: "/companions/pip-sales-fox.png" },
