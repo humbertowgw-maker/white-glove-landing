@@ -31,6 +31,18 @@ async function fetchCarrierPlans() {
   }
 }
 
+async function fetchPromoAds() {
+  try {
+    const res = await fetch(`${API}/api/promo-ads`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return Array.isArray(data.ads) ? data.ads : [];
+  } catch (err) {
+    console.warn("[landing] could not load promo ads:", err.message);
+    return [];
+  }
+}
+
 async function fetchDevices(search = "") {
   try {
     const url = new URL(`${API}/api/devices`);
@@ -330,6 +342,7 @@ export default function Home() {
   const [deviceCatalog, setDeviceCatalog] = useState(DEFAULT_DEVICES);
   const [devicesLoaded, setDevicesLoaded] = useState(false);
   const [carrierPlans, setCarrierPlans] = useState([]);
+  const [promoAds, setPromoAds] = useState([]);
   const trustboxRef = useRef(null);
 
   useEffect(() => {
@@ -356,6 +369,10 @@ export default function Home() {
     fetchCarrierPlans().then(plans => {
       if (!mounted) return;
       if (plans.length > 0) setCarrierPlans(plans);
+    });
+    fetchPromoAds().then(ads => {
+      if (!mounted) return;
+      setPromoAds(ads);
     });
     return () => { mounted = false; };
   }, []);
@@ -1230,6 +1247,29 @@ export default function Home() {
         .post-bill-upsell-lead { margin: 0 0 10px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
         .post-bill-upsell .bill-compare-cta { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
         .post-bill-upsell .bill-compare-card { padding: 16px; text-decoration: none; color: inherit; }
+        .promo-ads-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 16px;
+        }
+        .promo-ad-card {
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          overflow: hidden;
+          background: rgba(255,255,255,.04);
+          display: flex;
+          flex-direction: column;
+        }
+        .promo-ad-card:hover { border-color: var(--accent); }
+        .promo-ad-image {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 3 / 2;
+          background: rgba(255,255,255,.02);
+        }
+        .promo-ad-copy { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 6px; }
+        .promo-ad-copy h3 { margin: 0; font-size: 17px; }
+        .promo-ad-copy p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
@@ -2544,6 +2584,31 @@ export default function Home() {
             )}
           </aside>
         </section>
+
+        {promoAds.length > 0 && (
+          <section className="section promo-ads" aria-label="Current promotions">
+            <div className="section-head">
+              <div>
+                <div className="mono">Right Now</div>
+                <h2>Current promotions</h2>
+              </div>
+              <p>Fresh deals on the phones and trade-in credits available today.</p>
+            </div>
+            <div className="promo-ads-grid">
+              {promoAds.map(ad => (
+                <article className="promo-ad-card" key={ad.id}>
+                  <div className="promo-ad-image">
+                    <Image src={ad.image_url} alt={ad.headline} fill sizes="(max-width: 720px) 100vw, 380px" style={{ objectFit: "cover" }} unoptimized />
+                  </div>
+                  <div className="promo-ad-copy">
+                    <h3>{ad.headline}</h3>
+                    <p>{ad.caption}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
 
         <section className="section" aria-label="Common wireless problems">
           <div className="section-head">
