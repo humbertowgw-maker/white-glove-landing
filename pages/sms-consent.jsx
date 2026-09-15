@@ -6,6 +6,7 @@ export default function SmsConsent() {
     <>
       <Head>
         <title>SMS Consent &amp; Opt-In Evidence — White Glove Wireless</title>
+        <meta name="description" content="White Glove Wireless documentation for SMS opt-in consent, appointment reminders, lead follow-up, and compliance evidence." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
       <style>{`

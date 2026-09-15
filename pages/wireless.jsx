@@ -40,6 +40,7 @@ export default function WirelessLanding() {
   const [error, setError] = useState(null);
   const [form, setForm] = useState({ companyName: "", dealerCode: "", ownerName: "", email: "", password: "" });
   const [activeFeature, setActiveFeature] = useState("ai-team");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSignup = async () => {
     if (!form.companyName || !form.email || !form.password) { setError("Company name, email and password are required"); return; }
@@ -82,6 +83,7 @@ export default function WirelessLanding() {
     <>
       <Head>
         <title>White Glove Wireless — AI-Powered AT&T Sales Platform</title>
+        <meta name="description" content="Start a White Glove Wireless trial for an AI-assisted sales platform with leads, coaching, outreach, operations, and owner controls." />
         <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
       </Head>
       <AppInstallMeta slug="wgw" name="White Glove Wireless" themeColor="#d7a75b" />
@@ -298,7 +300,10 @@ export default function WirelessLanding() {
               ].map(f=>(
                 <div key={f.key}>
                   <div style={{fontSize:9,color:"#475569",marginBottom:5}}>{f.label}</div>
-                  <input className="input" type={f.type||"text"} placeholder={f.placeholder} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleSignup()}/>
+                  <div style={{position:"relative"}}>
+                    <input className="input" style={f.key === "password" ? {paddingRight:72} : undefined} type={f.key === "password" && showPassword ? "text" : (f.type||"text")} placeholder={f.placeholder} value={form[f.key]} onChange={e=>setForm(p=>({...p,[f.key]:e.target.value}))} onKeyDown={e=>e.key==="Enter"&&handleSignup()}/>
+                    {f.key === "password" && <button type="button" onClick={() => setShowPassword(visible => !visible)} aria-label={showPassword ? "Hide password" : "Show password"} style={{position:"absolute",right:8,top:"50%",transform:"translateY(-50%)",border:0,background:"transparent",color:"#d7a75b",fontSize:10,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>{showPassword ? "HIDE" : "SHOW"}</button>}
+                  </div>
                 </div>
               ))}
             </div>

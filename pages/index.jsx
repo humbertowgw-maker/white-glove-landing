@@ -6,6 +6,33 @@ import Script from "next/script";
 import AppInstallMeta from "../components/AppInstallMeta";
 
 const API = process.env.NEXT_PUBLIC_API_URL || "https://white-glove-backend-production-5a7d.up.railway.app";
+const PUBLIC_ORIGIN = "https://whitegwireless.com";
+const UTM_FIELDS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
+
+const FAQ_ITEMS = [
+  ["What happens after I upload my bill?", "A White Glove team member reviews the plan, line count, and device details you provide, then follows up with clear options. Nothing changes with your current service unless you choose to move forward."],
+  ["Can I keep my phone number?", "Usually, yes. Your number can normally be moved when the current account stays active through the transfer. A White Glove rep confirms the details before placing an order."],
+  ["Do I have to visit a store?", "No. You can compare options, review your bill, and complete the switch remotely. We coordinate the next steps with you by your preferred contact method."],
+  ["Is the calculator a final quote?", "The calculator is an estimate based on the details entered. A White Glove review confirms current eligibility, promotions, availability, taxes, and any device balance before you decide."],
+  ["Can businesses use White Glove Wireless?", "Yes. Business owners can request a review for wireless, internet, multi-line service, or a mix of services. The team will tailor the recommendation to the business rather than forcing a consumer plan."],
+];
+
+function getLandingAttribution() {
+  if (typeof window === "undefined") return {};
+  const params = new URLSearchParams(window.location.search);
+  return UTM_FIELDS.reduce((attribution, field) => {
+    const value = params.get(field);
+    if (value) attribution[field] = value.slice(0, 180);
+    return attribution;
+  }, {});
+}
+
+function formatUpdatedDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(date);
+}
 
 async function fetchTradeInPromos() {
   try {
@@ -344,6 +371,16 @@ export default function Home() {
   const [carrierPlans, setCarrierPlans] = useState([]);
   const [promoAds, setPromoAds] = useState([]);
   const trustboxRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState("dark");
+  const [cookiePreference, setCookiePreference] = useState(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterConsent, setNewsletterConsent] = useState(false);
+  const [newsletterStatus, setNewsletterStatus] = useState(null);
+  const [quoteConfirmationOpen, setQuoteConfirmationOpen] = useState(false);
+  const [copyStatus, setCopyStatus] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -375,6 +412,33 @@ export default function Home() {
       setPromoAds(ads);
     });
     return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("wgw-theme");
+    if (savedTheme === "light" || savedTheme === "dark") setTheme(savedTheme);
+    setCookiePreference(window.localStorage.getItem("wgw-cookie-preference") || "pending");
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    window.localStorage.setItem("wgw-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    const updateScrollTools = () => {
+      const maximum = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      setScrollProgress(Math.min(100, Math.max(0, (window.scrollY / maximum) * 100)));
+      setShowBackToTop(window.scrollY > 480);
+    };
+    updateScrollTools();
+    window.addEventListener("scroll", updateScrollTools, { passive: true });
+    window.addEventListener("resize", updateScrollTools);
+    return () => {
+      window.removeEventListener("scroll", updateScrollTools);
+      window.removeEventListener("resize", updateScrollTools);
+    };
   }, []);
 
   const [form, setForm] = useState({
@@ -825,8 +889,13 @@ export default function Home() {
     }
   };
 
-  const submitLandingQuote = async event => {
+  const submitLandingQuote = event => {
     event.preventDefault();
+    setQuoteConfirmationOpen(true);
+  };
+
+  const sendLandingQuote = async () => {
+    setQuoteConfirmationOpen(false);
     setSubmissionStatus({ kind: "loading", message: "Locking in your quote..." });
     try {
       const isWirelessPath = calculator.serviceInterest === 'wireless_only';
@@ -889,7 +958,8 @@ export default function Home() {
       const payload = {
         ...contactForm,
         quote_summary,
-        source_url: typeof window !== "undefined" ? window.location.href : "https://whitegwireless.com",
+        source_url: typeof window !== "undefined" ? window.location.href : PUBLIC_ORIGIN,
+        ...getLandingAttribution(),
       };
 
       const res = await fetch(`${API}/api/landing/submit`, {
@@ -917,6 +987,8 @@ export default function Home() {
     try {
       const body = new FormData();
       Object.entries(form).forEach(([key, value]) => body.append(key, String(value)));
+      body.append("source_url", typeof window !== "undefined" ? window.location.href : PUBLIC_ORIGIN);
+      Object.entries(getLandingAttribution()).forEach(([key, value]) => body.append(key, value));
       if (file) body.append("bill", file);
       const res = await fetch(`${API}/api/public-bill-intake`, { method: "POST", body });
       const data = await res.json().catch(() => ({}));
@@ -945,6 +1017,51 @@ export default function Home() {
     }
   };
 
+  const saveCookiePreference = preference => {
+    window.localStorage.setItem("wgw-cookie-preference", preference);
+    setCookiePreference(preference);
+  };
+
+  const handleNewsletterSubmit = async event => {
+    event.preventDefault();
+    if (!newsletterConsent) return;
+    setNewsletterStatus({ kind: "loading", message: "Saving your update request..." });
+    try {
+      const sourceUrl = typeof window !== "undefined" ? window.location.href : PUBLIC_ORIGIN;
+      const attribution = getLandingAttribution();
+      const res = await fetch(`${API}/api/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "Website updates subscriber",
+          email: newsletterEmail,
+          message: `Newsletter request from ${sourceUrl}${Object.keys(attribution).length ? `\\nAttribution: ${JSON.stringify(attribution)}` : ""}`,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "We could not save your update request.");
+      setNewsletterStatus({ kind: "success", message: "You are on the White Glove updates list." });
+      setNewsletterEmail("");
+      setNewsletterConsent(false);
+    } catch (error) {
+      setNewsletterStatus({ kind: "error", message: error.message });
+    }
+  };
+
+  const copySubmissionReference = async () => {
+    if (!submittedId) return;
+    try {
+      await navigator.clipboard.writeText(submittedId);
+      setCopyStatus("Copied");
+    } catch {
+      setCopyStatus("Copy unavailable — select the reference below.");
+    }
+  };
+
+  const scrollToBillReview = () => {
+    document.getElementById("bill-review")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <>
       <Head>
@@ -953,7 +1070,7 @@ export default function Home() {
           name="description"
           content="Switch wireless and fiber from your couch. Next-day delivery, personalized setup, no store upsells — upload your bill and see your savings."
         />
-        <link rel="canonical" href="https://whitegwireless.com/" />
+        <link key="canonical" rel="canonical" href="https://whitegwireless.com/" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="White Glove Wireless" />
         <meta property="og:url" content="https://whitegwireless.com/" />
@@ -992,6 +1109,17 @@ export default function Home() {
           --green: #34d399;
           --blue: #60a5fa;
         }
+        :root[data-theme="light"] {
+          color-scheme: light;
+          --page: #f6f8fc;
+          --ink: #142033;
+          --muted: #53657d;
+          --soft: #2e405a;
+          --line: rgba(20,32,51,.16);
+          --accent: #9a632f;
+          --accent-soft: rgba(154,99,47,.14);
+          --accent-glow: rgba(154,99,47,.32);
+        }
         * { box-sizing: border-box; }
         html { background: var(--page); scroll-behavior: smooth; }
         body {
@@ -1003,10 +1131,26 @@ export default function Home() {
             radial-gradient(circle at 82% 8%, rgba(212,163,115,.22), transparent 32%),
             radial-gradient(circle at 8% 18%, rgba(212,163,115,.15), transparent 26%),
             radial-gradient(circle at 50% 75%, rgba(212,163,115,.08), transparent 45%),
-            linear-gradient(180deg, #0b1120 0%, #111c33 58%, #0b1120 100%);
+            linear-gradient(180deg, var(--page) 0%, color-mix(in srgb, var(--page) 86%, #33527d) 58%, var(--page) 100%);
         }
         a { color: inherit; text-decoration: none; }
         button, input, select, textarea { font: inherit; }
+        :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+        .skip-link {
+          position: fixed;
+          top: 12px;
+          left: 12px;
+          z-index: 3000;
+          transform: translateY(-160%);
+          padding: 10px 14px;
+          border-radius: 8px;
+          background: var(--accent);
+          color: #07101f;
+          font-weight: 800;
+          transition: transform .16s ease;
+        }
+        .skip-link:focus { transform: translateY(0); }
+        .scroll-progress { position: fixed; top: 0; left: 0; z-index: 2500; height: 3px; background: var(--accent); box-shadow: 0 1px 10px var(--accent-glow); transition: width .1s linear; }
         .shell { min-height: 100vh; overflow: hidden; }
         .nav {
           width: min(1180px, calc(100% - 48px));
@@ -1016,6 +1160,11 @@ export default function Home() {
           align-items: center;
           justify-content: space-between;
           gap: 18px;
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: color-mix(in srgb, var(--page) 86%, transparent);
+          backdrop-filter: blur(16px);
         }
         .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
         .brand img { border-radius: 8px; }
@@ -1027,7 +1176,18 @@ export default function Home() {
           letter-spacing: .08em;
           text-transform: uppercase;
         }
-        .nav-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .nav-actions { display: flex; align-items: center; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+        .nav-toggle, .theme-toggle {
+          border: 1px solid var(--line);
+          border-radius: 8px;
+          padding: 10px 13px;
+          color: var(--ink);
+          background: rgba(255,255,255,.04);
+          font-size: 11px;
+          font-weight: 800;
+          cursor: pointer;
+        }
+        .nav-toggle { display: none; }
         .access-links {
           display: flex;
           align-items: center;
@@ -1067,6 +1227,7 @@ export default function Home() {
           font-weight: 800;
           background: rgba(255,255,255,.04);
         }
+        .nav-actions a:hover, .nav-toggle:hover, .theme-toggle:hover { border-color: var(--accent-glow); background: var(--accent-soft); }
         .access-links a {
           padding: 8px 10px;
           font-size: 10px;
@@ -1270,6 +1431,42 @@ export default function Home() {
         .promo-ad-copy { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 6px; }
         .promo-ad-copy h3 { margin: 0; font-size: 17px; }
         .promo-ad-copy p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+        .promo-ad-updated { color: var(--muted); font: 10px "DM Mono", monospace; letter-spacing: .06em; text-transform: uppercase; }
+        .faq-list { display: grid; gap: 10px; }
+        .faq-item { border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.035); overflow: hidden; }
+        .faq-item summary { padding: 18px 20px; cursor: pointer; color: var(--ink); font-size: 15px; font-weight: 800; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: "+"; color: var(--accent); font-size: 21px; line-height: 1; }
+        .faq-item[open] summary::after { content: "−"; }
+        .faq-item p { margin: 0; padding: 0 20px 20px; max-width: 840px; color: var(--muted); line-height: 1.7; font-size: 14px; }
+        .newsletter-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .88fr); gap: 28px; padding: 28px; border: 1px solid rgba(212,163,115,.32); border-radius: 16px; background: linear-gradient(135deg, var(--accent-soft), rgba(255,255,255,.025)); }
+        .newsletter-panel h2 { margin: 8px 0 10px; font-size: clamp(26px, 4vw, 38px); }
+        .newsletter-panel p { margin: 0; color: var(--muted); line-height: 1.7; }
+        .newsletter-form { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+        .newsletter-row { display: flex; gap: 10px; }
+        .newsletter-row input { min-width: 0; flex: 1; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.06); color: var(--ink); }
+        .newsletter-row button { border: 0; border-radius: 8px; padding: 12px 16px; background: var(--accent); color: #07101f; font-weight: 800; cursor: pointer; white-space: nowrap; }
+        .newsletter-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+        .newsletter-status { margin: 0; font-size: 12px; }
+        .newsletter-status.success { color: var(--green); }
+        .newsletter-status.error { color: #fb7185; }
+        .newsletter-status.loading { color: var(--accent); }
+        .floating-review, .back-to-top { position: fixed; z-index: 900; border: 1px solid var(--line); background: rgba(11,17,32,.88); color: var(--ink); backdrop-filter: blur(12px); cursor: pointer; box-shadow: 0 10px 28px rgba(0,0,0,.22); }
+        .floating-review { right: 104px; bottom: 24px; padding: 12px 14px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+        .back-to-top { right: 24px; bottom: 100px; width: 48px; height: 48px; border-radius: 50%; font-size: 20px; }
+        .floating-review:hover, .back-to-top:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .cookie-banner { position: fixed; z-index: 2000; left: 20px; right: 20px; bottom: 20px; max-width: 780px; margin: 0 auto; display: flex; align-items: center; gap: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: rgba(9,12,18,.96); box-shadow: 0 20px 64px rgba(0,0,0,.42); }
+        .cookie-banner p { flex: 1; margin: 0; color: var(--soft); font-size: 12px; line-height: 1.6; }
+        .cookie-banner-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .cookie-banner button { border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; background: transparent; color: var(--ink); font-size: 11px; font-weight: 800; cursor: pointer; }
+        .cookie-banner button:last-child { border-color: var(--accent); background: var(--accent); color: #07101f; }
+        .confirmation-backdrop { position: fixed; inset: 0; z-index: 2200; display: grid; place-items: center; padding: 20px; background: rgba(2,6,15,.7); }
+        .confirmation-modal { width: min(100%, 460px); padding: 26px; border: 1px solid var(--line); border-radius: 16px; background: var(--page); box-shadow: 0 24px 80px rgba(0,0,0,.5); }
+        .confirmation-modal h2 { margin: 0 0 10px; font-size: 24px; }
+        .confirmation-modal p { margin: 0; color: var(--muted); line-height: 1.65; font-size: 14px; }
+        .confirmation-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+        .confirmation-actions button { border-radius: 8px; padding: 11px 14px; border: 1px solid var(--line); background: transparent; color: var(--ink); font-weight: 800; cursor: pointer; }
+        .confirmation-actions button:last-child { border-color: var(--accent); background: var(--accent); color: #07101f; }
         .footer {
           width: min(1180px, calc(100% - 48px));
           margin: 0 auto;
@@ -2456,10 +2653,15 @@ export default function Home() {
         }
         @media (max-width: 640px) {
           .nav, .hero, .section, .footer { width: min(100% - 28px, 620px); }
-          .nav { align-items: flex-start; }
+          .nav { align-items: center; min-height: 78px; }
           .brand span { display: none; }
           .accent-badge { display: none; }
-          .nav-actions a:not(.primary-link) { display: none; }
+          .nav-toggle { display: inline-flex; align-items: center; justify-content: center; }
+          .nav-actions { display: none; position: absolute; top: calc(100% - 2px); left: 0; right: 0; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--page); box-shadow: 0 18px 45px rgba(0,0,0,.22); }
+          .nav-actions.open { display: flex; flex-direction: column; align-items: stretch; }
+          .nav-actions.open a, .nav-actions.open .theme-toggle { display: block; width: 100%; text-align: left; }
+          .nav-actions.open .access-links { display: flex; }
+          .nav-actions.open .primary-link { text-align: center; }
           .hero { padding-top: 28px; }
           .hero-copy h1 { font-size: clamp(42px, 14vw, 62px); }
           .hero-copy p { font-size: 14px; }
@@ -2473,11 +2675,30 @@ export default function Home() {
           .quote-wizard { padding: 18px; }
           .quote-wizard-header { flex-direction: column; text-align: center; }
           .quote-wizard-avatar { margin: 0 auto; }
+          .newsletter-panel { grid-template-columns: 1fr; padding: 20px; }
+          .newsletter-row { flex-direction: column; }
+          .newsletter-row button { width: 100%; }
+          .cookie-banner { left: 12px; right: 12px; bottom: 12px; display: block; }
+          .cookie-banner-actions { margin-top: 12px; }
+          .floating-review { right: 96px; bottom: 16px; padding: 10px 12px; }
+          .back-to-top { right: 16px; bottom: 92px; }
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          .section, .hero, .footer { animation: site-enter .45s ease both; }
+          @keyframes site-enter { from { opacity: .001; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        }
+        @media print {
+          .nav, .sophia-chat-widget, .floating-review, .back-to-top, .cookie-banner, .scroll-progress, .confirmation-backdrop { display: none !important; }
+          body { background: #fff !important; color: #111827 !important; }
+          .shell, .section, .hero, .footer { width: 100% !important; color: #111827 !important; background: transparent !important; }
+          a { color: #111827 !important; text-decoration: underline !important; }
         }
       `}</style>
 
-      <main className="shell">
-        <nav className="nav">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <div className="scroll-progress" aria-hidden="true" style={{ width: `${scrollProgress}%` }} />
+      <main className="shell" id="main-content">
+        <nav className="nav" aria-label="Main navigation">
           <Link className="brand" href="/">
             <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless logo" width={42} height={42} priority />
             <span>
@@ -2485,18 +2706,24 @@ export default function Home() {
               <span>Wireless & fiber without the store</span>
             </span>
           </Link>
-          <div className="nav-actions">
-            <Link href="#services">Services</Link>
-            <Link href="#calculator">Calculator</Link>
-            <Link href="#why-us">Why us</Link>
+          <div className={`nav-actions ${mobileMenuOpen ? "open" : ""}`} id="site-navigation">
+            <Link href="#services" onClick={() => setMobileMenuOpen(false)}>Services</Link>
+            <Link href="#calculator" onClick={() => setMobileMenuOpen(false)}>Calculator</Link>
+            <Link href="#why-us" onClick={() => setMobileMenuOpen(false)}>Why us</Link>
             <div className="access-links" aria-label="Access links">
               <span className="access-label">Access</span>
-              <a href="https://white-glove-frontend.vercel.app/">Dashboard</a>
-              <Link href="/apps">Our apps</Link>
-              <Link href="/sales-platform">License our platform</Link>
+              <a href="https://white-glove-frontend.vercel.app/" onClick={() => setMobileMenuOpen(false)}>Dashboard</a>
+              <Link href="/apps" onClick={() => setMobileMenuOpen(false)}>Our apps</Link>
+              <Link href="/sales-platform" onClick={() => setMobileMenuOpen(false)}>License our platform</Link>
             </div>
-            <a className="primary-link" href="#bill-review">Upload bill</a>
+            <button className="theme-toggle" type="button" onClick={() => setTheme(current => current === "dark" ? "light" : "dark")} aria-pressed={theme === "light"}>
+              {theme === "dark" ? "Use light theme" : "Use dark theme"}
+            </button>
+            <a className="primary-link" href="#bill-review" onClick={() => setMobileMenuOpen(false)}>Upload bill</a>
           </div>
+          <button className="nav-toggle" type="button" aria-controls="site-navigation" aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen(open => !open)}>
+            {mobileMenuOpen ? "Close" : "Menu"}
+          </button>
         </nav>
 
         <section className="hero">
@@ -2520,7 +2747,7 @@ export default function Home() {
 
           <aside className="bill-panel" id="bill-review">
             <div className="panel-head">
-              <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="" width={52} height={52} />
+              <Image src="/logos/white-glove-wireless-app-icon-selected.png" alt="White Glove Wireless" width={52} height={52} />
               <div>
                 <h2>Get your free bill review</h2>
                 <p>Send us your current wireless or fiber bill and a local expert will compare your options, estimate your savings, and recommend the right plan — no obligation.</p>
@@ -2603,6 +2830,9 @@ export default function Home() {
                   <div className="promo-ad-copy">
                     <h3>{ad.headline}</h3>
                     <p>{ad.caption}</p>
+                    {formatUpdatedDate(ad.updated_at || ad.published_at || ad.created_at) && (
+                      <span className="promo-ad-updated">Updated {formatUpdatedDate(ad.updated_at || ad.published_at || ad.created_at)}</span>
+                    )}
                   </div>
                 </article>
               ))}
@@ -3342,6 +3572,16 @@ export default function Home() {
                               </span>
                             )}
                           </div>
+                          {submittedId && (
+                            <div className="book-call-box">
+                              <div className="book-call-title">Your request reference</div>
+                              <p className="book-call-subtitle">Keep this private reference if you contact us about this quote.</p>
+                              <div className="capture-status loading" style={{ wordBreak: "break-all" }}>{submittedId}</div>
+                              <button type="button" className="capture-submit" style={{ marginTop: 12 }} onClick={copySubmissionReference}>
+                                {copyStatus || "Copy reference"}
+                              </button>
+                            </div>
+                          )}
                           {bookCallStatus?.kind !== "success" && (
                             <div className="book-call-box">
                               <div className="book-call-title">Want to lock in your savings faster?</div>
@@ -3749,6 +3989,57 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="section" id="faq" aria-labelledby="faq-heading">
+          <div className="section-head">
+            <div>
+              <div className="mono">Answers first</div>
+              <h2 id="faq-heading">Frequently asked questions</h2>
+            </div>
+            <p>Clear answers before you share your information or make a change.</p>
+          </div>
+          <div className="faq-list">
+            {FAQ_ITEMS.map(([question, answer]) => (
+              <details className="faq-item" key={question}>
+                <summary>{question}</summary>
+                <p>{answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        <section className="section" aria-labelledby="newsletter-heading">
+          <div className="newsletter-panel">
+            <div>
+              <div className="mono">Stay in the loop</div>
+              <h2 id="newsletter-heading">Get practical wireless updates.</h2>
+              <p>Occasional updates about plan changes, switching guidance, and ways to get more from your service. No SMS enrollment here.</p>
+            </div>
+            <form className="newsletter-form" onSubmit={handleNewsletterSubmit}>
+              <div className="newsletter-row">
+                <input
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  required
+                  aria-label="Email address for White Glove updates"
+                  placeholder="you@example.com"
+                  value={newsletterEmail}
+                  onChange={event => setNewsletterEmail(event.target.value)}
+                />
+                <button type="submit" disabled={newsletterStatus?.kind === "loading"}>
+                  {newsletterStatus?.kind === "loading" ? "Saving..." : "Get updates"}
+                </button>
+              </div>
+              <label className="capture-checkbox">
+                <input type="checkbox" checked={newsletterConsent} onChange={event => setNewsletterConsent(event.target.checked)} required />
+                <span>I agree to receive White Glove Wireless updates by email.</span>
+              </label>
+              <p className="newsletter-note">You can ask us to stop at any time. We store this as an in-house White Glove update request.</p>
+              {newsletterStatus && <p className={`newsletter-status ${newsletterStatus.kind}`} role="status">{newsletterStatus.message}</p>}
+            </form>
+          </div>
+        </section>
+
         <footer className="footer">
           <div className="footer-trustpilot">
             {/*
@@ -3844,6 +4135,31 @@ export default function Home() {
             </svg>
           </button>
         </div>
+        <button className="floating-review" type="button" onClick={scrollToBillReview}>Free bill review</button>
+        {showBackToTop && (
+          <button className="back-to-top" type="button" aria-label="Back to top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>↑</button>
+        )}
+        {cookiePreference === "pending" && (
+          <aside className="cookie-banner" aria-label="Cookie preferences">
+            <p>We use essential storage for your display and cookie choices. Analytics are not enabled by this banner.</p>
+            <div className="cookie-banner-actions">
+              <button type="button" onClick={() => saveCookiePreference("essential")}>Essential only</button>
+              <button type="button" onClick={() => saveCookiePreference("accepted")}>Got it</button>
+            </div>
+          </aside>
+        )}
+        {quoteConfirmationOpen && (
+          <div className="confirmation-backdrop" role="presentation">
+            <section className="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="quote-confirmation-title">
+              <h2 id="quote-confirmation-title">Ready to send your quote?</h2>
+              <p>White Glove will save the contact details and estimate you entered so Sofia and a local rep can follow up using your selected method.</p>
+              <div className="confirmation-actions">
+                <button type="button" onClick={() => setQuoteConfirmationOpen(false)}>Go back</button>
+                <button type="button" onClick={sendLandingQuote}>Send my quote</button>
+              </div>
+            </section>
+          </div>
+        )}
       </main>
     </>
   );
